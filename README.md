@@ -53,7 +53,7 @@ git clone https://github.com/Sigma-cine/Sigma-cine
 Navegar al directorio del proyecto:
 
 ```
-cd sigma-cine
+cd Sigma-cine
 ```
 
 ### Configurar el proyecto en tu IDE:

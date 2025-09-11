@@ -48,7 +48,7 @@ Asegúrate de tener instalado lo siguiente:
 ### Instalación
 Clonar el repositorio:
 ```
-git clone https://github.com/Tu-Usuario/sigma-cine.git
+git clone https://github.com/Sigma-cine/Sigma-cine
 ```
 Navegar al directorio del proyecto:
 

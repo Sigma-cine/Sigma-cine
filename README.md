@@ -87,4 +87,4 @@ Puedes encontrar estos documentos en la carpeta docs/ de este repositorio.
 
 1. Carolina Ujueta Ricardo
 
-Diego Zabala González
+1. Diego Zabala González

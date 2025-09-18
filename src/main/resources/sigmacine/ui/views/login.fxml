@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="sigmacine.ui.controller.LoginController"
+      spacing="10" alignment="CENTER" prefWidth="380" prefHeight="260">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Sigma Cine" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="emailField" promptText="Email" />
+    <PasswordField fx:id="passwordField" promptText="Contraseña" />
+
+    <Button fx:id="loginButton" text="Ingresar" maxWidth="Infinity"/>
+
+    <HBox spacing="6" alignment="CENTER">
+        <Label text="¿No tienes cuenta?"/>
+        <Hyperlink fx:id="registrarLink" text="Registrarse"/>
+    </HBox>
+
+    <Label fx:id="feedback" text=""/>
+</VBox>

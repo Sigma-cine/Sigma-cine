@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="12" alignment="CENTER" prefWidth="420" prefHeight="320">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Sigma Cine - Registrarse" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TextField     fx:id="txtNombre"   promptText="Nombre completo"  prefWidth="300"/>
+    <TextField     fx:id="txtEmail"    promptText="Correo"            prefWidth="300"/>
+    <PasswordField fx:id="txtPassword" promptText="Contraseña"        prefWidth="300"/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Registrar" onAction="#onRegistrar"/>
+        <Button text="Cancelar"  onAction="#onCancelar"/>
+    </HBox>
+</VBox>

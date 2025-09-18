@@ -1,7 +1,7 @@
 -- Usuarios, Clientes y Administradores
-INSERT INTO USUARIO (ID, EMAIL, CONTRASENA) VALUES(1, 'admin@sigma.com', 'admin_pass');
-INSERT INTO USUARIO (ID, EMAIL, CONTRASENA) VALUES(2, 'cliente1@correo.com', 'cliente1_pass');
-INSERT INTO USUARIO (ID, EMAIL, CONTRASENA) VALUES(3, 'cliente2@correo.com', 'cliente2_pass');
+INSERT INTO USUARIO (ID, EMAIL, CONTRASENA, ROL) VALUES(1, 'admin@sigma.com', 'admin_pass','ADMIN');
+INSERT INTO USUARIO (ID, EMAIL, CONTRASENA, ROL) VALUES(2, 'cliente1@correo.com', 'cliente1_pass', 'CLIENTE');
+INSERT INTO USUARIO (ID, EMAIL, CONTRASENA, ROL) VALUES(3, 'cliente2@correo.com', 'cliente2_pass', 'CLIENTE');
 
 INSERT INTO ADMIN (ID, NOMBRE) VALUES(1, 'Juan Perez');
 

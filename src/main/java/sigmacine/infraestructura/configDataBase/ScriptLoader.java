@@ -1,4 +1,6 @@
-import java.io.InputStream; import java.io.InputStreamReader; import java.io.IOException; // <--- AGREGAR ESTA IMPORTACIÓN 
+import java.io.InputStream; 
+import java.io.InputStreamReader; 
+import java.io.IOException; // <--- AGREGAR ESTA IMPORTACIÓN 
 import java.nio.charset.StandardCharsets; 
 import java.sql.Connection; 
 import java.sql.SQLException; 
@@ -25,7 +27,7 @@ public class ScriptLoader {
                         } 
                         try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8))
                          { RunScript.execute(conn, reader); 
-                            System.out.println("✔ Ejecutado: " + resourcePath); 
+                            System.out.println("Ejecutado: " + resourcePath); 
                         } 
                     } 
                 }

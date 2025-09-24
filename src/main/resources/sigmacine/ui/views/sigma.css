@@ -207,3 +207,82 @@
   -fx-opacity: 0.5;
   -fx-effect: none;
 }
+
+/* aca empieza el login*/
+
+/* Tarjeta blanca centrada (login) */
+.auth-card {
+  -fx-background-color: white;
+  -fx-background-radius: 15;
+  -fx-padding: 20;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0.2, 0, 6);
+}
+
+/* Título dentro de la tarjeta */
+.auth-title {
+  -fx-text-fill: white;
+  -fx-font-weight: bold;
+  -fx-font-size: 17px;
+}
+
+/* Encabezado rojo de la tarjeta */
+.auth-topbar {
+  -fx-background-color: #8A2F24;
+  -fx-background-radius: 12 12 0 0;
+  -fx-padding: 8 12;
+}
+
+/* Etiquetas de campo */
+.field-label {
+  -fx-text-fill: #8A2F24;         /* rojo corporativo */
+  -fx-padding: 10 0 4 0;
+  -fx-font-weight: bold;
+}
+
+/* Inputs */
+.input {
+  -fx-background-color: #F5DDDB;
+  -fx-background-radius: 15;
+  -fx-text-fill: #333;
+  -fx-prompt-text-fill: #A9A9A9;
+  -fx-padding: 6 10;
+  -fx-border-color: transparent;
+}
+
+.input:focused {
+  -fx-background-color: #f2cfc9;
+  -fx-effect: dropshadow(gaussian, rgba(138,47,36,0.25), 8, 0.3, 0, 0);
+}
+
+/* Botón principal (puedes reutilizar .buy-btn si quieres) */
+.primary-btn {
+  -fx-background-color: #8A2F24;
+  -fx-text-fill: white;
+  -fx-font-weight: bold;
+  -fx-background-radius: 15;
+  -fx-padding: 8 20;
+}
+.primary-btn:hover   { -fx-background-color: #9d3a2d; }
+.primary-btn:pressed { -fx-background-color: #74271e; }
+
+/* Link rojo (Registrarse) */
+.link-red {
+  -fx-text-fill: #8A2F24;
+}
+.link-red:hover { -fx-underline: true; }
+
+
+/* Link para acciones secundarias (ej: registro) */
+.text-link {
+  -fx-text-fill: #8A2F24;
+  -fx-cursor: hand;
+  -fx-font-weight: bold;
+}
+.text-link:hover {
+  -fx-underline: true;
+}
+
+
+.text-dark {
+  -fx-text-fill: #333333; /* gris oscuro legible en blanco */
+}

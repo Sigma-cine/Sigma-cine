@@ -1,12 +1,12 @@
-package sigmacine.infraestructura.configDataBase;
+package sigmacine.infraestructura.configdatabase;
 
 import java.sql.*;
 
 public class TestConexion {
     public static void main(String[] args) {
         try {
-            DatabaseConfig db = new DatabaseConfig();               // ← instancias
-            try (Connection conn = db.getConnection()) {            // ← usas método no estático
+            DatabaseConfig db = new DatabaseConfig();               
+            try (Connection conn = db.getConnection()) {            
                 System.out.println("Conectado a: " + conn.getMetaData().getURL());
 
                 try (Statement st = conn.createStatement();
@@ -17,7 +17,7 @@ public class TestConexion {
             
 
             DatabaseMetaData meta = conn.getMetaData();
-                try (ResultSet tablas = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
+                try (ResultSet tablas = meta.getTables(null, "PUBLIC", "%", new String[]{"TABLE"})) {
                     System.out.println("\nTablas encontradas en la BD:");
                     while (tablas.next()) {
                         String nombreTabla = tablas.getString("TABLE_NAME");

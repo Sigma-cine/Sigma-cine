@@ -1,3 +1,5 @@
+package sigmacine.infraestructura.configdatabase;
+
 import java.io.InputStream; 
 import java.io.InputStreamReader; 
 import java.io.IOException; // <--- AGREGAR ESTA IMPORTACIÓN 

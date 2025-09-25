@@ -3,7 +3,7 @@ package sigmacine.ui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.configdatabase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 
 import sigmacine.dominio.repository.UsuarioRepository;
@@ -28,9 +28,10 @@ public class App extends Application {
         RegistroService registroService = new RegistroService(repo);    
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
        
-       /* ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
-        coordinador.mostrarLogin();*/
+       ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+        coordinador.mostrarLogin();
 
+        /* 
         //Este codigo es para omitir el login
             Usuario u;
             UsuarioDTO dto = new UsuarioDTO();
@@ -45,7 +46,7 @@ public class App extends Application {
                 dto.setFechaRegistro("25-09-2025");
             
             ControladorControlador coordinador=new ControladorControlador(stage, authFacade);
-            coordinador.mostrarHome(dto);
+            coordinador.mostrarHome(dto);*/
     }
 
     public static void main(String[] args) {

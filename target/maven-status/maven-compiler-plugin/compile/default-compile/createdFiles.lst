@@ -10,10 +10,10 @@ sigmacine\aplicacion\facade\AuthFacade.class
 sigmacine\dominio\entity\Usuario.class
 sigmacine\ui\App.class
 sigmacine\dominio\entity\Cliente.class
+sigmacine\infraestructura\configDataBase\ScriptLoader.class
 sigmacine\dominio\entity\Admin.class
 sigmacine\ui\controller\ControladorControlador.class
 sigmacine\dominio\repository\UsuarioRepository.class
-ScriptLoader.class
 sigmacine\dominio\entity\SigmaCard.class
 sigmacine\dominio\valueobject\PasswordHash.class
 sigmacine\infraestructura\configDataBase\DatabaseConfig.class

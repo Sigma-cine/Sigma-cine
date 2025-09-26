@@ -13,13 +13,13 @@ public final class DatabaseConfig {
     private static final String URL ="jdbc:h2:~/sigmacine/db/cine_db;DB_CLOSE_ON_EXIT=FALSE";
     private static final String DRIVER = "org.h2.Driver";
 
-    static {
+    /*static {
         try {
             Class.forName(DRIVER); // cargar driver UNA sola vez
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("No se encontró el driver de H2", e);
         }
-    }
+    }*/
 
     /** Método estándar (instancia) */
     public Connection getConnection() throws SQLException {

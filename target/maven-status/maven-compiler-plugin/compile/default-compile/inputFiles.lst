@@ -1,12 +1,15 @@
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\aplicacion\data\UsuarioDTO.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\aplicacion\facade\AuthFacade.java
+C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\aplicacion\service\BuscarPeliculaService.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\aplicacion\service\LoginService.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\aplicacion\service\RegistroService.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\Admin.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\Cliente.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\Compra.java
+C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\Pelicula.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\SigmaCard.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\entity\Usuario.java
+C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\repository\PeliculaRepository.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\repository\UsuarioRepository.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\valueobject\Email.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\dominio\valueobject\PasswordHash.java
@@ -16,6 +19,7 @@ C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de 
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\infraestructura\persistencia\jdbc\UsuarioRepositoryJdbc.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\App.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\controller\AdminController.java
+C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\controller\BuscarPeliculaController.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\controller\ClienteController.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\controller\ControladorControlador.java
 C:\Users\57300\OneDrive\Escritorio\Universidad\SÉPTIMO SEMESTRE\Fundamentos de ing de sw\Sigma-cine\src\main\java\sigmacine\ui\controller\LoginController.java

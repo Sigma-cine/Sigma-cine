@@ -81,7 +81,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>sigmacine.infraestructura.configDataBase.TestConexion</mainClass>
+              <mainClass>sigmacine.infraestructura.configdatabase.TestConexion</mainClass>
               <classpathScope>runtime</classpathScope>
             </configuration>
           </execution>

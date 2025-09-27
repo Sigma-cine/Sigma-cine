@@ -2,7 +2,6 @@ sigmacine\aplicacion\service\LoginService.class
 sigmacine\aplicacion\service\RegistroService.class
 sigmacine\aplicacion\data\UsuarioDTO.class
 sigmacine\ui\controller\AdminController.class
-sigmacine\infraestructura\configDataBase\TestConexion.class
 sigmacine\dominio\entity\Pelicula.class
 sigmacine\ui\controller\ClienteController.class
 sigmacine\dominio\entity\Compra.class
@@ -11,8 +10,8 @@ sigmacine\aplicacion\facade\AuthFacade.class
 sigmacine\dominio\entity\Usuario.class
 sigmacine\ui\App.class
 sigmacine\dominio\entity\Cliente.class
-sigmacine\infraestructura\configDataBase\ScriptLoader.class
 sigmacine\dominio\entity\Admin.class
+sigmacine\infraestructura\configdatabase\ScriptLoader.class
 sigmacine\ui\controller\ControladorControlador.class
 sigmacine\dominio\repository\UsuarioRepository.class
 sigmacine\infraestructura\persistencia\Mapper\PeliculaMapper.class
@@ -21,7 +20,8 @@ sigmacine\dominio\repository\PeliculaRepository.class
 sigmacine\aplicacion\service\BuscarPeliculaService.class
 sigmacine\dominio\valueobject\PasswordHash.class
 sigmacine\infraestructura\persistencia\jdbc\PeliculaRepositoryJdbc.class
-sigmacine\infraestructura\configDataBase\DatabaseConfig.class
 sigmacine\infraestructura\persistencia\jdbc\UsuarioRepositoryJdbc.class
 sigmacine\ui\controller\RegisterController.class
+sigmacine\infraestructura\configdatabase\DatabaseConfig.class
+sigmacine\infraestructura\configdatabase\TestConexion.class
 sigmacine\dominio\valueobject\Email.class

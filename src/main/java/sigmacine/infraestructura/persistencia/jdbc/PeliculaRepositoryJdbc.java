@@ -9,7 +9,7 @@ import java.util.List;
 
 import sigmacine.dominio.entity.Pelicula;
 import sigmacine.dominio.repository.PeliculaRepository;
-import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.configdatabase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.Mapper.PeliculaMapper;
 
 /*Se utilizara la misma estructura de codigo en las funciones buscarPorTitulo, buscarPorGenero y buscarTodas,

@@ -3,7 +3,7 @@ package sigmacine.ui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.configdatabase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 
 import sigmacine.dominio.repository.UsuarioRepository;

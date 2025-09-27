@@ -3,7 +3,7 @@ package sigmacine.dominio.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
-import sigmacine.dominio.entity.SigmaCard;
+//import sigmacine.dominio.entity.SigmaCard;
 import sigmacine.dominio.valueobject.Email;
 import sigmacine.dominio.valueobject.PasswordHash;
 //import sigmacine.dominio.entity.*;

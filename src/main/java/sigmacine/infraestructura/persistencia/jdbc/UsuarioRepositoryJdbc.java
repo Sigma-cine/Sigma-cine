@@ -2,15 +2,23 @@ package sigmacine.infraestructura.persistencia.jdbc;
 
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.dominio.repository.UsuarioRepository;
-import sigmacine.dominio.entity.Admin;
-import sigmacine.dominio.entity.Cliente;
-import sigmacine.dominio.entity.Usuario;
-import sigmacine.dominio.valueobject.Email;
+//import sigmacine.dominio.entity.Admin;
+//import sigmacine.dominio.entity.Cliente;
+//import sigmacine.dominio.entity.Usuario;
+import sigmacine.dominio.entity.*;
+//import sigmacine.dominio.valueobject.Email;
+//import sigmacine.dominio.valueobject.PasswordHash;
+import sigmacine.dominio.valueobject.*;
 import java.lang.Long;
 import java.lang.String;
-import sigmacine.dominio.valueobject.PasswordHash;
 
-import java.sql.*;
+//import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Date;
+
 import java.util.Optional;
 
 public class UsuarioRepositoryJdbc implements UsuarioRepository {
@@ -21,7 +29,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         this.db = db;
     }
 
-    @Override
+   /* @Override
     public Optional<Usuario> buscarPorEmail(Email email) {
         final String sql = """
     SELECT
@@ -45,12 +53,44 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
             ps.setString(1, email.value());
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return Optional.empty();
-                return Optional.of(mapRowToDomain(rs));
+                return Optional.of(mapUsuario(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error consultando USUARIO por email", e);
         }
+    }*/
+
+    @Override
+    public Usuario buscarPorEmail(Email email) {
+    final String sql = """
+        SELECT
+            U.ID,
+            U.EMAIL,
+            U.CONTRASENA,
+            U.ROL,
+            A.NOMBRE  AS NOMBRE_ADMIN,
+            C.NOMBRE  AS NOMBRE_CLIENTE,
+            C.FECHA_REGISTRO
+        FROM USUARIO U
+        LEFT JOIN ADMIN   A ON A.ID = U.ID
+        LEFT JOIN CLIENTE C ON C.ID = U.ID
+        WHERE U.EMAIL = ?
+        FETCH FIRST 1 ROWS ONLY
+        """;
+
+    try (Connection con = db.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setString(1, email.value());
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) return null;   
+            return mapUsuario(rs);
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException("Error consultando USUARIO por email", e);
     }
+}
 
     @Override
     public void guardar(Usuario u) {
@@ -116,7 +156,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         }
     }
 
-    private Usuario mapRowToDomain(ResultSet rs) throws SQLException {
+    private Usuario mapUsuario(ResultSet rs) throws SQLException {
         Long id         = rs.getLong("ID");
         Email email     = new Email(rs.getString("EMAIL"));
         PasswordHash ph = new PasswordHash(rs.getString("CONTRASENA"));

@@ -1,60 +1,73 @@
 package sigmacine.dominio.entity;
 
+import java.util.List;
 
 public class Pelicula {
-	private int id;
-	private String titulo;
-	private String genero;
-	private String clasificacion;
-	private String duracion;
-	private String direccion;
-	private java.util.List<String> reparto;
-	private String trailer;
-	private String sinopsis;
-	private boolean estado;
+    private int id;
+    private String titulo;
+    private String genero;
+    private String clasificacion;
+    private int duracion;
+    private String director;   
+    private List<String> reparto;
+    private String trailer;
+    private String sinopsis;
+    private String estado;
 
-	public Pelicula() {}
+    public Pelicula() {}
 
-	public Pelicula(int id, String titulo, String genero, String clasificacion, String duracion, String direccion, java.util.List<String> reparto, String trailer, String sinopsis, boolean estado) {
-		this.id = id;
-		this.titulo = titulo;
-		this.genero = genero;
-		this.clasificacion = clasificacion;
-		this.duracion = duracion;
-		this.direccion = direccion;
-		this.reparto = reparto;
-		this.trailer = trailer;
-		this.sinopsis = sinopsis;
-		this.estado = estado;
-	}
+    public Pelicula(int id, String titulo, String genero, String clasificacion,int duracion, String director, List<String> reparto,
+                    String trailer, String sinopsis, String estado) {
+        this.id = id;
+        this.titulo = titulo;
+        this.genero = genero;
+        this.clasificacion = clasificacion;
+        this.duracion = duracion;
+        this.director = director;
+        this.reparto = reparto;
+        this.trailer = trailer;
+        this.sinopsis = sinopsis;
+        this.estado = estado;
+    }
 
-	public int getId() { return id; }
-	public void setId(int id) { this.id = id; }
+    public Pelicula(int id, String titulo, String genero, String clasificacion,
+                    int duracion, String director, String estado) {
+        this.id = id;
+        this.titulo = titulo;
+        this.genero = genero;
+        this.clasificacion = clasificacion;
+        this.duracion = duracion;
+        this.director = director;
+        this.estado = estado;
+    }
 
-	public String getTitulo() { return titulo; }
-	public void setTitulo(String titulo) { this.titulo = titulo; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-	public String getGenero() { return genero; }
-	public void setGenero(String genero) { this.genero = genero; }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-	public String getClasificacion() { return clasificacion; }
-	public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
+    public String getGenero() { return genero; }
+    public void setGenero(String genero) { this.genero = genero; }
 
-	public String getDuracion() { return duracion; }
-	public void setDuracion(String duracion) { this.duracion = duracion; }
+    public String getClasificacion() { return clasificacion; }
+    public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
 
-	public String getDireccion() { return direccion; }
-	public void setDireccion(String direccion) { this.direccion = direccion; }
+    public int getDuracion() { return duracion; }
+    public void setDuracion(int duracion) { this.duracion = duracion; }
 
-	public java.util.List<String> getReparto() { return reparto; }
-	public void setReparto(java.util.List<String> reparto) { this.reparto = reparto; }
+    public String getDirector() { return director; }
+    public void setDirector(String director) { this.director = director; }
 
-	public String getTrailer() { return trailer; }
-	public void setTrailer(String trailer) { this.trailer = trailer; }
+    public List<String> getReparto() { return reparto; }
+    public void setReparto(List<String> reparto) { this.reparto = reparto; }
 
-	public String getSinopsis() { return sinopsis; }
-	public void setSinopsis(String sinopsis) { this.sinopsis = sinopsis; }
+    public String getTrailer() { return trailer; }
+    public void setTrailer(String trailer) { this.trailer = trailer; }
 
-	public boolean isEstado() { return estado; }
-	public void setEstado(boolean estado) { this.estado = estado; }
+    public String getSinopsis() { return sinopsis; }
+    public void setSinopsis(String sinopsis) { this.sinopsis = sinopsis; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

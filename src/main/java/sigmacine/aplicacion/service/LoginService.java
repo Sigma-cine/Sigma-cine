@@ -18,10 +18,10 @@ public class LoginService {
     public UsuarioDTO autenticar(String emailRaw, String passwordRaw) {
         try {
             Email email = new Email(emailRaw);
-            Optional<Usuario> opt = usuarios.buscarPorEmail(email);
-            if (opt.isEmpty()) return null;
-
-            Usuario u = opt.get();
+            /*Optional<Usuario> opt = usuarios.buscarPorEmail(email);
+            if (opt.isEmpty()) return null;*/
+            Usuario u = usuarios.buscarPorEmail(email);
+            if (u == null) return null;
             if (!u.autenticar(passwordRaw)) return null;
 
             UsuarioDTO dto = new UsuarioDTO();

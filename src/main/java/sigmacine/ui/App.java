@@ -28,11 +28,11 @@ public class App extends Application {
         RegistroService registroService = new RegistroService(repo);    
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
        
-       /* ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
-        coordinador.mostrarLogin();*/
-
+        ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+        coordinador.mostrarLogin();
+/* 
         //Este codigo es para omitir el login
-            Usuario u;
+           // Usuario u;
             UsuarioDTO dto = new UsuarioDTO();
             dto.setId(6L);
             dto.setEmail("ClientePrueba@sigma.com");
@@ -45,7 +45,7 @@ public class App extends Application {
                 dto.setFechaRegistro("25-09-2025");
             
             ControladorControlador coordinador=new ControladorControlador(stage, authFacade);
-            coordinador.mostrarHome(dto);
+            coordinador.mostrarHome(dto);*/
     }
 
     public static void main(String[] args) {

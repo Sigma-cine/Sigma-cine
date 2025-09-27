@@ -15,10 +15,12 @@ sigmacine\infraestructura\configDataBase\ScriptLoader.class
 sigmacine\dominio\entity\Admin.class
 sigmacine\ui\controller\ControladorControlador.class
 sigmacine\dominio\repository\UsuarioRepository.class
+sigmacine\infraestructura\persistencia\Mapper\PeliculaMapper.class
 sigmacine\dominio\entity\SigmaCard.class
 sigmacine\dominio\repository\PeliculaRepository.class
 sigmacine\aplicacion\service\BuscarPeliculaService.class
 sigmacine\dominio\valueobject\PasswordHash.class
+sigmacine\infraestructura\persistencia\jdbc\PeliculaRepositoryJdbc.class
 sigmacine\infraestructura\configDataBase\DatabaseConfig.class
 sigmacine\infraestructura\persistencia\jdbc\UsuarioRepositoryJdbc.class
 sigmacine\ui\controller\RegisterController.class

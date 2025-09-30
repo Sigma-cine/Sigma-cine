@@ -6,8 +6,12 @@ C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmaci
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Admin.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Cliente.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Compra.java
+C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Funcion.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Pelicula.java
+C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Sala.java
+C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Sede.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\SigmaCard.java
+C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Silla.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\entity\Usuario.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\repository\PeliculaRepository.java
 C:\Users\santa\Proyecto-Fundamentos_de_Software\Sigma-cine\src\main\java\sigmacine\dominio\repository\UsuarioRepository.java

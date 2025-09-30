@@ -2,6 +2,7 @@ sigmacine\ui\controller\ConfiteriaController.class
 sigmacine\aplicacion\service\LoginService.class
 sigmacine\aplicacion\service\RegistroService.class
 sigmacine\aplicacion\data\UsuarioDTO.class
+sigmacine\dominio\entity\Sede.class
 sigmacine\ui\controller\AdminController.class
 sigmacine\dominio\entity\Pelicula.class
 sigmacine\ui\controller\ClienteController.class

@@ -6,7 +6,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="sigmacine.ui.controller.ClienteController">
    <top>
       <HBox prefHeight="58.0" prefWidth="600.0" style="-fx-background-color: #993726;" BorderPane.alignment="CENTER">
          <children>
@@ -26,7 +27,7 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="158.0" layoutX="14.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@/C:/Users/julia/dev/Sigma-cine/src/main/resources/Images/logo.png" />
+                              <Image url="/Images/logo.png" />
                            </image>
                         </ImageView>
                      </children>
@@ -63,7 +64,7 @@
                   <Font name="System Bold" size="13.0" />
                </font>
             </Label>
-            <Button layoutX="32.0" layoutY="109.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="75.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Ver más">
+            <Button  fx:id="btnPromoVerMas" layoutX="32.0" layoutY="109.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="75.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Ver más">
                <font>
                   <Font size="10.0" />
                </font>
@@ -96,27 +97,44 @@
                   <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                   <Label style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                   <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                  <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="69.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="69.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="69.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <ImageView fitHeight="106.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" />
-                  <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="69.0" style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
+                                 <Button fx:id="btnCard1" onAction="#onCard1"
+                     contentDisplay="CENTER" mnemonicParsing="false"
+                     prefHeight="30.0" prefWidth="69.0"
+                     style="-fx-background-color: #993726; -fx-background-radius: 14;
+                              -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                     text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                  <font><Font size="10.0" /></font>
+               </Button>
+
+               <Button fx:id="btnCard2" onAction="#onCard2"
+                     contentDisplay="CENTER" mnemonicParsing="false"
+                     prefHeight="30.0" prefWidth="69.0"
+                     style="-fx-background-color: #993726; -fx-background-radius: 14;
+                              -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                     text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER"
+                     GridPane.rowIndex="2">
+                  <font><Font size="10.0" /></font>
+               </Button>
+
+               <Button fx:id="btnCard3" onAction="#onCard3"
+                     contentDisplay="CENTER" mnemonicParsing="false"
+                     prefHeight="30.0" prefWidth="69.0"
+                     style="-fx-background-color: #993726; -fx-background-radius: 14;
+                              -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                     text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER"
+                     GridPane.rowIndex="2">
+                  <font><Font size="10.0" /></font>
+               </Button>
+
+               <Button fx:id="btnCard4" onAction="#onCard4"
+                     contentDisplay="CENTER" mnemonicParsing="false"
+                     prefHeight="30.0" prefWidth="69.0"
+                     style="-fx-background-color: #993726; -fx-background-radius: 14;
+                              -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                     text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER"
+                     GridPane.rowIndex="2">
+                  <font><Font size="10.0" /></font>
+               </Button>
                </children>
             </GridPane>
          </children>

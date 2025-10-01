@@ -64,7 +64,7 @@ public class ControladorControlador {
             boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
             String fxml = esAdmin
                     ? "/sigmacine/ui/views/admin_dashboard.fxml"
-                    : "/sigmacine/ui/views/cliente_home.fxml";
+                    : "/sigmacine/ui/views/pagina_inicial.fxml";
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent root = loader.load();
@@ -75,7 +75,7 @@ public class ControladorControlador {
                 stage.setTitle("Sigma Cine - Admin");
             } else {
                 ClienteController c = loader.getController();
-                c.init(usuario, this);
+                c.init(usuario);
                 stage.setTitle("Sigma Cine - Cliente");
             }
 

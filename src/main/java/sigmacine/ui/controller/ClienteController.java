@@ -1,32 +1,4 @@
-/*package sigmacine.ui.controller;
-
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import sigmacine.aplicacion.data.UsuarioDTO;
-
-public class ClienteController {
-
-    @FXML private Label welcomeLabel;
-
-    private UsuarioDTO usuario;
-    private ControladorControlador coordinador;
-
-    public void init(UsuarioDTO usuario, ControladorControlador coordinador) {
-        this.usuario = usuario;
-        this.coordinador = coordinador;
-        if (welcomeLabel != null) welcomeLabel.setText("Bienvenido al Cine Sigma");
-    }
-
-    @FXML
-    private void onLogout() {
-        if (coordinador != null) coordinador.mostrarLogin();
-    }
-
-    // Aquí irán acciones propias del cliente (cartelera, compras, etc.)
-}
-*/
 package sigmacine.ui.controller;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -34,75 +6,49 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.StackPane;
 import sigmacine.aplicacion.data.UsuarioDTO;
-
 import java.net.URL;
 import java.util.Objects;
 
+
 public class ClienteController {
 
-    @FXML private StackPane content;
+    // Botones que existen en pagina_inicial.fxml
+    @FXML private Button btnPromoVerMas;
+    @FXML private Button btnCard1, btnCard2, btnCard3, btnCard4;
 
+    // Si en el top tienes estos botones, déjalos:
     @FXML private Button btnCartelera;
     @FXML private Button btnConfiteria;
-    @FXML private Button btnSigmaCard;
-    @FXML private Button btnCart;
+    @FXML private Button btnSigmaCard; // si no existe en FXML, quedará null (no pasa nada)
+    @FXML private Button btnCart;      // idem
     @FXML private MenuItem miCerrarSesion;
 
+    // Estado
     private UsuarioDTO usuario;
-    private ControladorControlador coordinador;
 
-    // Rutas FXML (en classpath)
-    private static final String FXML_CARTELERA  = "/sigmacine/ui/views/contenidoCartelera.fxml";
-    private static final String FXML_CONFITERIA = "/sigmacine/ui/views/confiteria.fxml";
-    //private static final String FXML_SIGMACARD  = "/sigmacine/ui/views/pagina_inicial.fxml"; // temporal
-
-    public void init(UsuarioDTO usuario, ControladorControlador coordinador) {
+    // === Inicialización tras login (no carga FXML, no anida nada) ===
+    public void init(UsuarioDTO usuario) {
         this.usuario = usuario;
-        this.coordinador = coordinador;
-        goCartelera();
+        // Nada de goInicial() ni loadIntoContent(...)
     }
 
     @FXML
     private void initialize() {
-        if (btnCartelera  != null) btnCartelera.setOnAction(e -> goCartelera());
-        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> goConfiteria());
-     //   if (btnSigmaCard  != null) btnSigmaCard.setOnAction(e -> goSigmaCard());
+        // Wiring simple (sin navegar a otra escena por ahora)
+        if (btnCartelera  != null) btnCartelera.setOnAction(e -> System.out.println("Ir a Cartelera"));
+        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
-
-        // Por si no llaman init()
-        if (content != null && content.getChildren().isEmpty()) {
-            goCartelera();
-        }
     }
 
     private void onLogout() {
-        if (coordinador != null) coordinador.mostrarLogin();
+        System.out.println("Cerrar sesión de: " + (usuario != null ? usuario.getEmail() : "desconocido"));
+        // Aquí vuelves al login si quieres, pero sin anidar vistas.
     }
 
-    // Navegación interna
-    private void goCartelera()  { loadIntoContent(FXML_CARTELERA); }
-    private void goConfiteria() { loadIntoContent(FXML_CONFITERIA); }
-    //private void goSigmaCard()  { loadIntoContent(FXML_SIGMACARD); }
-
-    private void loadIntoContent(String fxmlPath) {
-        try {
-            URL url = Objects.requireNonNull(
-                ClienteController.class.getResource(fxmlPath),
-                "No se encontró el recurso FXML: " + fxmlPath
-            );
-            FXMLLoader loader = new FXMLLoader(url);
-            Node node = loader.load();
-            Object ctrl = loader.getController();
-
-            // Si tus sub-controladores existen, inyéctales el coordinador aquí
-            if (ctrl instanceof CarteleraController cc) {
-                cc.setCoordinador(coordinador);
-            } else if (ctrl instanceof ConfiteriaController cf) {
-                cf.setCoordinador(coordinador);
-            }
-            content.getChildren().setAll(node);
-        } catch (Exception e) {
-            throw new RuntimeException("Error cargando subvista: " + fxmlPath, e);
-        }
-    }
+    // === Handlers que tu FXML invoca con onAction="#..." ===
+    @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más"); }
+    @FXML private void onCard1()       { System.out.println("Card 1 → Ver más"); }
+    @FXML private void onCard2()       { System.out.println("Card 2 → Ver más"); }
+    @FXML private void onCard3()       { System.out.println("Card 3 → Ver más"); }
+    @FXML private void onCard4()       { System.out.println("Card 4 → Ver más"); }
 }

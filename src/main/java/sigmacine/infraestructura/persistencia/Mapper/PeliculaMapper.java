@@ -8,7 +8,7 @@ import sigmacine.dominio.entity.Pelicula;
 public class PeliculaMapper {
 
     public static Pelicula map(ResultSet rs) throws SQLException {       
-         return new Pelicula(
+         Pelicula p = new Pelicula(
             rs.getInt("ID"),
             rs.getString("TITULO"),
             rs.getString("GENERO"),
@@ -17,7 +17,11 @@ public class PeliculaMapper {
             rs.getString("DIRECTOR"),
             rs.getString("ESTADO")
         ); 
-         //Se omite reparto, trailer y  sinapsis 
+         String posterUrl = rs.getString("POSTER_URL"); // puede venir null
+    if (posterUrl != null) {
+        p.setPosterUrl(posterUrl);
+    }
+    return p;
     }
     
 }

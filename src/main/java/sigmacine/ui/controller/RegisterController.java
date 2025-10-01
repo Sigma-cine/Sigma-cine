@@ -34,7 +34,7 @@ public class RegisterController {
             if (nombre.isEmpty() || email.isEmpty() || pass.isEmpty()) {
                 throw new IllegalArgumentException("Completa todos los campos");
             }
-            Long id = auth.registrar(nombre, email, pass);
+            int id = auth.registrar(nombre, email, pass);
 
            /* new Alert(Alert.AlertType.INFORMATION,"¡Registro exitoso! ID = " + id, ButtonType.OK).showAndWait();*/
             

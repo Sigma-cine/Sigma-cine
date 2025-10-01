@@ -12,7 +12,7 @@ public class RegistroService {
 
     public RegistroService(UsuarioRepository repo) { this.repo = repo; }
 
-    public Long registrarCliente(String nombre, String emailPlano, String contrasenaPlano) {
+    public int registrarCliente(String nombre, String emailPlano, String contrasenaPlano) {
         Email email = new Email(emailPlano);
 
         /* if (repo.buscarPorEmail(email).isPresent()) {*/
@@ -22,11 +22,11 @@ public class RegistroService {
             throw new IllegalArgumentException("El email ya está registrado");
         }
 
-        // 2) Hash de contraseña
+       
         String hash = BCrypt.hashpw(contrasenaPlano, BCrypt.gensalt(10));
         PasswordHash ph = new PasswordHash(hash);
 
-        // 3) Crear en BD
+     
         return repo.crearCliente(email, ph, nombre);
     }
 }

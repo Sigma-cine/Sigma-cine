@@ -8,7 +8,7 @@ import sigmacine.dominio.valueobject.PasswordHash;
 public interface UsuarioRepository {
     //Optional<Usuario> buscarPorEmail(Email email);
     void guardar(Usuario usuario);
-    Long crearCliente(Email email, PasswordHash passwordHash, String nombre);
+    int crearCliente(Email email, PasswordHash passwordHash, String nombre);
     Usuario buscarPorEmail(Email email);
 
 }

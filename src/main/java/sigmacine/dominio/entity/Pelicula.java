@@ -13,7 +13,7 @@ public class Pelicula {
     private String trailer;
     private String sinopsis;
     private String estado;
-
+    public String posterUrl;
     public Pelicula() {}
 
     public Pelicula(int id, String titulo, String genero, String clasificacion,int duracion, String director, List<String> reparto,
@@ -70,4 +70,7 @@ public class Pelicula {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    
+    public String getPosterUrl() { return posterUrl; }
+    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
 }

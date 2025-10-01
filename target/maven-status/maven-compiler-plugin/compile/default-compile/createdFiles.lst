@@ -7,12 +7,14 @@ sigmacine\ui\controller\AdminController.class
 sigmacine\dominio\entity\Pelicula.class
 sigmacine\ui\controller\ClienteController.class
 sigmacine\dominio\entity\Compra.class
+sigmacine\dominio\entity\Funcion.class
+sigmacine\dominio\entity\Usuario$Rol.class
 sigmacine\ui\controller\LoginController.class
 sigmacine\aplicacion\facade\AuthFacade.class
+sigmacine\dominio\entity\Sala.class
 sigmacine\dominio\entity\Usuario.class
 sigmacine\ui\App.class
-sigmacine\dominio\entity\Cliente.class
-sigmacine\dominio\entity\Admin.class
+sigmacine\dominio\entity\Silla.class
 sigmacine\infraestructura\configdatabase\ScriptLoader.class
 sigmacine\ui\controller\CarteleraController.class
 sigmacine\ui\controller\ControladorControlador.class

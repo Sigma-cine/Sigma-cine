@@ -7,8 +7,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.MenuItem;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
+import javafx.scene.image.ImageView;      // ⬅️ IMPORT CLAVE
+import javafx.scene.layout.StackPane; 
 
 
 public class ClienteController {
@@ -21,6 +24,8 @@ public class ClienteController {
     @FXML private Button btnSigmaCard; // puede ser null si no existe en ese FXML
     @FXML private Button btnCart;      // idem
     @FXML private MenuItem miCerrarSesion;
+    @FXML private StackPane promoPane;
+    @FXML private ImageView imgPublicidad;
 
     // --- VISTA CIUDAD (ciudad.fxml) ---
     @FXML private ChoiceBox<String> cbCiudad;
@@ -53,6 +58,12 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
+        // Banner: ocupa todo el contenedor
+        if (promoPane != null && imgPublicidad != null) {
+        imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
+        imgPublicidad.setFitHeight(110);   // fijo
+        imgPublicidad.setPreserveRatio(true); 
+         }
         // --- Wiring para pantalla CIUDAD ---
         if (btnSeleccionarCiudad != null) {
             btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
@@ -63,6 +74,7 @@ public class ClienteController {
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
     }
+
 
     private String safeCiudad() {
         return ciudadSeleccionada != null ? ciudadSeleccionada : "sin ciudad";

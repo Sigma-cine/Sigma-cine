@@ -28,12 +28,13 @@ public class App extends Application {
         RegistroService registroService = new RegistroService(repo);    
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
        
-       ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+
+        ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
         coordinador.mostrarLogin();
 
-        /* 
-        //Este codigo es para omitir el login
-            Usuario u;
+
+       /*  //Este codigo es para omitir el login
+           // Usuario u;
             UsuarioDTO dto = new UsuarioDTO();
             dto.setId(6L);
             dto.setEmail("ClientePrueba@sigma.com");

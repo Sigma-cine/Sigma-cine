@@ -1,19 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="sigmacine.ui.controller.ClienteController">
+
+<!--
+  Vista principal del cliente.
+  - Barra superior con navegación (Cartelera, Confitería, Sigma Card)
+  - Buscador, Cart y menú de perfil con "Cerrar Sesión"
+  - Zona central dinámica: StackPane `content` para cargar sub-vistas
+  Requiere: ClienteController (maneja los botones por código en initialize())
+-->
+
+<BorderPane prefWidth="960.0" prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sigmacine.ui.controller.ClienteController"
+            stylesheets="@sigma.css">
+
+    <!-- ===== TOP BAR ===== -->
     <top>
-        <Label fx:id="welcomeLabel" text="Bienvenido al Cine Sigma"
-               style="-fx-font-size:18; -fx-font-weight:bold; -fx-padding:10;"/>
+        <HBox alignment="CENTER_LEFT" spacing="12" BorderPane.alignment="CENTER"
+              styleClass="topbar">
+            <children>
+
+                <!-- Marca / Logo (texto por ahora; si usas ImageView, colócalo aquí) -->
+                <Label text="SIGMA CINE" styleClass="brand"/>
+
+                <!-- Navegación -->
+                <Button fx:id="btnCartelera"  text="Cartelera"  styleClass="toplink"/>
+                <Button fx:id="btnConfiteria" text="Confitería" styleClass="toplink"/>
+                <Button fx:id="btnSigmaCard"  text="Sigma Card" styleClass="toplink"/>
+
+                <!-- Separador flexible para empujar a la derecha -->
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Buscador -->
+                <TextField promptText="Buscar" prefWidth="240"
+                           styleClass="search"/>
+
+                <!-- Carrito -->
+                <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
+
+                <!-- Perfil -->
+                <MenuButton text="👤" styleClass="icon-btn">
+                    <items>
+                        <MenuItem text="Mi Cuenta"/>
+                        <MenuItem text="Buscar Tiquetes"/>
+                        <MenuItem text="Confitería"/>
+                        <MenuItem text="Promociones"/>
+                        <MenuItem text="Información Personal"/>
+                        <MenuItem text="SigmaCard"/>
+                        <MenuItem text="Historial de compras"/>
+                        <MenuItem text="Notificaciones"/>
+                        <MenuItem text="Cartelera"/>
+                        <SeparatorMenuItem/>
+                        <!-- El controller engancha este item en initialize() -->
+                        <MenuItem fx:id="miCerrarSesion" text="Cerrar Sesión"/>
+                    </items>
+                </MenuButton>
+
+            </children>
+            <padding>
+                <Insets top="10" right="16" bottom="10" left="16"/>
+            </padding>
+        </HBox>
     </top>
+
+    <!-- ===== CONTENEDOR DINÁMICO =====
+         Aquí se inyectan las sub-vistas con ClienteController.loadIntoContent(...) -->
     <center>
-        <VBox spacing="8" style="-fx-padding:16;">
-            <Button text="Ver cartelera"/>
-            <Button text="Mis compras"/>
-        </VBox>
+        <StackPane fx:id="content" styleClass="content-root"/>
     </center>
+
+    <!-- ===== (Opcional) FOOTER SENCILLO ===== -->
     <bottom>
-        <Button text="Cerrar sesión" onAction="#onLogout" style="-fx-padding:10;"/>
+        <HBox alignment="CENTER_RIGHT" styleClass="footer">
+            <children>
+                <Label text="© Sigma Cine" styleClass="footer-text"/>
+            </children>
+            <padding>
+                <Insets top="8" right="16" bottom="8" left="16"/>
+            </padding>
+        </HBox>
     </bottom>
+
 </BorderPane>

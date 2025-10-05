@@ -1,6 +1,6 @@
 package sigmacine.infraestructura.persistencia.jdbc;
 
-import sigmacine.infraestructura.configdatabase.DatabaseConfig;
+import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.dominio.repository.UsuarioRepository;
 import sigmacine.dominio.entity.Usuario;
 import sigmacine.dominio.valueobject.Email;

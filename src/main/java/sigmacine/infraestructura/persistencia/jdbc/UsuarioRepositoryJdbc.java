@@ -2,6 +2,7 @@ package sigmacine.infraestructura.persistencia.jdbc;
 
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.dominio.repository.UsuarioRepository;
+import sigmacine.dominio.entity.Compra;
 import sigmacine.dominio.entity.Usuario;
 import sigmacine.dominio.valueobject.Email;
 import sigmacine.dominio.valueobject.PasswordHash;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.sql.Date;
 
 public class UsuarioRepositoryJdbc implements UsuarioRepository {
@@ -140,5 +142,17 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         String v = raw.trim().toUpperCase();
         if (v.equals("ADMIN") || v.equals("ADMI")) return Usuario.Rol.ADMIN;
         return Usuario.Rol.CLIENTE;
+    }
+
+    @Override
+    public Usuario buscarPorId(int id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
+    }
+
+    @Override
+    public List<Compra> verHistorial(String emailPlano) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'verHistorial'");
     }
 }

@@ -1,4 +1,4 @@
-package sigmacine.infraestructura.configdatabase;
+package sigmacine.infraestructura.configDataBase;
 
 import java.io.InputStream; 
 import java.io.InputStreamReader; 

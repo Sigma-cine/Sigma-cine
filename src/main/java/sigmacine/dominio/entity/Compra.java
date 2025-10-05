@@ -6,17 +6,17 @@ import java.util.List;
 
 public class Compra {
     private Long id;
-    private Cliente cliente;
+   // private Cliente cliente;
     //private List<Boleto> boletos = new ArrayList<>();
     //private List<Producto> productos = new ArrayList<>();
     //private Dinero total = new Dinero(BigDecimal.ZERO);
     //private Pago pago;
 
     // Constructor que inicializa una nueva compra con un cliente
-    public Compra(Long id, Cliente cliente) {
+   /* public Compra(Long id, Cliente cliente) {
         this.id = id;
         this.cliente = cliente;
-    }
+    }*/
 
    /*  public void agregarBoleto(Boleto boleto) {
         if (boleto == null) {
@@ -47,7 +47,7 @@ public class Compra {
         return id;
     }
 
-    public Cliente getCliente() {
+ /*   public Cliente getCliente() {
         return cliente;
     }
 

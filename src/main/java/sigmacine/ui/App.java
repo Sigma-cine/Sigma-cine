@@ -3,8 +3,9 @@ package sigmacine.ui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import sigmacine.infraestructura.configdatabase.DatabaseConfig;
+import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
+import sigmacine.infraestructura.configDataBase.ScriptLoader;
 
 import sigmacine.dominio.repository.UsuarioRepository;
 import sigmacine.aplicacion.service.LoginService;
@@ -23,17 +24,25 @@ public class App extends Application {
     public void start(Stage stage) {
 
         DatabaseConfig db = new DatabaseConfig();
+        // Ejecutar scripts SQL de esquema y datos si la base está vacía
+        try (var conn = db.getConnection()) {
+            ScriptLoader.runScripts(conn);
+        } catch (Exception e) {
+            System.err.println("No se pudieron ejecutar los scripts iniciales: " + e.getMessage());
+            e.printStackTrace();
+        }
         UsuarioRepository repo = new UsuarioRepositoryJdbc(db);
         LoginService loginService = new LoginService(repo);
         RegistroService registroService = new RegistroService(repo);    
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
        
-       ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+
+        ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
         coordinador.mostrarLogin();
 
-        /* 
-        //Este codigo es para omitir el login
-            Usuario u;
+
+       /*  //Este codigo es para omitir el login
+           // Usuario u;
             UsuarioDTO dto = new UsuarioDTO();
             dto.setId(6L);
             dto.setEmail("ClientePrueba@sigma.com");

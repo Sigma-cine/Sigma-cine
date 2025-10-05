@@ -64,7 +64,8 @@ public class ControladorControlador {
             boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
             String fxml = esAdmin
                     ? "/sigmacine/ui/views/admin_dashboard.fxml"
-                    : "/sigmacine/ui/views/cliente_home.fxml";
+                    : "/sigmacine/ui/views/ciudad.fxml";
+                    
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent root = loader.load();
@@ -75,7 +76,7 @@ public class ControladorControlador {
                 stage.setTitle("Sigma Cine - Admin");
             } else {
                 ClienteController c = loader.getController();
-                c.init(usuario, this);
+                c.initCiudad(usuario); 
                 stage.setTitle("Sigma Cine - Cliente");
             }
 
@@ -89,4 +90,45 @@ public class ControladorControlador {
             throw new RuntimeException("Error cargando vista home por rol", e);
         }
     }
+
+    //================================================
+   /*  public void mostrarMisCompras() {
+    try {
+        var loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/mis_compras.fxml"));
+        var root = loader.load();
+        // si tienes controlador: MisComprasController c = loader.getController(); c.init(...);
+        stage.setTitle("Sigma Cine - Mis compras");
+        stage.setScene(new Scene(root));
+        stage.show();
+    } catch (Exception e) {
+        throw new RuntimeException("Error cargando mis_compras.fxml", e);
+    }
+    public void mostrarCartelera() {
+    try {
+        var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cartelera.fxml"));
+        var root = loader.load();
+        var c = loader.getController();
+        if (c instanceof sigmacine.ui.controller.CarteleraController cc) cc.setCoordinador(this);
+        stage.setTitle("Sigma Cine - Cartelera");
+        stage.setScene(new javafx.scene.Scene(root));
+        stage.show();
+    } catch (Exception e) {
+        throw new RuntimeException("Error cargando cartelera.fxml", e);
+    }
+}
+
+public void mostrarConfiteria() {
+    try {
+        var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/confiteria.fxml"));
+        var root = loader.load();
+        var c = loader.getController();
+        if (c instanceof sigmacine.ui.controller.ConfiteriaController cc) cc.setCoordinador(this);
+        stage.setTitle("Sigma Cine - Confitería");
+        stage.setScene(new javafx.scene.Scene(root));
+        stage.show();
+    } catch (Exception e) {
+        throw new RuntimeException("Error cargando confiteria.fxml", e);
+    }
+}
+*/
 }

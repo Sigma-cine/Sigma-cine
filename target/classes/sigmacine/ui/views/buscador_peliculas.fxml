@@ -150,12 +150,5 @@
             </TableView>
          </children>
       </AnchorPane>
-                  <Button alignment="CENTER" mnemonicParsing="false" style="-fx-background-color: #993726; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 30;" text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                  <Button alignment="CENTER" mnemonicParsing="false" style="-fx-background-color: #993726; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 30;" text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                  <Button alignment="CENTER" mnemonicParsing="false" style="-fx-background-color: #993726; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 30;" text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-               </children>
-            </GridPane>
-         </children>
-      </AnchorPane>
    </children>
 </AnchorPane>

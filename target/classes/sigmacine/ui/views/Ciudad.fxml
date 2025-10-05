@@ -1,42 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-   <center>
-      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="235.0" prefWidth="262.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;" BorderPane.alignment="CENTER">
-         <children>
-            <VBox alignment="TOP_CENTER" layoutY="-4.0" prefHeight="253.0" prefWidth="263.0">
-               <children>
-                  <Pane prefHeight="43.0" prefWidth="263.0" style="-fx-background-color: #8B2E21; -fx-background-radius: 15 15 0 0;">
-                     <children>
-                        <Label contentDisplay="CENTER" layoutX="57.0" layoutY="9.0" style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Selecciona Ciudad ">
-                           <font>
-                              <Font size="17.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="192.0" prefWidth="266.0">
-                     <children>
-                        <ChoiceBox layoutX="57.0" layoutY="46.0" prefWidth="150.0" />
-                        <Button layoutX="61.0" layoutY="115.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="142.0" style="-fx-background-color: #8B2E21; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 8 20 8 20;" text="Seleccionar" />
-                     </children>
-                  </Pane>
-               </children>
-            </VBox>
-         </children>
-      </AnchorPane>
-   </center>
+<BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ClienteController">
+    <center>
+        <AnchorPane prefHeight="235.0" prefWidth="262.0" style="-fx-background-color: black; -fx-background-radius: 15; -fx-padding: 20;" BorderPane.alignment="CENTER">
+            <children>
+                <VBox alignment="TOP_CENTER" layoutX="152.0" layoutY="52.0" prefHeight="253.0" prefWidth="263.0">
+                    <children>
+                        <Pane prefHeight="43.0" prefWidth="263.0" style="-fx-background-color: #8B2E21; -fx-background-radius: 15 15 0 0;">
+                            <children>
+                                <Label layoutX="57.0" layoutY="9.0" style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Selecciona Ciudad">
+                                    <font><Font size="17.0" /></font>
+                                </Label>
+                            </children>
+                        </Pane>
+                        <Pane prefHeight="213.0" prefWidth="263.0" style="-fx-background-color: white;">
+                            <children>
+                                <ChoiceBox fx:id="cbCiudad" layoutX="57.0" layoutY="46.0" prefWidth="150.0" />
+                                <Button fx:id="btnSeleccionarCiudad" layoutX="61.0" layoutY="115.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="142.0" style="-fx-background-color: #8B2E21; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 8 20 8 20;" text="Seleccionar" />
+                            </children>
+                        </Pane>
+                    </children>
+                </VBox>
+            </children>
+        </AnchorPane>
+    </center>
 </BorderPane>

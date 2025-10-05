@@ -36,8 +36,9 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <!-- Buscador -->
-                <TextField promptText="Buscar" prefWidth="240"
+                <TextField fx:id="txtBuscar" promptText="Buscar" prefWidth="200"
                            styleClass="search"/>
+                <Button fx:id="btnBuscar" text="Buscar" onAction="#onBuscarTop" />
 
                 <!-- Carrito -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>

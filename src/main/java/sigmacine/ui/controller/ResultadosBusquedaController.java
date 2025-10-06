@@ -1,63 +1,62 @@
 package sigmacine.ui.controller;
 
 import javafx.fxml.FXML;
-
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
-import javafx.scene.layout.HBox;
 import sigmacine.dominio.entity.Pelicula;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class BuscarPeliculaController {
-
-
-
-    @FXML private javafx.scene.layout.HBox panelPeliculas;
+public class ResultadosBusquedaController {
+    @FXML private javafx.scene.control.Button btnVolver;
     @FXML private Label lblTituloResultados;
     @FXML private Label lblTextoBuscado;
+    @FXML private HBox panelPeliculas;
 
-    private ControladorControlador coordinador;
-    private java.util.function.Function<String, List<Pelicula>> buscador; // inyecta desde afuera
+    private List<Pelicula> peliculas;
+    private String textoBuscado;
 
-    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
-    /** Permite inyectar el servicio de búsqueda que ya tengas (por título) */
-    public void setBuscador(java.util.function.Function<String,List<Pelicula>> buscador) { this.buscador = buscador; }
+    public void setResultados(List<Pelicula> peliculas, String textoBuscado) {
+        this.peliculas = peliculas;
+        this.textoBuscado = textoBuscado;
+        mostrarResultados();
 
-
-
-    public void onBuscar() {
-        // Este método ya no se usa porque no hay campo de texto en el FXML
-        // Se recomienda usar onBuscar(String texto)
-        throw new UnsupportedOperationException("onBuscar() sin argumento no debe usarse");
-
-    }
-
-    public void onBuscar(String texto) {
-        if (lblTituloResultados != null) lblTituloResultados.setText("Resultados de búsqueda");
-        if (lblTextoBuscado != null) lblTextoBuscado.setText(texto != null ? texto : "");
-        if (buscador == null) return;
-        if (texto == null || texto.trim().isEmpty()) {
-            mostrarPeliculasBonitas(java.util.Collections.emptyList());
-            return;
+        if (btnVolver != null) {
+            btnVolver.setOnAction(e -> volverAInicio());
         }
-        List<Pelicula> lista = buscador.apply(texto.trim());
-        mostrarPeliculasBonitas(lista);
     }
 
+    private void volverAInicio() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.setTitle("Sigma Cine");
+        } catch (Exception ex) {
+            System.err.println("Error al volver a inicio: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 
-    private void mostrarPeliculasBonitas(List<Pelicula> peliculas) {
+    private void mostrarResultados() {
+        if (lblTituloResultados != null) lblTituloResultados.setText("Resultados de búsqueda");
+        if (lblTextoBuscado != null) lblTextoBuscado.setText(textoBuscado != null ? textoBuscado : "");
         if (panelPeliculas == null) return;
         panelPeliculas.getChildren().clear();
+        if (peliculas == null) return;
         for (Pelicula p : peliculas) {
             VBox tarjeta = new VBox(8);
             tarjeta.setAlignment(Pos.CENTER);
+            tarjeta.setPrefWidth(320);
+            tarjeta.setPrefHeight(420);
+            tarjeta.setMinWidth(320);
+            tarjeta.setMaxWidth(320);
+            tarjeta.setMinHeight(420);
+            tarjeta.setMaxHeight(420);
             tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 20; -fx-padding: 20; -fx-effect: dropshadow(gaussian, #000, 8, 0.2, 0, 2);");
             ImageView poster = new ImageView();
             poster.setFitHeight(180);
@@ -85,19 +84,17 @@ public class BuscarPeliculaController {
             Label sinopsis = new Label("Sinopsis: " + p.getSinopsis());
             sinopsis.setStyle("-fx-text-fill: #eee; -fx-font-size: 14px;");
             sinopsis.setWrapText(true);
-            Button btnDetalle = new Button("Ver detalle película");
+            javafx.scene.control.Button btnDetalle = new javafx.scene.control.Button("Ver detalle película");
             btnDetalle.setStyle("-fx-background-color: #993726; -fx-text-fill: #fff; -fx-font-weight: bold; -fx-background-radius: 30;");
             btnDetalle.setOnAction(e -> mostrarDetallePelicula(p));
+            VBox.setMargin(btnDetalle, new javafx.geometry.Insets(10, 0, 0, 0));
             tarjeta.getChildren().addAll(poster, titulo, genero, clasificacion, duracion, director, reparto, sinopsis, btnDetalle);
             panelPeliculas.getChildren().add(tarjeta);
         }
     }
 
-
-
     private void mostrarDetallePelicula(Pelicula p) {
-        // Aquí puedes abrir una nueva ventana, diálogo, o mostrar más info
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
         alert.setTitle("Detalle de Película");
         alert.setHeaderText(p.getTitulo());
         alert.setContentText("Género: " + p.getGenero() + "\n" +
@@ -108,11 +105,4 @@ public class BuscarPeliculaController {
                 "Sinopsis: " + p.getSinopsis());
         alert.showAndWait();
     }
-
-
-
- /*   @FXML
-    private void onVolver() {
-        if (coordinador != null) coordinador.mostrarCartelera();
-    }*/
 }

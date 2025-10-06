@@ -33,4 +33,5 @@ sigmacine\dominio\entity\Usuario.class
 sigmacine\dominio\repository\PeliculaRepository.class
 sigmacine\dominio\entity\Pago.class
 sigmacine\aplicacion\service\BuscarPeliculaService.class
+sigmacine\ui\controller\ResultadosBusquedaController.class
 sigmacine\infraestructura\persistencia\jdbc\UsuarioRepositoryJdbc.class

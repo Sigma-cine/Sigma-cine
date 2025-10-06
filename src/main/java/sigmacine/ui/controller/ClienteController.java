@@ -142,29 +142,26 @@ public class ClienteController {
         if (texto == null) texto = "";
         System.out.println("doSearch invoked with: '" + texto + "'");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/buscador_peliculas.fxml"));
-            Parent root = loader.load();
-
-            BuscarPeliculaController controller = loader.getController();
-            // crear repo y conectar buscador directamente al repo JDBC
+            // Buscar películas
             DatabaseConfig db = new DatabaseConfig();
             var repo = new PeliculaRepositoryJdbc(db);
-            controller.setBuscador(q -> repo.buscarPorTitulo(q == null ? "" : q));
+            var resultados = repo.buscarPorTitulo(texto);
 
-            // cargar la vista en content
-            if (content != null) {
-                content.getChildren().clear();
-                content.getChildren().add(root);
-            }
+            // Cargar la pantalla de resultados en el mismo Stage principal
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/resultados_busqueda.fxml"));
+            Parent root = loader.load();
+            ResultadosBusquedaController controller = loader.getController();
+            controller.setResultados(resultados, texto);
 
-            // ejecutar búsqueda inmediatamente
-            controller.setCoordinador(null);
-            controller.search(texto);
+            // Obtener el Stage principal desde cualquier nodo de la UI
+            javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Resultados de búsqueda");
 
         } catch (Exception ex) {
-            System.err.println("Error cargando buscarPeliculas.fxml: " + ex.getMessage());
+            System.err.println("Error cargando resultados_busqueda.fxml: " + ex.getMessage());
             ex.printStackTrace();
-            throw new RuntimeException("Error cargando buscarPeliculas.fxml", ex);
+            throw new RuntimeException("Error cargando resultados_busqueda.fxml", ex);
         }
     }
 }

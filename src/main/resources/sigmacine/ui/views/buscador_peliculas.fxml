@@ -91,6 +91,29 @@
                </content>
             </ScrollPane>
          </children>
+<<<<<<< HEAD
       </VBox>
+=======
+      </AnchorPane>
+      <!-- Tabla de resultados de búsqueda -->
+      <AnchorPane layoutY="410.0" prefHeight="300.0" prefWidth="560.0">
+         <children>
+            <TableView fx:id="tablaPeliculas" prefWidth="560.0" prefHeight="300.0">
+               <columns>
+                  <TableColumn fx:id="colId" text="ID" prefWidth="40" />
+                  <TableColumn fx:id="colTitulo" text="Título" prefWidth="150" />
+                  <TableColumn fx:id="colGenero" text="Género" prefWidth="100" />
+                  <TableColumn fx:id="colClasificacion" text="Clasificación" prefWidth="100" />
+                  <TableColumn fx:id="colDuracion" text="Duración" prefWidth="80" />
+                  <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="100" />
+                  <TableColumn fx:id="colReparto" text="Reparto" prefWidth="150" />
+                  <TableColumn fx:id="colTrailer" text="Trailer" prefWidth="100" />
+                  <TableColumn fx:id="colSinopsis" text="Sinopsis" prefWidth="200" />
+                  <TableColumn fx:id="colEstado" text="Estado" prefWidth="60" />
+               </columns>
+            </TableView>
+         </children>
+      </AnchorPane>
+>>>>>>> origin/buscarPeliculas
    </children>
 </AnchorPane>

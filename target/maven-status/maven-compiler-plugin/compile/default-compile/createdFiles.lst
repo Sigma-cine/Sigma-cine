@@ -13,7 +13,6 @@ sigmacine\ui\controller\ControladorControlador.class
 sigmacine\dominio\repository\UsuarioRepository.class
 sigmacine\infraestructura\persistencia\Mapper\PeliculaMapper.class
 sigmacine\dominio\entity\SigmaCard.class
-sigmacine\ui\controller\BuscarPeliculaController.class
 sigmacine\dominio\valueobject\PasswordHash.class
 sigmacine\infraestructura\persistencia\jdbc\PeliculaRepositoryJdbc.class
 sigmacine\infraestructura\configDataBase\DatabaseConfig.class

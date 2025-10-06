@@ -15,18 +15,13 @@ public class RegistroService {
     public int registrarCliente(String nombre, String emailPlano, String contrasenaPlano) {
         Email email = new Email(emailPlano);
 
-        /* if (repo.buscarPorEmail(email).isPresent()) {*/
-
-         Usuario existente = repo.buscarPorEmail(email);
+        Usuario existente = repo.buscarPorEmail(email);
         if (existente != null) {
             throw new IllegalArgumentException("El email ya está registrado");
         }
-
-       
         String hash = BCrypt.hashpw(contrasenaPlano, BCrypt.gensalt(10));
         PasswordHash ph = new PasswordHash(hash);
 
-     
         return repo.crearCliente(email, ph, nombre);
     }
 }

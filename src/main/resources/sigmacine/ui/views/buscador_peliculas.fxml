@@ -3,27 +3,14 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<<<<<<< HEAD
 <?import javafx.scene.control.ScrollPane?>
-=======
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
->>>>>>> origin/developer
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Separator?>
 
-<<<<<<< HEAD
 <AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.HistorialController" stylesheets="@../css/sigmacine.css">
-=======
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.BuscarPeliculaController">
->>>>>>> origin/developer
    <children>
       <VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="1000.0" styleClass="dark-bg" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -41,6 +28,7 @@
                   <Label styleClass="toplink" text="HISTORIAL"><HBox.margin><Insets left="20.0" /></HBox.margin></Label>
                   
                   <Label HBox.hgrow="ALWAYS" />
+                  
                   <Button styleClass="icon-btn" text="👤" /> 
                   <Button styleClass="icon-btn" text="🛒"><HBox.margin><Insets right="5.0" /></HBox.margin></Button>
                   <Button styleClass="icon-btn" text="🔍"><HBox.margin><Insets right="20.0" /></HBox.margin></Button>
@@ -48,9 +36,9 @@
             </HBox>
 
             <HBox alignment="CENTER" prefHeight="40.0" prefWidth="1000.0" styleClass="topbar">
-                <children>
-                    <Label styleClass="toplink" text="No olvides utilizar tu Sigma Card para tener descuentos en funciones y confitería!" />
-                </children>
+               <children>
+                  <Label styleClass="toplink" text="No olvides utilizar tu Sigma Card para tener descuentos en funciones y confitería!" />
+               </children>
             </HBox>
             
             <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
@@ -91,29 +79,6 @@
                </content>
             </ScrollPane>
          </children>
-<<<<<<< HEAD
       </VBox>
-=======
-      </AnchorPane>
-      <!-- Tabla de resultados de búsqueda -->
-      <AnchorPane layoutY="410.0" prefHeight="300.0" prefWidth="560.0">
-         <children>
-            <TableView fx:id="tablaPeliculas" prefWidth="560.0" prefHeight="300.0">
-               <columns>
-                  <TableColumn fx:id="colId" text="ID" prefWidth="40" />
-                  <TableColumn fx:id="colTitulo" text="Título" prefWidth="150" />
-                  <TableColumn fx:id="colGenero" text="Género" prefWidth="100" />
-                  <TableColumn fx:id="colClasificacion" text="Clasificación" prefWidth="100" />
-                  <TableColumn fx:id="colDuracion" text="Duración" prefWidth="80" />
-                  <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="100" />
-                  <TableColumn fx:id="colReparto" text="Reparto" prefWidth="150" />
-                  <TableColumn fx:id="colTrailer" text="Trailer" prefWidth="100" />
-                  <TableColumn fx:id="colSinopsis" text="Sinopsis" prefWidth="200" />
-                  <TableColumn fx:id="colEstado" text="Estado" prefWidth="60" />
-               </columns>
-            </TableView>
-         </children>
-      </AnchorPane>
->>>>>>> origin/buscarPeliculas
    </children>
 </AnchorPane>

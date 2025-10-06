@@ -7,52 +7,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" 
-            fx:controller="sigmacine.ui.controller.HistorialController" 
+<BorderPane prefHeight="700.0" prefWidth="1000.0"
             stylesheets="@../css/sigmacine.css"
-            xmlns="http://javafx.com/javafx/17.0.2" 
+            xmlns="http://javafx.com/javafx/17.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
-            style="-fx-background-color: #000000;"> 
-
-    <top>
-        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: #993726;"> 
-            <children>
-                <Label styleClass="brand" text="SIGMA CINE" style="-fx-text-fill: white;" />
-                <Separator orientation="VERTICAL" styleClass="brand-sep" />
-                
-                <Button text="Cartelera" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-                <Button text="Confitería" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-                <Button text="Sigma Card" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-                
-                <Label text="Historial" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 0 4 0;" /> 
-
-                <Region HBox.hgrow="ALWAYS" />
-
-                <TextField prefWidth="200" promptText="Buscar" styleClass="search" />
-
-                <Button styleClass="icon-btn" text="🛒" /> 
-                <MenuButton styleClass="icon-btn" text="👤">
-                    <items>
-                        <MenuItem text="Mi Cuenta" />
-                        <MenuItem text="Historial de compras" />
-                        <SeparatorMenuItem />
-                        <MenuItem text="Cerrar Sesión" />
-                    </items>
-                </MenuButton>
-            </children>
-            <padding>
-                <Insets bottom="8" left="16" right="16" top="8" />
-            </padding>
-        </HBox>
-    </top>
+            style="-fx-background-color: #000000;">
 
     <center>
         <ScrollPane fitToWidth="true" style="-fx-background-color: #000000;">
@@ -62,6 +23,10 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                     </padding>
                     
+                    <HBox alignment="CENTER_LEFT" prefWidth="960.0" styleClass="volver-bar">
+                        <Button fx:id="btnVolver" text="← Volver a Cartelera" style="-fx-background-color: transparent; -fx-text-fill: white;" />
+                    </HBox>
+
                     <Label styleClass="section-title" text="Tus Últimas Compras" alignment="CENTER_LEFT" prefWidth="960.0" style="-fx-text-fill: white;" />
                     
                     <HBox alignment="CENTER_LEFT" prefHeight="150.0" prefWidth="960.0" style="-fx-background-color: #1a1a1a; -fx-background-radius: 8;" spacing="20.0">

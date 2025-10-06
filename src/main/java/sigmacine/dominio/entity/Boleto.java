@@ -1,46 +1,27 @@
 package sigmacine.dominio.entity;
 
 public class Boleto {
-    private int id;
-    private Silla silla;
-    private double precio;
-    private String estado;
+    private Long id;
+    private String pelicula;
+    private String sala;
+    private String horario;
+    private String asiento;
+    private long precio;
 
-    public Boleto() {}
 
-    public Boleto(int id, double precio, String estado) {
-        this.id = id;
-        this.silla = new Silla();
-        this.precio = precio;
-        this.estado = estado;
+    public String getPelicula() {
+        return pelicula;
     }
 
-    public int getId() { 
-        return id; 
-    }
-    public void setId(int id) { 
-        this.id = id; 
+    public String getSala() {
+        return sala;
     }
 
-    public Silla getSilla() { 
-        return silla; 
+    public String getHorario() {
+        return horario;
     }
-    public void setAsiento(Silla silla) { 
-        this.silla = silla; 
+    
+    public long getPrecio() {
+        return precio;
     }
-
-    public double getPrecio() { 
-        return precio; 
-    }
-    public void setPrecio(double precio) { 
-        this.precio = precio; 
-    }
-
-    public String getEstado() { 
-        return estado; 
-    }
-    public void setEstado(String estado) { 
-        this.estado = estado; 
-    }
-
 }

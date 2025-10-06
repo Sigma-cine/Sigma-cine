@@ -18,7 +18,7 @@ import javafx.scene.input.KeyCode;
 import sigmacine.aplicacion.service.VerHistorialService;
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
-import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
+import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
 
 
 public class ClienteController {
@@ -35,8 +35,8 @@ public class ClienteController {
     @FXML private ImageView imgPublicidad;
     @FXML private TextField txtBuscar;
     @FXML private javafx.scene.control.Button btnBuscar;
-    @FXML private StackPane content; // Contenedor dinámico
-    // --- VISTA CIUDAD (ciudad.fxml) ---
+    @FXML private StackPane content;
+    
     @FXML private ChoiceBox<String> cbCiudad;
     @FXML private Button btnSeleccionarCiudad;
 
@@ -154,9 +154,11 @@ public class ClienteController {
         System.out.println("Navegando a Historial de Compras.");
         try {
             DatabaseConfig dbConfig = new DatabaseConfig();
+            // Asume que VerHistorialService requiere un repositorio de Usuario para buscar el historial.
             var usuarioRepo = new UsuarioRepositoryJdbc(dbConfig);
             var historialService = new VerHistorialService(usuarioRepo);
             
+            // Carga el FXML (ruta verificada y correcta)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/VerCompras.fxml"));
             
             VerHistorialController historialController = new VerHistorialController(historialService);
@@ -167,9 +169,10 @@ public class ClienteController {
             }
 
             loader.setController(historialController);
-        
+            
             Parent historialView = loader.load();
             
+            // 3. Muestra la vista
             content.getChildren().setAll(historialView);
             
         } catch (Exception ex) {
@@ -182,12 +185,14 @@ public class ClienteController {
     public void mostrarCartelera() {
     System.out.println("Volviendo a Cartelera (Inicio).");
     try {
+        // Asegúrate de que 'pagina_inicial.fxml' es el FXML que quieres cargar en el centro
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
         Parent carteleraView = loader.load();
         
+        // Carga el controlador de la nueva vista (si es diferente a ClienteController)
+        // Si el controlador de 'pagina_inicial.fxml' es ClienteController, puedes hacer esto:
         ClienteController controller = loader.getController();
         controller.init(this.usuario, this.ciudadSeleccionada);
-
         content.getChildren().setAll(carteleraView);
     } catch (Exception e) {
         content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de inicio."));

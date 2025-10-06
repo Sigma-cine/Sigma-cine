@@ -11,7 +11,10 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import javafx.scene.image.ImageView;      // ⬅️ IMPORT CLAVE
-import javafx.scene.layout.StackPane; 
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 
 
 public class ClienteController {
@@ -26,6 +29,9 @@ public class ClienteController {
     @FXML private MenuItem miCerrarSesion;
     @FXML private StackPane promoPane;
     @FXML private ImageView imgPublicidad;
+    @FXML private TextField txtBuscar;
+    @FXML private javafx.scene.control.Button btnBuscar;
+    @FXML private StackPane content;
 
     // --- VISTA CIUDAD (ciudad.fxml) ---
     @FXML private ChoiceBox<String> cbCiudad;
@@ -73,6 +79,17 @@ public class ClienteController {
         if (btnCartelera  != null) btnCartelera.setOnAction(e -> System.out.println("Ir a Cartelera (" + safeCiudad() + ")"));
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
+
+        // Wiring del buscador: al presionar Enter abre la vista de búsqueda y muestra resultados
+        if (txtBuscar != null) {
+            txtBuscar.setOnKeyPressed(ev -> {
+                if (ev.getCode() == KeyCode.ENTER) {
+                    doSearch(txtBuscar.getText());
+                }
+            });
+            // botón de búsqueda explícito
+            if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
+        }
     }
 
 
@@ -110,6 +127,44 @@ public class ClienteController {
             stage.show();
         } catch (Exception ex) {
             throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
+        }
+    }
+
+    @FXML
+    private void onBuscarTop() {
+        // Método invocado desde cliente_home.fxml cuando se presiona el botón Buscar
+        System.out.println("onBuscarTop clicked, txtBuscar='" + (txtBuscar != null ? txtBuscar.getText() : "<null>") + "'");
+        doSearch(txtBuscar != null ? txtBuscar.getText() : "");
+    }
+
+    /** Carga la vista buscarPeliculas.fxml dentro del content y ejecuta la búsqueda usando el repo JDBC */
+    private void doSearch(String texto) {
+        if (texto == null) texto = "";
+        System.out.println("doSearch invoked with: '" + texto + "'");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/buscador_peliculas.fxml"));
+            Parent root = loader.load();
+
+            BuscarPeliculaController controller = loader.getController();
+            // crear repo y conectar buscador directamente al repo JDBC
+            DatabaseConfig db = new DatabaseConfig();
+            var repo = new PeliculaRepositoryJdbc(db);
+            controller.setBuscador(q -> repo.buscarPorTitulo(q == null ? "" : q));
+
+            // cargar la vista en content
+            if (content != null) {
+                content.getChildren().clear();
+                content.getChildren().add(root);
+            }
+
+            // ejecutar búsqueda inmediatamente
+            controller.setCoordinador(null);
+            controller.search(texto);
+
+        } catch (Exception ex) {
+            System.err.println("Error cargando buscarPeliculas.fxml: " + ex.getMessage());
+            ex.printStackTrace();
+            throw new RuntimeException("Error cargando buscarPeliculas.fxml", ex);
         }
     }
 }

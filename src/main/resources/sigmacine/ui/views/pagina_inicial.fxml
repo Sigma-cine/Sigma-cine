@@ -54,7 +54,8 @@
                         <Font name="System Bold" size="15.0" />
                      </font>
                   </Label>
-                  <TextField style="-fx-background-color: #ffffff; -fx-background-radius: 30;" GridPane.columnIndex="4" />
+                  <TextField fx:id="txtBuscar" style="-fx-background-color: #ffffff; -fx-background-radius: 30;" GridPane.columnIndex="4" />
+                  <Button fx:id="btnBuscar" text="Buscar" GridPane.columnIndex="4" GridPane.halignment="RIGHT" onAction="#onBuscarTop" />
                </children>
             </GridPane>
          </children>
@@ -63,10 +64,16 @@
          </padding></HBox>
    </top>
    <center>
-  <StackPane fx:id="promoPane"
-             prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
-             style="-fx-background-color: #993726;"
-             BorderPane.alignment="TOP_CENTER">
+  <StackPane>
+    <children>
+      <StackPane fx:id="promoPane"
+                 prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
+                 style="-fx-background-color: #993726;"
+                 BorderPane.alignment="TOP_CENTER" />
+
+      <!-- contenedor dinámico donde se cargan las sub-vistas (buscar, confiteria, etc) -->
+      <StackPane fx:id="content" BorderPane.alignment="CENTER" />
+    </children>
 
     <ImageView fx:id="imgPublicidad"
                fitHeight="110.0"

@@ -23,7 +23,7 @@ public class BuscarPeliculaController {
     public void setBuscador(java.util.function.Function<String,List<Pelicula>> buscador) { this.buscador = buscador; }
 
     @FXML
-    private void initialize() {
+    public void initialize() {
         if (colId != null) colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         if (colTitulo != null) colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         if (colGenero != null) colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
@@ -37,10 +37,18 @@ public class BuscarPeliculaController {
     }
 
     @FXML
-    private void onBuscar() {
+    public void onBuscar() {
         if (buscador == null) return;
         String texto = txtTitulo.getText() == null ? "" : txtTitulo.getText().trim();
         List<Pelicula> lista = buscador.apply(texto);
+        tablaPeliculas.getItems().setAll(lista);
+    }
+
+    /** Permite ejecutar la búsqueda desde código externo (por ejemplo desde ClienteController) */
+    public void search(String texto) {
+        if (buscador == null) return;
+        String t = texto == null ? "" : texto.trim();
+        List<Pelicula> lista = buscador.apply(t);
         tablaPeliculas.getItems().setAll(lista);
     }
 

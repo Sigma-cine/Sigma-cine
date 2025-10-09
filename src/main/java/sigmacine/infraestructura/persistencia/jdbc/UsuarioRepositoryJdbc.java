@@ -1,6 +1,7 @@
 package sigmacine.infraestructura.persistencia.jdbc;
 
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.persistencia.Mapper.CompraMapper;
 import sigmacine.dominio.repository.UsuarioRepository;
 import sigmacine.dominio.entity.Compra;
 import sigmacine.dominio.entity.Usuario;
@@ -47,7 +48,13 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
-                return mapUsuario(rs);
+                //return mapUsuario(rs);
+                 Usuario usuario = mapUsuario(rs);
+                 /*Estas lineas de codigo no afectara la busqueda, ayudara a alimnetar la informacion de compras por 
+                 usuario para poder tener el historia alimentado con la informacion*/
+
+                 cargarComprasDeUsuario(con, usuario);
+                  return usuario;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error consultando USUARIO por email", e);
@@ -146,13 +153,91 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
 
     @Override
     public Usuario buscarPorId(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
+        
+        final String sql = """
+        SELECT
+            U.ID,
+            U.EMAIL,
+            U.CONTRASENA,
+            U.ROL,
+            A.NOMBRE  AS NOMBRE_ADMIN,
+            C.NOMBRE  AS NOMBRE_CLIENTE,
+            C.FECHA_REGISTRO
+        FROM USUARIO U
+        LEFT JOIN ADMIN   A ON A.ID = U.ID
+        LEFT JOIN CLIENTE C ON C.ID = U.ID
+        WHERE U.ID = ?
+        FETCH FIRST 1 ROWS ONLY
+    """;
+
+    try (Connection con = db.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, id);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) return null;
+            return mapUsuario(rs);
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException("Error consultando USUARIO por id", e);
+    }
     }
 
     @Override
     public List<Compra> verHistorial(String emailPlano) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'verHistorial'");
+    final String sql = """
+        SELECT
+            CO.ID    AS COMPRA_ID
+          , CO.TOTAL AS COMPRA_TOTAL   -- disponible si luego quieres reconstruir
+          , CO.FECHA AS COMPRA_FECHA   -- idem
+        FROM COMPRA CO
+        INNER JOIN CLIENTE C ON C.ID = CO.CLIENTE_ID
+        INNER JOIN USUARIO U ON U.ID = C.ID
+        WHERE U.EMAIL = ?
+        ORDER BY CO.FECHA DESC, CO.ID DESC
+    """;
+
+    try (Connection con = db.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setString(1, emailPlano);
+
+        Usuario usuario = buscarPorEmail(new Email(emailPlano));
+        if (usuario == null) return java.util.List.of();
+
+        try (ResultSet rs = ps.executeQuery()) {
+            var lista = new java.util.ArrayList<Compra>();
+            while (rs.next()) {
+                 lista.add(CompraMapper.map(rs, usuario));
+            }
+            return lista;
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException("Error consultando historial de compras del usuario " + emailPlano, e);
+    }  
     }
+
+   
+private void cargarComprasDeUsuario(Connection con, Usuario usuario) throws SQLException {
+    final String sqlCompras = """
+        SELECT
+            CO.ID    AS COMPRA_ID
+          , CO.TOTAL AS COMPRA_TOTAL   -- disponible si luego quieres reconstruir
+          , CO.FECHA AS COMPRA_FECHA   -- idem
+        FROM COMPRA CO
+        WHERE CO.CLIENTE_ID = ?
+        ORDER BY CO.FECHA DESC, CO.ID DESC
+    """;
+
+    try (PreparedStatement psC = con.prepareStatement(sqlCompras)) {
+        psC.setInt(1, usuario.getId());
+        try (ResultSet rsC = psC.executeQuery()) {
+            while (rsC.next()) {
+                usuario.agregarCompra(CompraMapper.map(rsC, usuario));
+            }
+        }
+    }
+}
+
 }

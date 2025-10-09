@@ -31,7 +31,7 @@ public class ResultadosBusquedaController {
 
     private void volverAInicio() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
             stage.setScene(new javafx.scene.Scene(root));
@@ -92,17 +92,25 @@ public class ResultadosBusquedaController {
             panelPeliculas.getChildren().add(tarjeta);
         }
     }
+private void mostrarDetallePelicula(Pelicula p) {
+    try {
+        var url = getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml");
+        if (url == null) throw new IllegalStateException("No se encontró detalle_pelicula.fxml");
 
-    private void mostrarDetallePelicula(Pelicula p) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-        alert.setTitle("Detalle de Película");
-        alert.setHeaderText(p.getTitulo());
-        alert.setContentText("Género: " + p.getGenero() + "\n" +
-                "Clasificación: " + p.getClasificacion() + "\n" +
-                "Duración: " + p.getDuracion() + " min\n" +
-                "Director: " + p.getDirector() + "\n" +
-                "Reparto: " + (p.getReparto() != null ? String.join(", ", p.getReparto()) : "") + "\n" +
-                "Sinopsis: " + p.getSinopsis());
-        alert.showAndWait();
+        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(url);
+        javafx.scene.Parent rootDetalle = loader.load();
+
+        DetallePeliculaController ctrl = loader.getController();
+        ctrl.setPelicula(p);
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
+        javafx.scene.Scene scene = new javafx.scene.Scene(rootDetalle);
+        // opcional: scene.getStylesheets().add(...);
+        stage.setScene(scene);
+        stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");
+        // stage.sizeToScene(); // úsalo solo si quieres que ajuste el tamaño a la nueva vista
+    } catch (Exception ex) {
+        ex.printStackTrace();
     }
+}
 }

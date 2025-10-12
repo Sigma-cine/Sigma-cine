@@ -37,6 +37,8 @@
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
 
                 <!-- Perfil -->
+                <Button fx:id="btnIniciarSesion" text="Iniciar sesión" styleClass="toplink" />
+                <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
                 <MenuButton text="👤" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>

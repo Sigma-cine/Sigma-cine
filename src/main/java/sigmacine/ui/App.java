@@ -37,8 +37,16 @@ public class App extends Application {
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
 
 
-        ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
-        coordinador.mostrarLogin();
+    ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+
+    // Arrancar en la vista cliente_home y mostrar popup de selección de ciudad
+    // Si hubiera un usuario por defecto (guest) podemos usar un DTO vacío
+    sigmacine.aplicacion.data.UsuarioDTO guest = new sigmacine.aplicacion.data.UsuarioDTO();
+    guest.setId(0); // id 0 = invitado
+    guest.setEmail("");
+    guest.setNombre("Invitado");
+
+    coordinador.mostrarClienteHomeConPopup(guest);
 
 
        /*  //Este codigo es para omitir el login

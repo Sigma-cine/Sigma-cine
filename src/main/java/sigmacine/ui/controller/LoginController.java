@@ -44,6 +44,7 @@ public void onIrARegistro() {
         feedback.setStyle("-fx-text-fill: #090;");
         feedback.setText("Bienvenido al Cine Sigma");
         if (coordinador != null) {
+            // Después de autenticarse, mostrar la vista principal para el usuario
             coordinador.mostrarHome(usuario);
         }
     }

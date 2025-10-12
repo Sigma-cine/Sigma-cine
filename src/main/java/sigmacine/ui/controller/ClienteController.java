@@ -19,6 +19,7 @@ import sigmacine.aplicacion.service.VerHistorialService;
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
+import sigmacine.ui.controller.ControladorControlador;
 
 
 public class ClienteController {
@@ -39,9 +40,12 @@ public class ClienteController {
     
     @FXML private ChoiceBox<String> cbCiudad;
     @FXML private Button btnSeleccionarCiudad;
+    @FXML private Button btnIniciarSesion;
+    @FXML private Button btnRegistrarse;
 
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
+    private ControladorControlador coordinador;
     
 
     public void init(UsuarioDTO usuario) { this.usuario = usuario; }
@@ -75,6 +79,9 @@ public class ClienteController {
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
 
+    if (btnIniciarSesion != null) btnIniciarSesion.setOnAction(e -> onIniciarSesion());
+    if (btnRegistrarse != null) btnRegistrarse.setOnAction(e -> onRegistrarse());
+
         if (txtBuscar != null) {
             txtBuscar.setOnKeyPressed(ev -> {
                 if (ev.getCode() == KeyCode.ENTER) {
@@ -83,6 +90,16 @@ public class ClienteController {
             });
             if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
         }
+    }
+
+    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
+
+    private void onIniciarSesion() {
+        if (coordinador != null) coordinador.mostrarLogin();
+    }
+
+    private void onRegistrarse() {
+        if (coordinador != null) coordinador.mostrarRegistro();
     }
 
 

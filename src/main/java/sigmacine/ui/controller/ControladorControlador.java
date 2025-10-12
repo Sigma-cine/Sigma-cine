@@ -2,7 +2,6 @@ package sigmacine.ui.controller;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
@@ -27,7 +26,8 @@ public class ControladorControlador {
             controller.setAuthFacade(authFacade);
 
             stage.setTitle("Sigma Cine - Login");
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
             stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando login.fxml", e);
@@ -44,9 +44,10 @@ public class ControladorControlador {
         loader.setController(controller); // <-- clave
 
         Parent root = loader.load();
-        stage.setTitle("Sigma Cine - Registrarse");
-        stage.setScene(new Scene(root));
-        stage.show();
+    stage.setTitle("Sigma Cine - Registrarse");
+    stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+    stage.setResizable(false);
+    stage.show();
     } catch (Exception e) {
         throw new RuntimeException("Error cargando registrarse.fxml", e);
     }
@@ -84,7 +85,8 @@ public class ControladorControlador {
             Label lbl = (Label) root.lookup("#welcomeLabel");
             if (lbl != null) lbl.setText("Bienvenido al Cine Sigma");
 
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
             stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando vista home por rol", e);

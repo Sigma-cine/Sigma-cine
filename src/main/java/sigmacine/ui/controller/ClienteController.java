@@ -3,7 +3,6 @@ package sigmacine.ui.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -120,7 +119,8 @@ public class ClienteController {
 
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
             stage.show();
         } catch (Exception ex) {
             throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
@@ -148,7 +148,8 @@ public class ClienteController {
             // Ocultar banner al navegar a una subvista
             if (imgPublicidad != null) { imgPublicidad.setVisible(false); imgPublicidad.setManaged(false); }
             javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
             stage.setTitle("Resultados de búsqueda");
 
         } catch (Exception ex) {

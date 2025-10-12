@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  Vista principal del cliente.
+  - Barra superior con navegación (Cartelera, Confitería, Sigma Card)
+  - Buscador, Cart y menú de perfil con "Cerrar Sesión"
+  - Zona central dinámica: StackPane `content` para cargar sub-vistas
+  Requiere: ClienteController (maneja los botones por código en initialize())
+-->
+
+<BorderPane prefHeight="600.0" prefWidth="960.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ClienteController">
+
+    <!-- ===== TOP BAR ===== -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="topbar" BorderPane.alignment="CENTER">
+            <children>
+
+                <!-- Marca / Logo (texto por ahora; si usas ImageView, colócalo aquí) -->
+                <Label styleClass="brand" text="SIGMA CINE" />
+
+                <!-- Navegación -->
+                <Button fx:id="btnCartelera" styleClass="toplink" text="Cartelera" />
+                <Button fx:id="btnConfiteria" styleClass="toplink" text="Confitería" />
+                <Button fx:id="btnSigmaCard" styleClass="toplink" text="Sigma Card" />
+
+                <!-- Separador flexible para empujar a la derecha -->
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Buscador -->
+                <TextField fx:id="txtBuscar" prefWidth="200" promptText="Buscar" styleClass="search" />
+                <Button fx:id="btnBuscar" onAction="#onBuscarTop" text="Buscar" />
+            <Button mnemonicParsing="false" style="-fx-background-color: #8B2E21; -fx-font-weight: bold; -fx-text-fill: white;" text="Cart" />
+
+                <!-- Perfil -->
+                <MenuButton styleClass="icon-btn" text="👤">
+                    <items>
+                        <MenuItem text="Mi Cuenta" />
+                        <MenuItem text="Buscar Tiquetes" />
+                        <MenuItem text="Confitería" />
+                        <MenuItem text="Promociones" />
+                        <MenuItem text="Información Personal" />
+                        <MenuItem text="SigmaCard" />
+                        <MenuItem text="Historial de compras" />
+                        <MenuItem text="Notificaciones" />
+                        <MenuItem text="Cartelera" />
+                        <SeparatorMenuItem />
+                        <!-- El controller engancha este item en initialize() -->
+                        <MenuItem fx:id="miCerrarSesion" text="Cerrar Sesión" />
+                    </items>
+                </MenuButton>
+
+            </children>
+            <padding>
+                <Insets bottom="10" left="16" right="16" top="10" />
+            </padding>
+        </HBox>
+    </top>
+
+    <!-- ===== (Opcional) FOOTER SENCILLO ===== -->
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" styleClass="footer">
+            <children>
+                <Label styleClass="footer-text" text="© Sigma Cine" />
+            </children>
+            <padding>
+                <Insets bottom="8" left="16" right="16" top="8" />
+            </padding>
+        </HBox>
+    </bottom>
+   <right>
+      <AnchorPane prefHeight="536.0" prefWidth="535.0" BorderPane.alignment="CENTER">
+         <children>
+            <ScrollPane fitToWidth="true" prefHeight="520.0" prefWidth="423.0">
+               <content>
+                  <VBox prefHeight="519.0" prefWidth="477.0" style="-fx-padding: 30; -fx-spacing: 10; -fx-border-color: #8B2E21; -fx-border-width: 7;">
+                     <children>
+                        <Label style="-fx-font-size: 22; -fx-font-weight: bold;" text="Mi carrito" />
+                        <VBox alignment="CENTER" prefHeight="179.0" prefWidth="474.0" style="-fx-border-color: #5A3084; -fx-padding: 3; -fx-spacing: 5; -fx-border-radius: 10; -fx-background-color: #181818; -fx-border-width: 3;">
+                           <children>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <ImageView fitHeight="150.0" fitWidth="145.0" pickOnBounds="true" preserveRatio="true" />
+                                    <VBox prefHeight="99.0" prefWidth="215.0" style="-fx-spacing: 10; -fx-padding: 10;">
+                                       <children>
+                                          <Label prefHeight="38.0" prefWidth="223.0" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-height: 30; -fx-pref-width: 220;" text="[Producto]" />
+                                          <Label prefHeight="47.0" prefWidth="215.0" style="-fx-font-size: 12xp; -fx-pref-height: 45; -fx-pref-width: 220;" text="[Descripcion]" />
+                                          <VBox alignment="CENTER" prefHeight="49.0" prefWidth="215.0">
+                                             <children>
+                                                <HBox alignment="CENTER" prefHeight="75.0" prefWidth="215.0">
+                                                   <children>
+                                                      <Button mnemonicParsing="false" prefHeight="24.0" prefWidth="44.0" style="-fx-background-color: #222; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-size: 16px; -fx-pref-width: 30; -fx-pref-height: 30;" text="-" />
+                                                      <Label alignment="CENTER" prefHeight="16.0" prefWidth="45.0" style="-fx-pref-height: 30; -fx-pref-width: 100;" text="1" textAlignment="CENTER" />
+                                                      <Button mnemonicParsing="false" prefWidth="31.0" style="-fx-background-color: #222; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-size: 16px; -fx-pref-width: 30; -fx-pref-height: 30;" text="+" />
+                                                      <Label alignment="CENTER" prefHeight="16.0" prefWidth="122.0" style="-fx-pref-height: 30;" text="[Precio]" textAlignment="CENTER" />
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="200.0" prefWidth="333.0" style="-fx-padding: 15; -fx-spacing: 15;">
+                           <children>
+                              <Label style="-fx-text-fill: #929292; -fx-font-size: 16px; -fx-font-weight: bold;" text="Tiquetes" />
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Total tiquetes" />
+                                    <Region prefHeight="100.0" prefWidth="84.0" />
+                                    <Label alignment="CENTER" prefHeight="20.0" prefWidth="91.0" style="-fx-font-weight: bold; -fx-font-size: 16px;" text="[Precio]" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="21.0" prefWidth="303.0" style="-fx-background-color: #2B2B2B; -fx-background-radius: 10; -fx-spacing: 20; -fx-padding: 15;">
+                                 <children>
+                                    <Label prefHeight="21.0" prefWidth="196.0" style="-fx-font-size: 18; -fx-font-weight: bold;" text="TOTAL" />
+                                    <Region prefHeight="200.0" prefWidth="200.0" />
+                                    <Label alignment="CENTER" prefHeight="21.0" prefWidth="201.0" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="[Precio]" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <HBox prefHeight="54.0" prefWidth="375.0">
+                           <children>
+                              <Region prefHeight="200.0" prefWidth="200.0" />
+                              <Button mnemonicParsing="false" prefHeight="32.0" prefWidth="384.0" style="-fx-background-color: #8B2E21; -fx-font-size: 14px; -fx-text-fill: white; -fx-padding: 7; -fx-background-radius: 20; -fx-pref-width: 300; -fx-font-weight: bold;" text="Proceder el pago" />
+                              <Region prefHeight="200.0" prefWidth="200.0" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </AnchorPane>
+   </right>
+
+</BorderPane>

@@ -64,7 +64,7 @@ public class ControladorControlador {
             boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
             String fxml = esAdmin
                     ? "/sigmacine/ui/views/admin_dashboard.fxml"
-                    : "/sigmacine/ui/views/ciudad.fxml";
+                    : "/sigmacine/ui/views/Ciudad.fxml";
                     
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));

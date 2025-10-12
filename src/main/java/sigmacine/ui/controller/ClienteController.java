@@ -1,5 +1,10 @@
 package sigmacine.ui.controller;
 
+import javafx.scene.layout.Region;
+import javafx.stage.Modality;
+import javafx.scene.input.KeyCode;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.GaussianBlur; //Muestra el fondo desenfocado
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -74,6 +79,8 @@ public class ClienteController {
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
+
+        if (btnCart != null) btnCart.setOnAction(e -> openCartModal());
 
         if (txtBuscar != null) {
             txtBuscar.setOnKeyPressed(ev -> {
@@ -185,12 +192,9 @@ public class ClienteController {
     public void mostrarCartelera() {
     System.out.println("Volviendo a Cartelera (Inicio).");
     try {
-        // Asegúrate de que 'pagina_inicial.fxml' es el FXML que quieres cargar en el centro
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
         Parent carteleraView = loader.load();
-        
-        // Carga el controlador de la nueva vista (si es diferente a ClienteController)
-        // Si el controlador de 'pagina_inicial.fxml' es ClienteController, puedes hacer esto:
+
         ClienteController controller = loader.getController();
         controller.init(this.usuario, this.ciudadSeleccionada);
         content.getChildren().setAll(carteleraView);
@@ -198,5 +202,56 @@ public class ClienteController {
         content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de inicio."));
         e.printStackTrace();
         }
+    }
+
+private boolean cartOpen = false;
+
+private void openCartModal() {
+    if (cartOpen) return;
+    Stage owner = (Stage) btnCart.getScene().getWindow();
+    var ownerRoot = owner.getScene().getRoot();
+    var prev = ownerRoot.getEffect();
+
+    try {
+        cartOpen = true;
+        ownerRoot.setEffect(new javafx.scene.effect.GaussianBlur(18));
+
+        FXMLLoader fx = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/prueba.fxml"));
+        Parent root = fx.load();
+
+        if (root instanceof javafx.scene.layout.Region r) {
+            if (r.getMinWidth() == Region.USE_COMPUTED_SIZE)  r.setMinWidth(600);
+            if (r.getMinHeight() == Region.USE_COMPUTED_SIZE) r.setMinHeight(400);
+
+        }
+
+        root.setStyle(root.getStyle() + "; -fx-background-color: rgba(0,0,0,0.92);");
+
+
+        Stage dialog = new Stage(javafx.stage.StageStyle.DECORATED);
+        dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        dialog.initOwner(owner);
+        dialog.setTitle("Carrito");
+        Scene sc = new Scene(root);
+        dialog.setScene(sc);
+        dialog.sizeToScene();
+        dialog.centerOnScreen();
+
+        sc.setOnKeyPressed(ev -> { if (ev.getCode() == javafx.scene.input.KeyCode.ESCAPE) dialog.close(); });
+
+        dialog.setOnHidden(ev -> {
+            ownerRoot.setEffect(prev);
+            cartOpen = false;
+        });
+
+        dialog.show();
+        dialog.requestFocus();
+
+    } catch (Exception ex) {
+        ownerRoot.setEffect(prev);
+        cartOpen = false;
+        ex.printStackTrace();
+        throw new RuntimeException("Error mostrando el carrito (prueba.fxml)", ex);
+    }
     }
 }

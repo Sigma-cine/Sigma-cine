@@ -11,7 +11,7 @@
 
 <!-- Carrito angosto, con fondo negro y scroll -->
 
-<StackPane fx:id="carritoRoot" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="carritoRoot" style="-fx-background-color: #000000; -fx-pref-height: 502;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
   <children>
 
     <!-- Ancho total aprox 420; alto aprox 560 -->
@@ -25,7 +25,7 @@
             <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Mi carrito" />
 
             <!-- Tarjeta de producto (borde morado) -->
-            <VBox alignment="CENTER" prefWidth="352.0" style="-fx-border-color: #5A3084; -fx-padding: 14; -fx-spacing: 10; -fx-border-radius: 10; -fx-background-color: #181818; -fx-border-width: 3;">
+            <VBox alignment="CENTER" prefWidth="352.0" style="-fx-border-color: #5A3084; -fx-padding: 14; -fx-spacing: 10; -fx-border-radius: 10; -fx-background-color: #181818; -fx-border-width: 3; -fx-background-radius: 10;">
               <children>
                 <HBox spacing="12">
                   <children>

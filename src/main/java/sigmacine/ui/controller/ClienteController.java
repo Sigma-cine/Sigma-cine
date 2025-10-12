@@ -3,51 +3,52 @@ package sigmacine.ui.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
-import javafx.scene.image.ImageView;      // ⬅️ IMPORT CLAVE
-import javafx.scene.layout.StackPane; 
+import javafx.scene.image.ImageView;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+// Dependencias necesarias para instanciación manual
+import sigmacine.aplicacion.service.VerHistorialService;
+import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
+import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
 
 
 public class ClienteController {
 
-    // --- VISTA PRINCIPAL (pagina_inicial.fxml) ---
+    // --- VISTA PRINCIPAL (cliente_home.fxml) ---
     @FXML private Button btnPromoVerMas;
-    @FXML private Button btnCard1, btnCard2, btnCard3, btnCard4;
     @FXML private Button btnCartelera;
     @FXML private Button btnConfiteria;
-    @FXML private Button btnSigmaCard; // puede ser null si no existe en ese FXML
-    @FXML private Button btnCart;      // idem
+    @FXML private Button btnSigmaCard;
+    @FXML private Button btnCart;
     @FXML private MenuItem miCerrarSesion;
+    @FXML private MenuItem miHistorial;
     @FXML private StackPane promoPane;
     @FXML private ImageView imgPublicidad;
-
-    // --- VISTA CIUDAD (ciudad.fxml) ---
+    @FXML private javafx.scene.layout.GridPane footerGrid;
+    @FXML private TextField txtBuscar;
+    @FXML private javafx.scene.control.Button btnBuscar;
+    @FXML private StackPane content;
+    
     @FXML private ChoiceBox<String> cbCiudad;
     @FXML private Button btnSeleccionarCiudad;
 
-    // --- Estado ---
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
+    
 
-    // === Inicialización genérica (compat) ===
-    public void init(UsuarioDTO usuario) {
-        this.usuario = usuario;
-    }
-
-    /** Llamado cuando ya estás en la principal (pagina_inicial.fxml) */
+    public void init(UsuarioDTO usuario) { this.usuario = usuario; }
     public void init(UsuarioDTO usuario, String ciudad) {
         this.usuario = usuario;
         this.ciudadSeleccionada = ciudad;
-        // Aquí puedes usar ciudadSeleccionada para filtrar/mostrar contenido
     }
-
-    /** Llamado cuando estás en la pantalla de ciudad (ciudad.fxml) */
     public void initCiudad(UsuarioDTO usuario) {
         this.usuario = usuario;
         if (cbCiudad != null) {
@@ -58,21 +59,36 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
-        // Banner: ocupa todo el contenedor
-        if (promoPane != null && imgPublicidad != null) {
-        imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
-        imgPublicidad.setFitHeight(110);   // fijo
-        imgPublicidad.setPreserveRatio(true); 
-         }
-        // --- Wiring para pantalla CIUDAD ---
+        // Por defecto el banner está visible; lo mostraremos/ocultaremos según la vista cargada.
+        if (imgPublicidad != null) {
+            imgPublicidad.setVisible(true);
+            imgPublicidad.setPreserveRatio(true);
+        }
+        // Limpiar footer placeholders para que no aparezcan labels viejos
+        if (footerGrid != null) {
+            footerGrid.getChildren().clear();
+            footerGrid.setVisible(false);
+            footerGrid.setManaged(false);
+        }
+        
         if (btnSeleccionarCiudad != null) {
             btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
         }
 
-        // --- Wiring para pantalla PRINCIPAL ---
-        if (btnCartelera  != null) btnCartelera.setOnAction(e -> System.out.println("Ir a Cartelera (" + safeCiudad() + ")"));
+        if (btnCartelera!= null) btnCartelera.setOnAction(e -> System.out.println("Ir a Cartelera (" + safeCiudad() + ")"));
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
+        
+        if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
+
+        if (txtBuscar != null) {
+            txtBuscar.setOnKeyPressed(ev -> {
+                if (ev.getCode() == KeyCode.ENTER) {
+                    doSearch(txtBuscar.getText());
+                }
+            });
+            if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
+        }
     }
 
 
@@ -82,13 +98,13 @@ public class ClienteController {
 
     private void onLogout() {
         System.out.println("Cerrar sesión de: " + (usuario != null ? usuario.getEmail() : "desconocido"));
-        
     }
+    
     @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard1()       { System.out.println("Card 1 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard2()       { System.out.println("Card 2 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard3()       { System.out.println("Card 3 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard4()       { System.out.println("Card 4 → Ver más (" + safeCiudad() + ")"); }
+    @FXML private void onCard1(){ System.out.println("Card 1 → Ver más (" + safeCiudad() + ")"); }
+    @FXML private void onCard2(){ System.out.println("Card 2 → Ver más (" + safeCiudad() + ")"); }
+    @FXML private void onCard3(){ System.out.println("Card 3 → Ver más (" + safeCiudad() + ")"); }
+    @FXML private void onCard4(){ System.out.println("Card 4 → Ver más (" + safeCiudad() + ")"); }
 
 
     private void onSeleccionarCiudad() {
@@ -98,18 +114,101 @@ public class ClienteController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
-
-            // Reutilizamos el mismo controller (ClienteController) que ya está en pagina_inicial.fxml
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
 
-            // Cambiar la escena en el Stage actual
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
             stage.show();
         } catch (Exception ex) {
             throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
+        }
+    }
+
+    @FXML
+    private void onBuscarTop() {
+        doSearch(txtBuscar != null ? txtBuscar.getText() : "");
+    }
+    
+    private void doSearch(String texto) {
+        if (texto == null) texto = "";
+        System.out.println("doSearch invoked with: '" + texto + "'");
+        try {
+            DatabaseConfig db = new DatabaseConfig();
+            var repo = new PeliculaRepositoryJdbc(db);
+            var resultados = repo.buscarPorTitulo(texto);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/resultados_busqueda.fxml"));
+            Parent root = loader.load();
+            ResultadosBusquedaController controller = loader.getController();
+            controller.setResultados(resultados, texto);
+
+            // Ocultar banner al navegar a una subvista
+            if (imgPublicidad != null) { imgPublicidad.setVisible(false); imgPublicidad.setManaged(false); }
+            javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
+            stage.setResizable(false);
+            stage.setTitle("Resultados de búsqueda");
+
+        } catch (Exception ex) {
+            System.err.println("Error cargando resultados_busqueda.fxml: " + ex.getMessage());
+            ex.printStackTrace();
+            throw new RuntimeException("Error cargando resultados_busqueda.fxml", ex);
+        }
+    }
+
+    @FXML
+    private void onVerHistorial() {
+        try {
+            DatabaseConfig dbConfig = new DatabaseConfig();
+            // Asume que VerHistorialService requiere un repositorio de Usuario para buscar el historial.
+            var usuarioRepo = new UsuarioRepositoryJdbc(dbConfig);
+            var historialService = new VerHistorialService(usuarioRepo);
+            
+            // Carga el FXML (ruta verificada y correcta)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
+            
+            VerHistorialController historialController = new VerHistorialController(historialService);
+            historialController.setClienteController(this);
+
+            if (this.usuario != null) {
+                historialController.setUsuarioEmail(this.usuario.getEmail());
+            }
+
+            loader.setController(historialController);
+            
+            Parent historialView = loader.load();
+
+            // Ocultar publicidad mientras vemos el historial
+            if (imgPublicidad != null) { imgPublicidad.setVisible(false); imgPublicidad.setManaged(false); }
+            content.getChildren().setAll(historialView);
+            
+        } catch (Exception ex) {
+            System.err.println("Error cargando HistorialDeCompras.fxml: " + ex.getMessage());
+            ex.printStackTrace();
+            content.getChildren().setAll(new Label("Error cargando Historial: " + ex.getMessage()));
+        }
+    }
+    
+    public void mostrarCartelera() {
+    System.out.println("Volviendo a Cartelera (Inicio).");
+    try {
+        // Asegúrate de que 'pagina_inicial.fxml' es el FXML que quieres cargar en el centro
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+        Parent carteleraView = loader.load();
+        
+        // Carga el controlador de la nueva vista (si es diferente a ClienteController)
+        // Si el controlador de 'pagina_inicial.fxml' es ClienteController, puedes hacer esto:
+    ClienteController controller = loader.getController();
+    controller.init(this.usuario, this.ciudadSeleccionada);
+    // Restaurar banner en la pantalla principal
+    if (controller.imgPublicidad != null) { controller.imgPublicidad.setVisible(true); controller.imgPublicidad.setManaged(true); }
+    content.getChildren().setAll(carteleraView);
+    } catch (Exception e) {
+        content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de inicio."));
+        e.printStackTrace();
         }
     }
 }

@@ -4,13 +4,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<!--
-  Vista principal del cliente.
-  - Barra superior con navegación (Cartelera, Confitería, Sigma Card)
-  - Buscador, Cart y menú de perfil con "Cerrar Sesión"
-  - Zona central dinámica: StackPane `content` para cargar sub-vistas
-  Requiere: ClienteController (maneja los botones por código en initialize())
--->
 
 <BorderPane prefWidth="960.0" prefHeight="600.0"
             xmlns="http://javafx.com/javafx/17.0.12"
@@ -21,7 +14,7 @@
     <!-- ===== TOP BAR ===== -->
     <top>
         <HBox alignment="CENTER_LEFT" spacing="12" BorderPane.alignment="CENTER"
-              styleClass="topbar">
+            styleClass="topbar">
             <children>
 
                 <!-- Marca / Logo (texto por ahora; si usas ImageView, colócalo aquí) -->
@@ -36,8 +29,9 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <!-- Buscador -->
-                <TextField promptText="Buscar" prefWidth="240"
-                           styleClass="search"/>
+                <TextField fx:id="txtBuscar" promptText="Buscar" prefWidth="200"
+                        styleClass="search"/>
+                <Button fx:id="btnBuscar" text="Buscar" onAction="#onBuscarTop" />
 
                 <!-- Carrito -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
@@ -51,7 +45,7 @@
                         <MenuItem text="Promociones"/>
                         <MenuItem text="Información Personal"/>
                         <MenuItem text="SigmaCard"/>
-                        <MenuItem text="Historial de compras"/>
+                        <MenuItem fx:id="miHistorial" text="Historial de compras"/>
                         <MenuItem text="Notificaciones"/>
                         <MenuItem text="Cartelera"/>
                         <SeparatorMenuItem/>
@@ -59,7 +53,7 @@
                         <MenuItem fx:id="miCerrarSesion" text="Cerrar Sesión"/>
                     </items>
                 </MenuButton>
-
+                
             </children>
             <padding>
                 <Insets top="10" right="16" bottom="10" left="16"/>
@@ -67,13 +61,11 @@
         </HBox>
     </top>
 
-    <!-- ===== CONTENEDOR DINÁMICO =====
-         Aquí se inyectan las sub-vistas con ClienteController.loadIntoContent(...) -->
+    
     <center>
         <StackPane fx:id="content" styleClass="content-root"/>
     </center>
-
-    <!-- ===== (Opcional) FOOTER SENCILLO ===== -->
+    
     <bottom>
         <HBox alignment="CENTER_RIGHT" styleClass="footer">
             <children>

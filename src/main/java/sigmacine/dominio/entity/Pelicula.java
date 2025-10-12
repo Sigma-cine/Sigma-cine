@@ -1,7 +1,5 @@
 package sigmacine.dominio.entity;
 
-import java.util.List;
-
 public class Pelicula {
     private int id;
     private String titulo;
@@ -9,14 +7,14 @@ public class Pelicula {
     private String clasificacion;
     private int duracion;
     private String director;   
-    private List<String> reparto;
+    private String reparto;
     private String trailer;
     private String sinopsis;
     private String estado;
     public String posterUrl;
     public Pelicula() {}
 
-    public Pelicula(int id, String titulo, String genero, String clasificacion,int duracion, String director, List<String> reparto,
+    public Pelicula(int id, String titulo, String genero, String clasificacion,int duracion, String director, String reparto,
                     String trailer, String sinopsis, String estado) {
         this.id = id;
         this.titulo = titulo;
@@ -59,8 +57,8 @@ public class Pelicula {
     public String getDirector() { return director; }
     public void setDirector(String director) { this.director = director; }
 
-    public List<String> getReparto() { return reparto; }
-    public void setReparto(List<String> reparto) { this.reparto = reparto; }
+    public String getReparto() { return reparto; }
+    public void setReparto(String reparto) { this.reparto = reparto; }
 
     public String getTrailer() { return trailer; }
     public void setTrailer(String trailer) { this.trailer = trailer; }

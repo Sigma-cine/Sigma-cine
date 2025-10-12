@@ -11,6 +11,16 @@ public final class CompraMapper {
     private CompraMapper() {}
     public static Compra map(ResultSet rs, Usuario cliente) throws SQLException {
         Long id = rs.getLong("COMPRA_ID"); 
-        return new Compra(id, cliente);
+        Compra c = new Compra(id, cliente);
+        try {
+            // Mapeo de campos adicionales si vienen en el ResultSet
+            java.math.BigDecimal totalBd = rs.getBigDecimal("COMPRA_TOTAL");
+            java.sql.Date fechaSql = rs.getDate("COMPRA_FECHA");
+            if (fechaSql != null) c.setFecha(fechaSql.toLocalDate());
+            if (totalBd != null) c.setTotalDecimal(totalBd.doubleValue());
+        } catch (SQLException ex) {
+            // Si no vienen las columnas, devolvemos la compra con datos mínimos
+        }
+        return c;
     }
 }

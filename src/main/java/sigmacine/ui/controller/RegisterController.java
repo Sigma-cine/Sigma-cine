@@ -36,25 +36,30 @@ public class RegisterController {
             }
             int id = auth.registrar(nombre, email, pass);
 
-           /* new Alert(Alert.AlertType.INFORMATION,"¡Registro exitoso! ID = " + id, ButtonType.OK).showAndWait();*/
-            
-               feedback.setStyle("-fx-text-fill: #2e7d32;");  // verde éxito
-              feedback.setText("¡Registro exitoso! ID = " + id);
+            feedback.setStyle("-fx-text-fill: #2e7d32;");  // verde éxito
+            feedback.setText("¡Registro exitoso! ID = " + id);
 
             if (coordinador != null) coordinador.mostrarLogin(); 
         } catch (IllegalArgumentException ex) {
-           /*new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK).showAndWait();*/
                     feedback.setStyle("-fx-text-fill: #e53935;");  // rojo error
                     feedback.setText(ex.getMessage());
         } catch (Exception ex) {
-            /*new Alert(Alert.AlertType.ERROR, "Error registrando: " + ex.getMessage(), ButtonType.OK).showAndWait();*/
-             feedback.setStyle("-fx-text-fill: #e53935;");
-             feedback.setText("Error registrando: " + ex.getMessage());
+        
+            feedback.setStyle("-fx-text-fill: #e53935;");
+            feedback.setText("Error registrando: " + ex.getMessage());
     }
 }
 
     @FXML
     public void onCancelar() {
-        if (coordinador != null) coordinador.mostrarLogin();
+        if (coordinador != null) {
+            // Ir a la home del cliente como invitado y mostrar el popup de ciudad
+            sigmacine.aplicacion.data.UsuarioDTO guest = new sigmacine.aplicacion.data.UsuarioDTO();
+            guest.setId(0);
+            guest.setEmail("");
+            guest.setNombre("Invitado");
+            // Ir al home sin reabrir el popup de selección (ya se mostró al inicio si aplica)
+            coordinador.mostrarHome(guest);
+        }
     }
 }

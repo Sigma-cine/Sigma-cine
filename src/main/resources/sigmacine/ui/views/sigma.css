@@ -1,5 +1,5 @@
 /* =======================
-   Sigma UI – Estilos globales
+  Sigma UI – Estilos globales
    ======================= */
 
 /* Base */
@@ -17,7 +17,7 @@
 .scroll-pane > .viewport { -fx-background-color: #0D0D0D; }
 
 /* =======================
-   Topbar (barra superior)
+  Topbar (barra superior)
    ======================= */
 .topbar {
   -fx-background-color: #8A2F24;              /* rojo corporativo */
@@ -62,7 +62,7 @@
 }
 
 /* =======================
-   Menú desplegable (perfil)
+  Menú desplegable (perfil)
    ======================= */
 .context-menu {
   -fx-background-color: #121212;
@@ -75,7 +75,7 @@
 .separator-menu-item > .line { -fx-background-color: #8A2F24; }
 
 /* =======================
-   Secciones (contenidos)
+  Secciones (contenidos)
    ======================= */
 .section-title {
   -fx-text-fill: white;
@@ -104,7 +104,7 @@
 .brand-sep:horizontal .line { -fx-background-color: #8A2F24; -fx-pref-height: 2; }
 
 /* =======================
-   Chips (días y horarios)
+  Chips (días y horarios)
    ======================= */
 .chip {
   -fx-background-color: transparent;
@@ -119,7 +119,7 @@
 .chip:pressed { -fx-background-color: #161616; }
 
 /* =======================
-   Botón “Comprar Tiquete”
+  Botón “Comprar Tiquete”
    ======================= */
 .buy-btn {
   -fx-background-color: #8A2F24;
@@ -132,7 +132,7 @@
 .buy-btn:pressed{ -fx-background-color: #74271e; }
 
 /* =======================
-   Scrollbars oscuros (opcional)
+  Scrollbars oscuros (opcional)
    ======================= */
 .scroll-pane > .viewport { -fx-background-color: #0D0D0D; }
 .scroll-bar:vertical, .scroll-bar:horizontal { -fx-background-color: #0D0D0D; }
@@ -152,7 +152,7 @@
 }
 
 /* ===== Escala general grande (ya la tienes) ===== */
-.app-scale { 
+.app-scale {
     -fx-font-size: 32px;            /* tu base grande */
 }
 
@@ -284,14 +284,11 @@
 
 
 .text-dark {
-  -fx-text-fill: #333333; /* gris oscuro legible en blanco */
+  -fx-text-fill: #333333;
 }
 
-/* =======================
-   Detalle de compra (modal)
-   ======================= */
 .detail-card {
-  -fx-background-color: #0F0F0F; /* oscuro para que el texto blanco sea legible */
+  -fx-background-color: #0F0F0F;
   -fx-background-radius: 10;
   -fx-padding: 16;
   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0.2, 0, 4);
@@ -309,3 +306,39 @@
 .line-item .label { -fx-text-fill: #E6E6E6; }
 
 .detail-lists { -fx-padding: 6 0 6 0; -fx-spacing: 6; }
+
+
+.content-root {
+  -fx-alignment: center;
+  -fx-padding: 24;
+}
+
+.content-root > * {
+  -fx-max-width: 1280px;
+  -fx-pref-width: 100%;
+}
+
+.centered-container {
+  -fx-alignment: center;
+  -fx-spacing: 12;
+  -fx-padding: 12;
+}
+
+.card-wrap, .tarjeta-compra {
+  -fx-max-width: 1100px;
+  -fx-pref-width: 100%;
+  -fx-padding: 12;
+  -fx-background-radius: 12;
+}
+
+.detail-lists, .panel-list {
+  -fx-pref-width: 100%;
+  -fx-max-width: 1100px;
+}
+
+.auth-card.centered {
+  -fx-alignment: center;
+  -fx-pref-width: 338px;   /* fixed original card width */
+  -fx-max-width: 338px;
+  -fx-min-width: 338px;
+}

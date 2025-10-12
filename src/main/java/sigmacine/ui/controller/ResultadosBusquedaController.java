@@ -17,10 +17,21 @@ public class ResultadosBusquedaController {
 
     private List<Pelicula> peliculas;
     private String textoBuscado;
+    private sigmacine.ui.controller.ControladorControlador coordinador;
+    private sigmacine.aplicacion.data.UsuarioDTO usuario;
+
+    public void setCoordinador(sigmacine.ui.controller.ControladorControlador coordinador) {
+        this.coordinador = coordinador;
+    }
+
+    public void setUsuario(sigmacine.aplicacion.data.UsuarioDTO usuario) {
+        this.usuario = usuario;
+    }
 
     public void setResultados(List<Pelicula> peliculas, String textoBuscado) {
         this.peliculas = peliculas;
         this.textoBuscado = textoBuscado;
+        System.out.println("[DEBUG] setResultados called: peliculas=" + (peliculas == null ? 0 : peliculas.size()) + " texto='" + textoBuscado + "'");
         mostrarResultados();
 
         if (btnVolver != null) {
@@ -30,6 +41,12 @@ public class ResultadosBusquedaController {
 
     private void volverAInicio() {
         try {
+            // If coordinator + usuario are available, delegate so the same session is preserved
+            if (coordinador != null && usuario != null) {
+                coordinador.mostrarHome(usuario);
+                return;
+            }
+
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
@@ -39,6 +56,7 @@ public class ResultadosBusquedaController {
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new javafx.scene.Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Sigma Cine");
+            stage.setMaximized(true);
         } catch (Exception ex) {
             System.err.println("Error al volver a inicio: " + ex.getMessage());
             ex.printStackTrace();
@@ -64,7 +82,7 @@ public class ResultadosBusquedaController {
             tarjeta.setAlignment(Pos.CENTER);
             // let the tarjeta fill the available width; keep a fixed height for consistent cards
             tarjeta.setPrefHeight(420);
-            tarjeta.prefWidthProperty().bind(panelPeliculas.widthProperty().subtract(40)); // account for padding
+            tarjeta.setMaxWidth(840); // keep a fixed max width so tarjeta stays centered inside the panel
             tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 20; -fx-padding: 20; -fx-effect: dropshadow(gaussian, #000, 8, 0.2, 0, 2);");
             ImageView poster = new ImageView();
             // Poster will scale with tarjeta width, preserving aspect ratio

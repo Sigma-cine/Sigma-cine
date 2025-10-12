@@ -155,36 +155,32 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
 
     @Override
     public List<HistorialCompraDTO> verHistorial(String emailPlano) {
-        final String sql = """
-    SELECT
-    co.ID                              AS COMPRA_ID,
-    co.FECHA                           AS COMPRA_FECHA,
-    COALESCE(co.TOTAL,
-            SUM(DISTINCT COALESCE(b.PRECIO_FINAL,0))
-             + SUM(COALESCE(cp.CANTIDAD * cp.PRECIO_UNITARIO,0))
-    )                                   AS COMPRA_TOTAL,
+                final String sql = """
+        SELECT
+            co.ID AS COMPRA_ID,
+            co.FECHA AS COMPRA_FECHA,
+            (
+                (SELECT COALESCE(SUM(b2.PRECIO_FINAL),0) FROM BOLETO b2 WHERE b2.COMPRA_ID = co.ID)
+                + (SELECT COALESCE(SUM(cp2.SUBTOTAL),0) FROM COMPRA_PRODUCTO cp2 WHERE cp2.COMPRA_ID = co.ID)
+            ) AS COMPRA_TOTAL,
+            MIN(se.ID) AS SEDE_ID,
+            MIN(se.CIUDAD) AS SEDE_CIUDAD,
+            MIN(f.FECHA) AS FUNCION_FECHA,
+            MIN(f.HORA) AS FUNCION_HORA,
+            (SELECT COUNT(*) FROM BOLETO b3 WHERE b3.COMPRA_ID = co.ID) AS CANT_BOLETOS,
+            (SELECT COALESCE(SUM(cp3.CANTIDAD),0) FROM COMPRA_PRODUCTO cp3 WHERE cp3.COMPRA_ID = co.ID) AS CANT_PRODUCTOS
+        FROM COMPRA co
+        JOIN CLIENTE c ON c.ID = co.CLIENTE_ID
+        JOIN USUARIO u ON u.ID = c.ID
+        LEFT JOIN BOLETO b ON b.COMPRA_ID = co.ID
+        LEFT JOIN FUNCION f ON f.ID = b.FUNCION_ID
+        LEFT JOIN SALA sa ON sa.ID = f.SALA_ID
+        LEFT JOIN SEDE se ON se.ID = sa.SEDE_ID
+        WHERE u.EMAIL = ?
+        GROUP BY co.ID, co.FECHA, co.TOTAL
+        ORDER BY co.FECHA DESC, co.ID DESC;
 
-    MIN(se.ID)                          AS SEDE_ID,
-    MIN(se.CIUDAD)                      AS SEDE_CIUDAD,
-
-    MIN(f.FECHA)                        AS FUNCION_FECHA,
-    MIN(f.HORA)                         AS FUNCION_HORA,
-
-    COUNT(DISTINCT b.ID)                AS CANT_BOLETOS,
-    COALESCE(SUM(cp.CANTIDAD),0)        AS CANT_PRODUCTOS
-    FROM COMPRA co
-    JOIN CLIENTE c       ON c.ID = co.CLIENTE_ID
-    JOIN USUARIO u       ON u.ID = c.ID
-    LEFT JOIN BOLETO b   ON b.COMPRA_ID = co.ID
-    LEFT JOIN FUNCION f  ON f.ID = b.FUNCION_ID
-    LEFT JOIN SALA sa    ON sa.ID = f.SALA_ID
-    LEFT JOIN SEDE se    ON se.ID = sa.SEDE_ID
-    LEFT JOIN COMPRA_PRODUCTO cp ON cp.COMPRA_ID = co.ID
-    WHERE u.EMAIL = ?
-    GROUP BY co.ID, co.FECHA, co.TOTAL
-    ORDER BY co.FECHA DESC, co.ID DESC;
-
-    """;
+        """;
 
         try (Connection con = db.getConnection();
             PreparedStatement ps = con.prepareStatement(sql)) {

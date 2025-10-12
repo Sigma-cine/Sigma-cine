@@ -46,6 +46,16 @@ public class App extends Application {
     guest.setEmail("");
     guest.setNombre("Invitado");
 
+    // Si por ejecuciones previas la preferencia ya estaba marcada, la removemos
+    // para que el selector de ciudad se muestre una vez ahora. Después de mostrarse
+    // se guardará en Preferences y no volverá a aparecer en siguientes ejecuciones.
+    try {
+        java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(sigmacine.ui.controller.ControladorControlador.class);
+        if (prefs.getBoolean("cityPopupShown", false)) {
+            prefs.remove("cityPopupShown");
+        }
+    } catch (Exception ignored) {}
+
     coordinador.mostrarClienteHomeConPopup(guest);
 
 

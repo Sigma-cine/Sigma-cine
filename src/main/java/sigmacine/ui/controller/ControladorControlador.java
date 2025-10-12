@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import java.util.prefs.Preferences;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import sigmacine.aplicacion.facade.AuthFacade;
 
@@ -12,6 +13,8 @@ public class ControladorControlador {
 
     private final Stage stage;
     private final AuthFacade authFacade;
+    // Guard para la sesión actual: evita mostrar el popup repetidas veces durante la misma ejecución
+    private static boolean cityPopupShownInSession = false;
 
     public ControladorControlador(Stage stage, AuthFacade authFacade) {
         this.stage = stage;
@@ -30,8 +33,9 @@ public class ControladorControlador {
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.show();
+                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+                stage.setMaximized(true);
+                stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando login.fxml", e);
         }
@@ -51,20 +55,19 @@ public class ControladorControlador {
     javafx.scene.Scene current = stage.getScene();
     double w = current != null ? current.getWidth() : 900;
     double h = current != null ? current.getHeight() : 600;
-    stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-    stage.show();
+        stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+        stage.setMaximized(true);
+        stage.show();
     } catch (Exception e) {
         throw new RuntimeException("Error cargando registrarse.fxml", e);
     }
 }
 
 
-    /** Compatibilidad hacia atrás: ahora delega al home por rol */
     public void mostrarBienvenida(UsuarioDTO usuario) {
         mostrarHome(usuario);
     }
 
-    /** Nuevo: enruta por rol y carga el controlador correspondiente */
     public void mostrarHome(UsuarioDTO usuario) {
         try {
         boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
@@ -94,8 +97,9 @@ public class ControladorControlador {
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.show();
+                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+                stage.setMaximized(true);
+                stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando vista home por rol", e);
         }
@@ -118,8 +122,9 @@ public class ControladorControlador {
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.show();
+                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+                stage.setMaximized(true);
+                stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error mostrando resultados de búsqueda", e);
         }
@@ -138,72 +143,41 @@ public class ControladorControlador {
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.setTitle("Sigma Cine - Cliente");
-            stage.show();
+                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+                stage.setMaximized(true);
+                stage.setTitle("Sigma Cine - Cliente");
+                stage.show();
 
-            // Ahora carga el popup de ciudad como modal
-            FXMLLoader popup = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/ciudad.fxml"));
-            Parent popupRoot = popup.load();
-            CiudadController cc = popup.getController();
-            cc.setOnCiudadSelected(ciudad -> {
-                // cuando se seleccione la ciudad, informa al cliente
-                cliente.init(usuario, ciudad);
-                stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            });
+            // Mostrar el popup de ciudad solo la primera vez que se ejecuta la aplicación
+            Preferences prefs = Preferences.userNodeForPackage(ControladorControlador.class);
+            boolean yaMostrado = prefs.getBoolean("cityPopupShown", false);
+            System.out.println("[DEBUG] cityPopupShown (prefs)=" + yaMostrado + " cityPopupShownInSession=" + cityPopupShownInSession);
+            if (!yaMostrado && !cityPopupShownInSession) {
+                FXMLLoader popup = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/ciudad.fxml"));
+                Parent popupRoot = popup.load();
+                CiudadController cc = popup.getController();
+                cc.setOnCiudadSelected(ciudad -> {
+                    // cuando se seleccione la ciudad, informa al cliente
+                    cliente.init(usuario, ciudad);
+                    stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
+                });
 
-            Stage dialog = new Stage();
-            dialog.initOwner(stage);
-            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
-            dialog.setTitle("Seleccione su ciudad");
-            dialog.setScene(new javafx.scene.Scene(popupRoot));
-            dialog.setResizable(false);
-            dialog.centerOnScreen();
-            dialog.showAndWait();
+                Stage dialog = new Stage();
+                dialog.initOwner(stage);
+                dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                dialog.setTitle("Seleccione su ciudad");
+                dialog.setScene(new javafx.scene.Scene(popupRoot));
+                dialog.setResizable(false);
+                dialog.centerOnScreen();
+                // marcar como mostrado para no volver a abrir en ejecuciones posteriores
+                prefs.putBoolean("cityPopupShown", true);
+                cityPopupShownInSession = true;
+                System.out.println("[DEBUG] city popup shown now; prefs and session flag updated.");
+                dialog.showAndWait();
+            }
 
         } catch (Exception e) {
             throw new RuntimeException("Error cargando cliente_home con popup de ciudad", e);
         }
     }
-
-    //================================================
-   /*  public void mostrarMisCompras() {
-    try {
-        var loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/mis_compras.fxml"));
-        var root = loader.load();
-        // si tienes controlador: MisComprasController c = loader.getController(); c.init(...);
-        stage.setTitle("Sigma Cine - Mis compras");
-        stage.setScene(new Scene(root));
-        stage.show();
-    } catch (Exception e) {
-        throw new RuntimeException("Error cargando mis_compras.fxml", e);
-    }
-    public void mostrarCartelera() {
-    try {
-        var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cartelera.fxml"));
-        var root = loader.load();
-        var c = loader.getController();
-        if (c instanceof sigmacine.ui.controller.CarteleraController cc) cc.setCoordinador(this);
-        stage.setTitle("Sigma Cine - Cartelera");
-        stage.setScene(new javafx.scene.Scene(root));
-        stage.show();
-    } catch (Exception e) {
-        throw new RuntimeException("Error cargando cartelera.fxml", e);
-    }
-}
-
-public void mostrarConfiteria() {
-    try {
-        var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/confiteria.fxml"));
-        var root = loader.load();
-        var c = loader.getController();
-        if (c instanceof sigmacine.ui.controller.ConfiteriaController cc) cc.setCoordinador(this);
-        stage.setTitle("Sigma Cine - Confitería");
-        stage.setScene(new javafx.scene.Scene(root));
-        stage.show();
-    } catch (Exception e) {
-        throw new RuntimeException("Error cargando confiteria.fxml", e);
-    }
-}
-*/
 }

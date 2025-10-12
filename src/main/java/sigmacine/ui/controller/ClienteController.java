@@ -73,7 +73,7 @@ public class ClienteController {
             btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
         }
 
-        if (btnCartelera!= null) btnCartelera.setOnAction(e -> System.out.println("Ir a Cartelera (" + safeCiudad() + ")"));
+    if (btnCartelera!= null) btnCartelera.setOnAction(e -> mostrarCartelera());
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
         
@@ -136,6 +136,7 @@ public class ClienteController {
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
+            stage.setMaximized(true);
         } catch (Exception ex) {
             throw new RuntimeException("Error cargando cliente_home.fxml", ex);
         }
@@ -157,6 +158,9 @@ public class ClienteController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/resultados_busqueda.fxml"));
             Parent root = loader.load();
             ResultadosBusquedaController controller = loader.getController();
+            // pass current session info so the results view can return to the same client home
+            controller.setCoordinador(this.coordinador);
+            controller.setUsuario(this.usuario);
             controller.setResultados(resultados, texto);
 
             javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
@@ -165,6 +169,7 @@ public class ClienteController {
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Resultados de búsqueda");
+            stage.setMaximized(true);
 
         } catch (Exception ex) {
             System.err.println("Error cargando resultados_busqueda.fxml: " + ex.getMessage());
@@ -207,20 +212,29 @@ public class ClienteController {
     }
     
     public void mostrarCartelera() {
-    System.out.println("Volviendo a Cartelera (Inicio).");
-    try {
-        // Asegúrate de que 'pagina_inicial.fxml' es el FXML que quieres cargar en el centro
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
-        Parent carteleraView = loader.load();
-        
-        // Carga el controlador de la nueva vista (si es diferente a ClienteController)
-        // Si el controlador de 'pagina_inicial.fxml' es ClienteController, puedes hacer esto:
-        ClienteController controller = loader.getController();
-        controller.init(this.usuario, this.ciudadSeleccionada);
-        content.getChildren().setAll(carteleraView);
-    } catch (Exception e) {
-        content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de inicio."));
-        e.printStackTrace();
+        System.out.println("Volviendo a Cartelera (Contenido a pantalla completa).");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
+            Parent carteleraView = loader.load();
+
+            // Si el controlador de contenidoCartelera.fxml necesita inicialización, invocamos init(usuario)
+            try {
+                var ctrl = loader.getController();
+                java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
+                if (m != null) m.invoke(ctrl, this.usuario);
+            } catch (NoSuchMethodException ignore) {}
+
+            // Reemplazamos la Scene entera para que ocupe toda la ventana
+            Stage stage = (Stage) content.getScene().getWindow();
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(carteleraView, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle("Sigma Cine - Cartelera");
+            stage.setMaximized(true);
+        } catch (Exception e) {
+            content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de cartelera."));
+            e.printStackTrace();
         }
     }
 }

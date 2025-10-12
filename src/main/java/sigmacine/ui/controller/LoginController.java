@@ -45,6 +45,7 @@ public void onIrARegistro() {
         feedback.setText("Bienvenido al Cine Sigma");
         if (coordinador != null) {
             // Después de autenticarse, mostrar la vista principal para el usuario
+            // Ir directamente al home del usuario (no volver a abrir el popup de ciudad)
             coordinador.mostrarHome(usuario);
         }
     }

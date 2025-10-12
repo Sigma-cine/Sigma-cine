@@ -47,78 +47,75 @@
         </HBox>
     </top>
 
-    <!-- IZQUIERDA -->
-    <left>
-    <VBox prefHeight="421.0" prefWidth="437.0" spacing="12"
-          style="-fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
-        <children>
-            <Label fx:id="lblSinopsisTitulo"
-                   style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;"
-                   text="SINOPSIS" />
-
-            <!-- ===== FICHA TÉCNICA ===== -->
-            <Label text="FICHA TÉCNICA"
-                   style="-fx-text-fill: #e5e7eb; -fx-font-weight: bold; -fx-font-size: 14;"/>
-            <GridPane hgap="10" vgap="6" style="-fx-background-color: transparent;">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" minWidth="110"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
-                <children>
-                    <Label text="Género:" style="-fx-text-fill: #cbd5e1;"/>
-                    <Label fx:id="lblGenero" GridPane.columnIndex="1" style="-fx-text-fill: #ffffff;"/>
-
-                    <Label text="Clasificación:" GridPane.rowIndex="1" style="-fx-text-fill: #cbd5e1;"/>
-                    <Label fx:id="lblClasificacion" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-text-fill: #ffffff;"/>
-
-                    <Label text="Duración:" GridPane.rowIndex="2" style="-fx-text-fill: #cbd5e1;"/>
-                    <Label fx:id="lblDuracion" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-text-fill: #ffffff;"/>
-
-                    <Label text="Director:" GridPane.rowIndex="3" style="-fx-text-fill: #cbd5e1;"/>
-                    <Label fx:id="lblDirector" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-text-fill: #ffffff;"/>
-
-                    <Label text="Reparto:" GridPane.rowIndex="4" style="-fx-text-fill: #cbd5e1;"/>
-                    <Label fx:id="lblReparto" GridPane.columnIndex="1" GridPane.rowIndex="4"
-                           style="-fx-text-fill: #ffffff;" wrapText="true"/>
-                </children>
-            </GridPane>
-
-            <!-- Poster -->
-            <ImageView fx:id="imgPoster" fitHeight="241.0" fitWidth="405.0" preserveRatio="true" />
-
-            <!-- Sinopsis -->
-            <TextArea fx:id="txtSinopsis" editable="false" prefHeight="147.0" prefRowCount="12" prefWidth="405.0"
-                      style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;"
-                      text="" wrapText="true" />
-        </children>
-        <padding>
-            <Insets bottom="16" left="16" right="16" top="16" />
-        </padding>
-    </VBox>
-</left>
-
-    <!-- DERECHA -->
+    <!-- CENTER: vertical detail layout (title -> poster -> info -> trailer) inside a ScrollPane -->
     <center>
         <ScrollPane fitToWidth="true" style="-fx-background: #0D0D0D; -fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
             <content>
-                <VBox spacing="20" style="-fx-background-color: #0D0D0D;" fx:id="panelFunciones">
+                <VBox fx:id="detalleRoot" spacing="16" style="-fx-background-color: transparent;" alignment="TOP_CENTER">
                     <children>
-                        <Label fx:id="lblDia" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" text="DÍA" />
+                        <Label fx:id="lblTituloPelicula" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 22;" />
 
-                        <!-- Aquí dejas tus sedes/horarios tal cual, o los generamos por código -->
-                        <!-- ... (tu contenido actual) ... -->
-
-                        <HBox alignment="CENTER_RIGHT">
+                        <StackPane style="-fx-background-color: transparent;" alignment="CENTER">
                             <children>
-                                <Button fx:id="btnComprar" style="-fx-background-color: #8A2F24; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 18 8 18;" text="Comprar Tiquete" />
+                                <ImageView fx:id="imgPoster" preserveRatio="true" fitWidth="480" />
+                            </children>
+                        </StackPane>
+
+                        <VBox spacing="8" prefWidth="820" style="-fx-background-color: transparent;">
+                            <children>
+                                <Label fx:id="lblSinopsisTitulo" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" text="SINOPSIS" />
+                                <TextArea fx:id="txtSinopsis" editable="false" wrapText="true" prefHeight="120"
+                                          style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" />
+
+                                <Label text="FICHA TÉCNICA" style="-fx-text-fill: #e5e7eb; -fx-font-weight: bold; -fx-font-size: 14;"/>
+                                <GridPane hgap="10" vgap="6" style="-fx-background-color: transparent;">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="110"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Género:" style="-fx-text-fill: #cbd5e1;"/>
+                                        <Label fx:id="lblGenero" GridPane.columnIndex="1" style="-fx-text-fill: #ffffff;"/>
+
+                                        <Label text="Clasificación:" GridPane.rowIndex="1" style="-fx-text-fill: #cbd5e1;"/>
+                                        <Label fx:id="lblClasificacion" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-text-fill: #ffffff;"/>
+
+                                        <Label text="Duración:" GridPane.rowIndex="2" style="-fx-text-fill: #cbd5e1;"/>
+                                        <Label fx:id="lblDuracion" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-text-fill: #ffffff;"/>
+
+                                        <Label text="Director:" GridPane.rowIndex="3" style="-fx-text-fill: #cbd5e1;"/>
+                                        <Label fx:id="lblDirector" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-text-fill: #ffffff;"/>
+
+                                        <Label text="Reparto:" GridPane.rowIndex="4" style="-fx-text-fill: #cbd5e1;"/>
+                                        <Label fx:id="lblReparto" GridPane.columnIndex="1" GridPane.rowIndex="4"
+                                               style="-fx-text-fill: #ffffff;" wrapText="true"/>
+                                    </children>
+                                </GridPane>
+
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Button fx:id="btnRegresarBusqueda" text="← Búsqueda" style="-fx-background-color: transparent; -fx-text-fill: white;" />
+                                        <Button fx:id="btnRegresarHome" text="Inicio" style="-fx-background-color: transparent; -fx-text-fill: white;" />
+                                    </children>
+                                </HBox>
+
+                                <VBox fx:id="panelFunciones" spacing="8" />
+                                <HBox alignment="CENTER_RIGHT">
+                                    <children>
+                                        <Button fx:id="btnComprar" style="-fx-background-color: #8A2F24; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 18 8 18;" text="Comprar Tiquete" />
+                                    </children>
+                                </HBox>
                             </children>
                             <padding>
                                 <Insets bottom="8" left="8" right="8" top="8" />
                             </padding>
-                        </HBox>
+                        </VBox>
+
+                        <Label text="TRAILER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
+                        <StackPane fx:id="trailerContainer" prefHeight="360" prefWidth="820" />
                     </children>
                     <padding>
-                        <Insets bottom="24" left="20" right="20" top="16" />
+                        <Insets top="12" right="12" left="12" bottom="24" />
                     </padding>
                 </VBox>
             </content>

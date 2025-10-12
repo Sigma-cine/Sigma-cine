@@ -7,6 +7,7 @@ import sigmacine.dominio.entity.Compra;
 import sigmacine.dominio.entity.Usuario;
 import sigmacine.dominio.valueobject.Email;
 import sigmacine.dominio.valueobject.PasswordHash;
+import sigmacine.aplicacion.data.HistorialCompraDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,19 +43,19 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         """;
 
         try (Connection con = db.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, email.value());
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
                 //return mapUsuario(rs);
-                Usuario usuario = mapUsuario(rs);
-                /*Estas lineas de codigo no afectara la busqueda, ayudara a alimnetar la informacion de compras por 
-                usuario para poder tener el historia alimentado con la informacion*/
+                 Usuario usuario = mapUsuario(rs);
+                 /*Estas lineas de codigo no afectara la busqueda, ayudara a alimnetar la informacion de compras por 
+                 usuario para poder tener el historia alimentado con la informacion*/
 
-                cargarComprasDeUsuario(con, usuario);
-                return usuario;
+                 cargarComprasDeUsuario(con, usuario);
+                  return usuario;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error consultando USUARIO por email", e);
@@ -65,12 +66,12 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
     public void guardar(Usuario u) {
         final String sql = """
             UPDATE USUARIO
-            SET CONTRASENA = ?,
-                ROL        = ?
-            WHERE ID = ?
+               SET CONTRASENA = ?,
+                   ROL        = ?
+             WHERE ID = ?
         """;
         try (Connection con = db.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, u.getPasswordHash().value());
             ps.setString(2, u.getRol().name());
@@ -95,13 +96,13 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
             try {
                 int id;
                 try (PreparedStatement ps = con.prepareStatement(nextIdSql);
-                    ResultSet rs = ps.executeQuery()) {
+                     ResultSet rs = ps.executeQuery()) {
                     rs.next();
                     id = rs.getInt("NEXT_ID");
                 }
 
                 try (PreparedStatement psU = con.prepareStatement(insertUsuario);
-                    PreparedStatement psC = con.prepareStatement(insertCliente)) {
+                     PreparedStatement psC = con.prepareStatement(insertCliente)) {
 
                     psU.setLong(1, id);
                     psU.setString(2, email.value());
@@ -171,7 +172,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
     """;
 
     try (Connection con = db.getConnection();
-        PreparedStatement ps = con.prepareStatement(sql)) {
+         PreparedStatement ps = con.prepareStatement(sql)) {
 
         ps.setInt(1, id);
 
@@ -185,21 +186,43 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
     }
 
     @Override
-    public List<Compra> verHistorial(String emailPlano) {
+    public List<HistorialCompraDTO> verHistorial(String emailPlano) {
     final String sql = """
-        SELECT
-            CO.ID    AS COMPRA_ID
-        , CO.TOTAL AS COMPRA_TOTAL   -- disponible si luego quieres reconstruir
-        , CO.FECHA AS COMPRA_FECHA   -- idem
-        FROM COMPRA CO
-        INNER JOIN CLIENTE C ON C.ID = CO.CLIENTE_ID
-        INNER JOIN USUARIO U ON U.ID = C.ID
-        WHERE U.EMAIL = ?
-        ORDER BY CO.FECHA DESC, CO.ID DESC
+      SELECT
+    co.ID                              AS COMPRA_ID,
+    co.FECHA                           AS COMPRA_FECHA,
+    COALESCE(co.TOTAL,
+             SUM(DISTINCT COALESCE(b.PRECIO_FINAL,0))
+             + SUM(COALESCE(cp.CANTIDAD * cp.PRECIO_UNITARIO,0))
+    )                                   AS COMPRA_TOTAL,
+
+    -- sede si hubo boletos
+    MIN(se.ID)                          AS SEDE_ID,
+    MIN(se.CIUDAD)                      AS SEDE_CIUDAD,
+
+    -- primera función (si hay varias)
+    MIN(f.FECHA)                        AS FUNCION_FECHA,
+    MIN(f.HORA)                         AS FUNCION_HORA,
+
+    COUNT(DISTINCT b.ID)                AS CANT_BOLETOS,
+    COALESCE(SUM(cp.CANTIDAD),0)        AS CANT_PRODUCTOS
+FROM COMPRA co
+JOIN CLIENTE c       ON c.ID = co.CLIENTE_ID
+JOIN USUARIO u       ON u.ID = c.ID
+LEFT JOIN BOLETO b   ON b.COMPRA_ID = co.ID
+LEFT JOIN FUNCION f  ON f.ID = b.FUNCION_ID
+LEFT JOIN SALA sa    ON sa.ID = f.SALA_ID
+LEFT JOIN SEDE se    ON se.ID = sa.SEDE_ID
+LEFT JOIN COMPRA_PRODUCTO cp ON cp.COMPRA_ID = co.ID
+WHERE u.EMAIL = ?
+GROUP BY co.ID, co.FECHA, co.TOTAL
+ORDER BY co.FECHA DESC, co.ID DESC;
+
+
     """;
 
     try (Connection con = db.getConnection();
-        PreparedStatement ps = con.prepareStatement(sql)) {
+         PreparedStatement ps = con.prepareStatement(sql)) {
 
         ps.setString(1, emailPlano);
 
@@ -207,71 +230,25 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         if (usuario == null) return java.util.List.of();
 
         try (ResultSet rs = ps.executeQuery()) {
-            var lista = new java.util.ArrayList<Compra>();
+            var lista = new java.util.ArrayList<HistorialCompraDTO>();
             while (rs.next()) {
-                Compra c = CompraMapper.map(rs, usuario);
-                // Cargar boletos asociados a la compra
-                try { cargarBoletosDeCompra(con, c); } catch (SQLException ex) { /* ignorar si no existe info */ }
-                lista.add(c);
+                lista.add(CompraMapper.mapHistorial(rs));
+                //lista.add(CompraMapper.map(rs, usuario));
             }
             return lista;
         }
     } catch (SQLException e) {
         throw new RuntimeException("Error consultando historial de compras del usuario " + emailPlano, e);
+    }  
     }
-}
 
-private void cargarBoletosDeCompra(Connection con, Compra compra) throws SQLException {
-    final String sqlBoletos = """
-        SELECT B.ID AS BOLETO_ID, B.CODIGO AS BOLETO_CODIGO, B.PRECIO_FINAL AS BOLETO_PRECIO, B.FUNCION_ID AS FUNCION_ID
-        FROM BOLETO B
-        WHERE B.COMPRA_ID = ?
-    """;
-
-    try (PreparedStatement ps = con.prepareStatement(sqlBoletos)) {
-        ps.setLong(1, compra.getId());
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                long id = rs.getLong("BOLETO_ID");
-                String codigo = rs.getString("BOLETO_CODIGO");
-                double precio = rs.getBigDecimal("BOLETO_PRECIO").doubleValue();
-                long funcionId = rs.getLong("FUNCION_ID");
-                // intentar recuperar algunos datos de función/película para mostrar
-                String pelicula = "[Sin título]";
-                String sala = "[N/A]";
-                String horario = "[N/A]";
-                final String sqlFunc = "SELECT F.HORA AS HORA, S.NUMERO_SALA AS SALA, P.TITULO AS TITULO FROM FUNCION F JOIN SALA S ON S.ID = F.SALA_ID JOIN PELICULA P ON P.ID = F.PELICULA_ID WHERE F.ID = ?";
-                try (PreparedStatement psf = con.prepareStatement(sqlFunc)) {
-                    psf.setLong(1, funcionId);
-                    try (ResultSet rsf = psf.executeQuery()) {
-                        if (rsf.next()) {
-                            horario = rsf.getString("HORA");
-                            sala = String.valueOf(rsf.getInt("SALA"));
-                            pelicula = rsf.getString("TITULO");
-                        }
-                    }
-                } catch (SQLException e) {
-                    // ignorar
-                }
-                sigmacine.dominio.entity.Boleto b = new sigmacine.dominio.entity.Boleto();
-                b.setId(Long.valueOf(id));
-                b.setPelicula(pelicula);
-                b.setSala(sala);
-                b.setHorario(horario);
-                b.setAsiento(codigo);
-                b.setPrecio((long) precio);
-                compra.getBoletos().add(b);
-            }
-        }
-    }
-}
-
+   
 private void cargarComprasDeUsuario(Connection con, Usuario usuario) throws SQLException {
     final String sqlCompras = """
         SELECT
             CO.ID    AS COMPRA_ID
-            , CO.TOTAL AS COMPRA_TOTAL   -- disponible si luego quieres reconstruir
-        , CO.FECHA AS COMPRA_FECHA   -- idem
+          , CO.TOTAL AS COMPRA_TOTAL   -- disponible si luego quieres reconstruir
+          , CO.FECHA AS COMPRA_FECHA   -- idem
         FROM COMPRA CO
         WHERE CO.CLIENTE_ID = ?
         ORDER BY CO.FECHA DESC, CO.ID DESC

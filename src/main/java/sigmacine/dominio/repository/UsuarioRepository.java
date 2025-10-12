@@ -3,6 +3,7 @@ package sigmacine.dominio.repository;
 import java.util.List;
 import java.util.Optional;
 
+import sigmacine.aplicacion.data.HistorialCompraDTO;
 import sigmacine.dominio.entity.Compra;
 import sigmacine.dominio.entity.Usuario;
 import sigmacine.dominio.valueobject.Email;
@@ -14,7 +15,8 @@ public interface UsuarioRepository {
     int crearCliente(Email email, PasswordHash passwordHash, String nombre);
     Usuario buscarPorEmail(Email email);
     Usuario buscarPorId(int id);
-    List<Compra> verHistorial(String emailPlano);
+    //List<Compra> verHistorial(String emailPlano);
+    List<HistorialCompraDTO> verHistorial(String emailPlano);
 
 
 }

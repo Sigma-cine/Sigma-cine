@@ -2,15 +2,14 @@ package sigmacine.ui.controller;
 
 import java.util.List;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
-
 import sigmacine.aplicacion.service.VerHistorialService;
-import sigmacine.dominio.entity.Compra;
-import sigmacine.dominio.entity.Boleto;
+import sigmacine.aplicacion.data.HistorialCompraDTO;
 
 public class VerHistorialController {
     
@@ -115,16 +114,15 @@ public class VerHistorialController {
         }
 
         try {
-            // El servicio debe devolver List<Compra>
-            List<Compra> historial = historialService.verHistorial(usuarioEmail);
+            List<HistorialCompraDTO> historial = historialService.verHistorial(usuarioEmail);
 
             if (historial.isEmpty()) {
                 comprasContainer.getChildren().add(new Label("No has realizado ninguna compra aún."));
                 return;
             }
 
-            for (Compra compra : historial) {
-                HBox tarjetaCompra = crearTarjetaCompra(compra);
+            for (HistorialCompraDTO dto : historial) {
+                HBox tarjetaCompra = crearTarjetaCompra(dto);
                 comprasContainer.getChildren().add(tarjetaCompra);
             }
 
@@ -136,19 +134,14 @@ public class VerHistorialController {
         }
     }
 
-    private HBox crearTarjetaCompra(Compra compra) {
-        
-        String titulo = "Compra de Confitería y/o Sin Boletos";
-        String ubicacion = "N/A";
+    private HBox crearTarjetaCompra(HistorialCompraDTO dto) {
+
+        String titulo = dto.getCantBoletos() > 0 ? "Compra de Entradas" : "Compra de Confitería";
+        String ubicacion = dto.getSedeCiudad() != null ? dto.getSedeCiudad() : "N/A";
         String fechaHora = "N/A";
-        
-        if (!compra.getBoletos().isEmpty()) {
-            Boleto primerBoleto = compra.getBoletos().get(0);
-            titulo = primerBoleto.getPelicula();
-            ubicacion = primerBoleto.getSala();
-            fechaHora = primerBoleto.getHorario();
-        }
-        
+        if (dto.getCompraFecha() != null) fechaHora = dto.getCompraFecha().toString();
+        else if (dto.getFuncionFecha() != null) fechaHora = dto.getFuncionFecha().toString();
+
         HBox tarjeta = new HBox(20);
         tarjeta.setPadding(new javafx.geometry.Insets(10, 15, 10, 15));
         tarjeta.setPrefHeight(150);
@@ -165,33 +158,30 @@ public class VerHistorialController {
         ubicacionLbl.getStyleClass().add("small-muted");
         detalles.getChildren().add(ubicacionLbl);
 
-        // Mostrar fecha si está disponible (si no, usar horario del boleto)
-        String fechaText = (compra.getFecha() != null) ? compra.getFecha().toString() : fechaHora;
+    // Mostrar fecha si está disponible
+    String fechaText = fechaHora;
         Label fechaLbl = new Label("Fecha/Hora: " + fechaText);
         fechaLbl.getStyleClass().add("small-muted");
         detalles.getChildren().add(fechaLbl);
 
         // ID de la compra
-        Label idLbl = new Label("ID: " + compra.getId());
+        Label idLbl = new Label("ID: " + (dto.getCompraId() != null ? dto.getCompraId().toString() : "N/A"));
         idLbl.getStyleClass().add("small-muted");
         detalles.getChildren().add(idLbl);
-
-        // Si hay boletos, mostrar listado compacto de boletos
-        if (!compra.getBoletos().isEmpty()) {
-            VBox listaBoletos = new VBox(3);
-            listaBoletos.setStyle("-fx-padding: 6 0 0 0;");
-            for (Boleto bt : compra.getBoletos()) {
-                String asiento = bt.getPelicula() != null ? bt.getPelicula() : "[película]";
-                String linea = String.format("%s — Sala %s — Asiento %s — %.0f", asiento, bt.getSala(), bt.getHorario(), (double) bt.getPrecio());
-                Label bLbl = new Label(linea);
-                bLbl.getStyleClass().add("small-muted");
-                listaBoletos.getChildren().add(bLbl);
-            }
-            detalles.getChildren().add(listaBoletos);
+        // Mostrar cantidades de boletos/productos si disponibles
+        if (dto.getCantBoletos() > 0) {
+            Label boletosLbl = new Label("Boletos: " + dto.getCantBoletos());
+            boletosLbl.getStyleClass().add("small-muted");
+            detalles.getChildren().add(boletosLbl);
+        }
+        if (dto.getCantProductos() > 0) {
+            Label productosLbl = new Label("Productos: " + dto.getCantProductos());
+            productosLbl.getStyleClass().add("small-muted");
+            detalles.getChildren().add(productosLbl);
         }
 
-        // Mostrar total decimal con dos decimales
-        String totalStr = String.format("%.2f", compra.getTotalDecimal());
+        // Mostrar total con dos decimales
+        String totalStr = dto.getTotal() != null ? String.format("%.2f", dto.getTotal().doubleValue()) : "0.00";
         Label total = new Label("Total: " + totalStr);
         total.getStyleClass().add("venue-box");
         detalles.getChildren().add(total);
@@ -202,8 +192,36 @@ public class VerHistorialController {
         posterPlaceholder.setPrefSize(100, 130);
         posterPlaceholder.setStyle("-fx-background-color: #111111; -fx-border-radius: 4; -fx-background-radius: 4;");
 
-        // Añadir solo imagen y detalles; no botones extra
-        tarjeta.getChildren().addAll(posterPlaceholder, detalles);
+        // Añadir imagen, detalles y botón "Ver detalle"
+        Button btnDetalle = new Button("Ver detalle");
+        btnDetalle.getStyleClass().add("primary-btn");
+        btnDetalle.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/detalleCompra.fxml"));
+                // inyectar DTO y repositorio en el controller
+                loader.setControllerFactory(cls -> {
+                    if (cls == sigmacine.ui.controller.DetalleCompraController.class) {
+                        return new sigmacine.ui.controller.DetalleCompraController(dto, this.historialService.repo);
+                    }
+                    try { return cls.getDeclaredConstructor().newInstance(); } catch (Exception ex) { throw new RuntimeException(ex); }
+                });
+                javafx.scene.Parent root = loader.load();
+                javafx.stage.Stage stage = new javafx.stage.Stage();
+                stage.setTitle("Detalle compra " + (dto.getCompraId() != null ? dto.getCompraId() : ""));
+                stage.setScene(new javafx.scene.Scene(root));
+                stage.initOwner(comprasContainer.getScene().getWindow());
+                stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                stage.showAndWait();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        VBox accionBox = new VBox();
+        accionBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        accionBox.getChildren().add(btnDetalle);
+
+        tarjeta.getChildren().addAll(posterPlaceholder, detalles, accionBox);
         return tarjeta;
     }
     

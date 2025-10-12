@@ -17,6 +17,8 @@ public interface UsuarioRepository {
     Usuario buscarPorId(int id);
     //List<Compra> verHistorial(String emailPlano);
     List<HistorialCompraDTO> verHistorial(String emailPlano);
+    List<sigmacine.dominio.entity.Boleto> obtenerBoletosPorCompra(Long compraId);
+    List<sigmacine.aplicacion.data.CompraProductoDTO> obtenerProductosPorCompra(Long compraId);
 
 
 }

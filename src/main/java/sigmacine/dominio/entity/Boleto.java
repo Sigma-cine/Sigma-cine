@@ -44,4 +44,6 @@ public class Boleto {
     public long getPrecio() {
         return precio;
     }
+
+    public String getAsiento() { return asiento; }
 }

@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import sigmacine.dominio.entity.Pelicula;
@@ -14,7 +13,7 @@ public class ResultadosBusquedaController {
     @FXML private javafx.scene.control.Button btnVolver;
     @FXML private Label lblTituloResultados;
     @FXML private Label lblTextoBuscado;
-    @FXML private HBox panelPeliculas;
+    @FXML private VBox panelPeliculas;
 
     private List<Pelicula> peliculas;
     private String textoBuscado;
@@ -31,7 +30,7 @@ public class ResultadosBusquedaController {
 
     private void volverAInicio() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
             // preserve current window size when switching
@@ -63,16 +62,14 @@ public class ResultadosBusquedaController {
         for (Pelicula p : peliculas) {
             VBox tarjeta = new VBox(8);
             tarjeta.setAlignment(Pos.CENTER);
-            tarjeta.setPrefWidth(320);
+            // let the tarjeta fill the available width; keep a fixed height for consistent cards
             tarjeta.setPrefHeight(420);
-            tarjeta.setMinWidth(320);
-            tarjeta.setMaxWidth(320);
-            tarjeta.setMinHeight(420);
-            tarjeta.setMaxHeight(420);
+            tarjeta.prefWidthProperty().bind(panelPeliculas.widthProperty().subtract(40)); // account for padding
             tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 20; -fx-padding: 20; -fx-effect: dropshadow(gaussian, #000, 8, 0.2, 0, 2);");
             ImageView poster = new ImageView();
-            poster.setFitHeight(180);
-            poster.setFitWidth(120);
+            // Poster will scale with tarjeta width, preserving aspect ratio
+            poster.fitWidthProperty().bind(tarjeta.widthProperty().multiply(0.28));
+            poster.setPreserveRatio(true);
             if (p.getPosterUrl() != null && !p.getPosterUrl().isEmpty()) {
                 try {
                     poster.setImage(new Image(p.getPosterUrl(), true));
@@ -116,7 +113,11 @@ private void mostrarDetallePelicula(Pelicula p) {
         ctrl.setPelicula(p);
 
         javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
-        javafx.scene.Scene scene = new javafx.scene.Scene(rootDetalle);
+        // Preserve current stage size when showing details
+        javafx.scene.Scene current = stage.getScene();
+        double w = current != null ? current.getWidth() : 900;
+        double h = current != null ? current.getHeight() : 600;
+        javafx.scene.Scene scene = new javafx.scene.Scene(rootDetalle, w > 0 ? w : 900, h > 0 ? h : 600);
         // opcional: scene.getStylesheets().add(...);
         stage.setScene(scene);
         stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");

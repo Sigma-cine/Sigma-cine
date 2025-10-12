@@ -106,17 +106,21 @@ public class ClienteController {
         if (ciudad == null || ciudad.isBlank()) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            // Load the main client home screen so both flows land on the same initial UI
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             Parent root = loader.load();
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
 
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            stage.setScene(new Scene(root));
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
         } catch (Exception ex) {
-            throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
+            throw new RuntimeException("Error cargando cliente_home.fxml", ex);
         }
     }
 
@@ -139,7 +143,10 @@ public class ClienteController {
             controller.setResultados(resultados, texto);
 
             javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Resultados de búsqueda");
 
         } catch (Exception ex) {

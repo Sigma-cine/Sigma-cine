@@ -27,7 +27,10 @@ public class ControladorControlador {
             controller.setAuthFacade(authFacade);
 
             stage.setTitle("Sigma Cine - Login");
-            stage.setScene(new Scene(root));
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando login.fxml", e);
@@ -43,10 +46,13 @@ public class ControladorControlador {
         controller.setCoordinador(this); // pásale el coordinador
         loader.setController(controller); // <-- clave
 
-        Parent root = loader.load();
-        stage.setTitle("Sigma Cine - Registrarse");
-        stage.setScene(new Scene(root));
-        stage.show();
+    Parent root = loader.load();
+    stage.setTitle("Sigma Cine - Registrarse");
+    javafx.scene.Scene current = stage.getScene();
+    double w = current != null ? current.getWidth() : 900;
+    double h = current != null ? current.getHeight() : 600;
+    stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+    stage.show();
     } catch (Exception e) {
         throw new RuntimeException("Error cargando registrarse.fxml", e);
     }
@@ -84,7 +90,10 @@ public class ControladorControlador {
             Label lbl = (Label) root.lookup("#welcomeLabel");
             if (lbl != null) lbl.setText("Bienvenido al Cine Sigma");
 
-            stage.setScene(new Scene(root));
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
         } catch (Exception e) {
             throw new RuntimeException("Error cargando vista home por rol", e);

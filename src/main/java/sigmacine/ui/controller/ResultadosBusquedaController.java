@@ -34,7 +34,11 @@ public class ResultadosBusquedaController {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
+            // preserve current window size when switching
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new javafx.scene.Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Sigma Cine");
         } catch (Exception ex) {
             System.err.println("Error al volver a inicio: " + ex.getMessage());
@@ -47,7 +51,15 @@ public class ResultadosBusquedaController {
         if (lblTextoBuscado != null) lblTextoBuscado.setText(textoBuscado != null ? textoBuscado : "");
         if (panelPeliculas == null) return;
         panelPeliculas.getChildren().clear();
-        if (peliculas == null) return;
+        if (peliculas == null || peliculas.isEmpty()) {
+            // Mostrar mensaje amigable cuando no hay coincidencias
+            Label msg = new Label("No hay coincidencias");
+            msg.setStyle("-fx-text-fill: #ddd; -fx-font-size: 18px; -fx-font-weight: bold;");
+            // Centrar el mensaje dentro del panel
+            panelPeliculas.setAlignment(Pos.CENTER);
+            panelPeliculas.getChildren().add(msg);
+            return;
+        }
         for (Pelicula p : peliculas) {
             VBox tarjeta = new VBox(8);
             tarjeta.setAlignment(Pos.CENTER);

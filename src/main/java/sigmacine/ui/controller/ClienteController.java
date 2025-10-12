@@ -3,6 +3,7 @@ package sigmacine.ui.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -32,7 +33,6 @@ public class ClienteController {
     @FXML private MenuItem miHistorial;
     @FXML private StackPane promoPane;
     @FXML private ImageView imgPublicidad;
-    @FXML private javafx.scene.layout.GridPane footerGrid;
     @FXML private TextField txtBuscar;
     @FXML private javafx.scene.control.Button btnBuscar;
     @FXML private StackPane content;
@@ -59,16 +59,10 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
-        // Por defecto el banner está visible; lo mostraremos/ocultaremos según la vista cargada.
-        if (imgPublicidad != null) {
-            imgPublicidad.setVisible(true);
+        if (promoPane != null && imgPublicidad != null) {
+            imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
+            imgPublicidad.setFitHeight(110);
             imgPublicidad.setPreserveRatio(true);
-        }
-        // Limpiar footer placeholders para que no aparezcan labels viejos
-        if (footerGrid != null) {
-            footerGrid.getChildren().clear();
-            footerGrid.setVisible(false);
-            footerGrid.setManaged(false);
         }
         
         if (btnSeleccionarCiudad != null) {
@@ -112,18 +106,21 @@ public class ClienteController {
         if (ciudad == null || ciudad.isBlank()) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            // Load the main client home screen so both flows land on the same initial UI
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             Parent root = loader.load();
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
 
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
-            stage.setResizable(false);
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
         } catch (Exception ex) {
-            throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
+            throw new RuntimeException("Error cargando cliente_home.fxml", ex);
         }
     }
 
@@ -145,11 +142,11 @@ public class ClienteController {
             ResultadosBusquedaController controller = loader.getController();
             controller.setResultados(resultados, texto);
 
-            // Ocultar banner al navegar a una subvista
-            if (imgPublicidad != null) { imgPublicidad.setVisible(false); imgPublicidad.setManaged(false); }
             javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root, sigmacine.ui.UiConfig.WIDTH, sigmacine.ui.UiConfig.HEIGHT));
-            stage.setResizable(false);
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Resultados de búsqueda");
 
         } catch (Exception ex) {
@@ -161,6 +158,7 @@ public class ClienteController {
 
     @FXML
     private void onVerHistorial() {
+        System.out.println("Navegando a Historial de Compras.");
         try {
             DatabaseConfig dbConfig = new DatabaseConfig();
             // Asume que VerHistorialService requiere un repositorio de Usuario para buscar el historial.
@@ -168,7 +166,7 @@ public class ClienteController {
             var historialService = new VerHistorialService(usuarioRepo);
             
             // Carga el FXML (ruta verificada y correcta)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/VerCompras.fxml"));
             
             VerHistorialController historialController = new VerHistorialController(historialService);
             historialController.setClienteController(this);
@@ -180,9 +178,8 @@ public class ClienteController {
             loader.setController(historialController);
             
             Parent historialView = loader.load();
-
-            // Ocultar publicidad mientras vemos el historial
-            if (imgPublicidad != null) { imgPublicidad.setVisible(false); imgPublicidad.setManaged(false); }
+            
+            // 3. Muestra la vista
             content.getChildren().setAll(historialView);
             
         } catch (Exception ex) {
@@ -201,11 +198,9 @@ public class ClienteController {
         
         // Carga el controlador de la nueva vista (si es diferente a ClienteController)
         // Si el controlador de 'pagina_inicial.fxml' es ClienteController, puedes hacer esto:
-    ClienteController controller = loader.getController();
-    controller.init(this.usuario, this.ciudadSeleccionada);
-    // Restaurar banner en la pantalla principal
-    if (controller.imgPublicidad != null) { controller.imgPublicidad.setVisible(true); controller.imgPublicidad.setManaged(true); }
-    content.getChildren().setAll(carteleraView);
+        ClienteController controller = loader.getController();
+        controller.init(this.usuario, this.ciudadSeleccionada);
+        content.getChildren().setAll(carteleraView);
     } catch (Exception e) {
         content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de inicio."));
         e.printStackTrace();

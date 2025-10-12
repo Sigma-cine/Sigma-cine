@@ -18,10 +18,22 @@ public class PeliculaMapper {
             rs.getString("ESTADO")
         ); 
          String posterUrl = rs.getString("POSTER_URL"); // puede venir null
-    if (posterUrl != null) {
-        p.setPosterUrl(posterUrl);
-    }
-    return p;
+        if (posterUrl != null) {
+            p.setPosterUrl(posterUrl);
+        }
+
+        String sinopsis = rs.getString("SINOPSIS");
+        if (sinopsis != null) {
+            p.setSinopsis(sinopsis);
+        }
+
+        // Reparto: guardamos la cadena tal cual (coma-separada)
+        String reparto = rs.getString("REPARTO");
+        if (reparto != null) {
+            p.setReparto(reparto);
+        }
+
+        return p;
     }
     
 }

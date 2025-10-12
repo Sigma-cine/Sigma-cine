@@ -82,42 +82,108 @@ public class ResultadosBusquedaController {
             tarjeta.setAlignment(Pos.CENTER);
             // let the tarjeta fill the available width; keep a fixed height for consistent cards
             tarjeta.setPrefHeight(420);
-            tarjeta.setMaxWidth(840); // keep a fixed max width so tarjeta stays centered inside the panel
+            tarjeta.prefWidthProperty().bind(panelPeliculas.widthProperty().subtract(40)); // account for padding
             tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 20; -fx-padding: 20; -fx-effect: dropshadow(gaussian, #000, 8, 0.2, 0, 2);");
             ImageView poster = new ImageView();
-            // Poster will scale with tarjeta width, preserving aspect ratio
-            poster.fitWidthProperty().bind(tarjeta.widthProperty().multiply(0.28));
             poster.setPreserveRatio(true);
-            if (p.getPosterUrl() != null && !p.getPosterUrl().isEmpty()) {
-                try {
-                    poster.setImage(new Image(p.getPosterUrl(), true));
-                } catch (Exception e) {
-                    poster.setImage(null);
+            // we will bind poster fitHeight later to match the info column height
+
+            javafx.scene.control.Label posterPlaceholder = new javafx.scene.control.Label("No image");
+            posterPlaceholder.setStyle("-fx-text-fill: #999; -fx-font-size: 12px;");
+            posterPlaceholder.setWrapText(true);
+            posterPane.getChildren().addAll(poster, posterPlaceholder);
+            javafx.scene.layout.StackPane.setAlignment(posterPlaceholder, Pos.CENTER);
+            javafx.scene.layout.StackPane.setAlignment(poster, Pos.CENTER);
+            poster.visibleProperty().bind(poster.imageProperty().isNotNull());
+            posterPlaceholder.visibleProperty().bind(poster.imageProperty().isNull());
+
+            // Try load poster (remote URL or classpath resource under /Images)
+            try {
+                String posterRef = p.getPosterUrl();
+                if (posterRef != null && !posterRef.isBlank()) {
+                    String lower = posterRef.toLowerCase();
+                    if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                        poster.setImage(new Image(posterRef, true));
+                    } else {
+                        var res = getClass().getResource("/Images/" + posterRef);
+                        if (res != null) poster.setImage(new Image(res.toExternalForm(), false));
+                    }
                 }
+            } catch (Exception ex) {
+                // leave poster null (placeholder will show)
             }
-            Label titulo = new Label(p.getTitulo());
+
+            // Info column (center) - reserve 1/3 width
+            VBox infoCol = new VBox(6);
+            infoCol.setAlignment(Pos.TOP_LEFT);
+            infoCol.prefWidthProperty().bind(tarjeta.widthProperty().multiply(1.0/3.0));
+            infoCol.setMaxWidth(Double.MAX_VALUE);
+            javafx.scene.layout.HBox.setHgrow(infoCol, javafx.scene.layout.Priority.ALWAYS);
+
+            Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Título desconocido");
             titulo.setStyle("-fx-font-size: 22px; -fx-text-fill: #fff; -fx-font-weight: bold;");
-            Label genero = new Label("Género: " + p.getGenero());
-            genero.setStyle("-fx-text-fill: #ccc;");
-            Label clasificacion = new Label("Clasificación: " + p.getClasificacion());
-            clasificacion.setStyle("-fx-text-fill: #ccc;");
-            Label duracion = new Label("Duración: " + p.getDuracion() + " min");
-            duracion.setStyle("-fx-text-fill: #ccc;");
-            Label director = new Label("Director: " + p.getDirector());
-            director.setStyle("-fx-text-fill: #ccc;");
-            Label reparto = new Label("Reparto: " + (p.getReparto() != null ? String.join(", ", p.getReparto()) : ""));
-            reparto.setStyle("-fx-text-fill: #ccc;");
+            titulo.setWrapText(true);
+            Label genero = new Label("Género: " + (p.getGenero() != null ? p.getGenero() : "-"));
+            genero.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
+            Label clasificacion = new Label("Clasificación: " + (p.getClasificacion() != null ? p.getClasificacion() : "-"));
+            clasificacion.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
+            Label duracion = new Label("Duración: " + (p.getDuracion() > 0 ? p.getDuracion() + " min" : "-"));
+            duracion.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
+            Label director = new Label("Director: " + (p.getDirector() != null ? p.getDirector() : "-"));
+            director.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
+            String repartoText = (p.getReparto() != null && !p.getReparto().isBlank()) ? p.getReparto() : "No disponible";
+            Label reparto = new Label("Reparto: " + repartoText);
+            reparto.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
             reparto.setWrapText(true);
-            Label sinopsis = new Label("Sinopsis: " + p.getSinopsis());
-            sinopsis.setStyle("-fx-text-fill: #eee; -fx-font-size: 14px;");
+            String sinopsisText = p.getSinopsis() != null ? p.getSinopsis() : "No disponible";
+            Label sinopsis = new Label("Sinopsis: " + sinopsisText);
+            // use same size/color as other info labels
+            sinopsis.setStyle("-fx-text-fill: #ccc; -fx-font-size: 12px;");
             sinopsis.setWrapText(true);
+
+            infoCol.getChildren().addAll(titulo, genero, clasificacion, duracion, director, reparto, sinopsis);
+
+            // Ensure wrapping respects the info column width
+            titulo.maxWidthProperty().bind(infoCol.widthProperty().subtract(10));
+            titulo.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+            reparto.maxWidthProperty().bind(infoCol.widthProperty().subtract(10));
+            sinopsis.maxWidthProperty().bind(infoCol.widthProperty().subtract(10));
+
+            // Make posterPane follow a portion of the tarjeta height
+            posterPane.prefHeightProperty().bind(tarjeta.heightProperty().multiply(0.9));
+
+            // Bind poster fitHeight to the posterPane so the image scales properly
+            poster.fitHeightProperty().bind(posterPane.heightProperty().multiply(0.95));
+            poster.fitWidthProperty().bind(posterPane.widthProperty().multiply(0.9));
+
+            // Button column (right) - reserve 1/3 width
+            javafx.scene.layout.StackPane btnPane = new javafx.scene.layout.StackPane();
+            btnPane.prefWidthProperty().bind(tarjeta.widthProperty().multiply(1.0/3.0));
+            btnPane.setMaxWidth(Double.MAX_VALUE);
+            btnPane.setAlignment(Pos.CENTER);
+            javafx.scene.layout.HBox.setHgrow(btnPane, javafx.scene.layout.Priority.ALWAYS);
+
             javafx.scene.control.Button btnDetalle = new javafx.scene.control.Button("Ver detalle película");
             btnDetalle.setStyle("-fx-background-color: #993726; -fx-text-fill: #fff; -fx-font-weight: bold; -fx-background-radius: 30;");
             btnDetalle.setOnAction(e -> mostrarDetallePelicula(p));
-            VBox.setMargin(btnDetalle, new javafx.geometry.Insets(10, 0, 0, 0));
-            tarjeta.getChildren().addAll(poster, titulo, genero, clasificacion, duracion, director, reparto, sinopsis, btnDetalle);
+            btnPane.getChildren().add(btnDetalle);
+
+            // Compose row and add to tarjeta
+            javafx.scene.layout.HBox fila = new javafx.scene.layout.HBox(12);
+            fila.setAlignment(Pos.TOP_LEFT);
+            fila.setStyle("-fx-padding: 6 0 6 0;");
+            fila.getChildren().addAll(posterPane, infoCol, btnPane);
+
+            tarjeta.getChildren().addAll(fila);
             panelPeliculas.getChildren().add(tarjeta);
         }
+        // Simple layout pass
+        javafx.application.Platform.runLater(() -> {
+            try {
+                panelPeliculas.applyCss();
+                panelPeliculas.layout();
+            } catch (Exception ignored) {}
+        });
     }
 private void mostrarDetallePelicula(Pelicula p) {
     try {
@@ -127,8 +193,10 @@ private void mostrarDetallePelicula(Pelicula p) {
         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(url);
         javafx.scene.Parent rootDetalle = loader.load();
 
-        DetallePeliculaController ctrl = loader.getController();
-        ctrl.setPelicula(p);
+    DetallePeliculaController ctrl = loader.getController();
+    // pass current results and search text so detail can return to them
+    ctrl.setBackResults(this.peliculas, this.textoBuscado);
+    ctrl.setPelicula(p);
 
         javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
         // Preserve current stage size when showing details

@@ -48,9 +48,9 @@ public class PeliculaRepositoryJdbc implements PeliculaRepository {
     @Override
     public List<Pelicula> buscarPorGenero(String genero){
         String sql = "SELECT ID,TITULO,GENERO,CLASIFICACION,DURACION,DIRECTOR,ESTADO,POSTER_URL " +
-                     "FROM PELICULA WHERE UPPER(GENERO) LIKE UPPER(?)";
+                    "FROM PELICULA WHERE UPPER(GENERO) LIKE UPPER(?)";
         try (Connection cn = db.getConnection();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
+            PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setString(1, "%"+genero+"%");
             try (ResultSet rs = ps.executeQuery()) {
                 List<Pelicula> out = new ArrayList<>();
@@ -63,15 +63,15 @@ public class PeliculaRepositoryJdbc implements PeliculaRepository {
             throw new RuntimeException("Error en la busqueda por genero", e);
         }
 
-     }
-     
-     @Override
+    }
+    
+    @Override
     public List<Pelicula> buscarTodas(){
-         String sql = "SELECT ID,TITULO,GENERO,CLASIFICACION,DURACION,DIRECTOR,ESTADO,POSTER_URL " +
-                     "FROM PELICULA";
+        String sql = "SELECT ID,TITULO,GENERO,CLASIFICACION,DURACION,DIRECTOR,ESTADO,POSTER_URL " +
+                    "FROM PELICULA";
         try (Connection cn = db.getConnection();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+            PreparedStatement ps = cn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
 
             List<Pelicula> out = new ArrayList<>();
             while (rs.next()){ 
@@ -82,5 +82,5 @@ public class PeliculaRepositoryJdbc implements PeliculaRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error en el listado de las peliculas", e);
         }
-     }
+    }
 }

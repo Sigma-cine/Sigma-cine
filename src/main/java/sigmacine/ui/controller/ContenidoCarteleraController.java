@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 public class ContenidoCarteleraController {
 
     @FXML private Button btnCarteleraTop;
+    @FXML private Button btnBack;
 
     @FXML
     private void onCartelera() {
@@ -23,6 +24,23 @@ public class ContenidoCarteleraController {
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setMaximized(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onVolver() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) btnBack.getScene().getWindow();
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle("Sigma Cine");
             stage.setMaximized(true);
         } catch (Exception ex) {
             ex.printStackTrace();

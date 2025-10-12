@@ -1,5 +1,6 @@
 package sigmacine.dominio.entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,8 @@ public class Compra {
     private List<Boleto> boletos = new ArrayList<>();
     private List<Producto> productos = new ArrayList<>();
     private long total = 0;
+    private double totalDecimal = 0.0;
+    private LocalDate fecha;
     private Pago pago;
 
     // Constructor que inicializa una nueva compra con un cliente
@@ -40,6 +43,22 @@ public class Compra {
         }
         this.pago = pago;
     }
+    
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
+    public void setTotalDecimal(double totalDecimal) {
+        this.totalDecimal = totalDecimal;
+    }
+
+    public double getTotalDecimal() { return totalDecimal; }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalDate getFecha() { return fecha; }
     public Long getId() {
         return id;
     }

@@ -33,9 +33,9 @@ public class App extends Application {
         }
         UsuarioRepository repo = new UsuarioRepositoryJdbc(db);
         LoginService loginService = new LoginService(repo);
-        RegistroService registroService = new RegistroService(repo);    
+        RegistroService registroService = new RegistroService(repo);
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
-       
+
 
         ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
         coordinador.mostrarLogin();

@@ -91,6 +91,7 @@ public class ResultadosBusquedaController {
             javafx.scene.control.Label posterPlaceholder = new javafx.scene.control.Label("No image");
             posterPlaceholder.setStyle("-fx-text-fill: #999; -fx-font-size: 12px;");
             posterPlaceholder.setWrapText(true);
+            javafx.scene.layout.StackPane posterPane = new javafx.scene.layout.StackPane();
             posterPane.getChildren().addAll(poster, posterPlaceholder);
             javafx.scene.layout.StackPane.setAlignment(posterPlaceholder, Pos.CENTER);
             javafx.scene.layout.StackPane.setAlignment(poster, Pos.CENTER);

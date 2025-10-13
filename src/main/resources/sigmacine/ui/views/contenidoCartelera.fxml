@@ -7,7 +7,8 @@
 <?import javafx.scene.layout.*?>
 
 
-<BorderPane prefWidth="960.0" prefHeight="600.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ContenidoCarteleraController">
+<BorderPane xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="contenidoCartelera.xsd" prefWidth="960.0" prefHeight="600.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ContenidoCarteleraController">
 
 <top>
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="topbar">
@@ -49,7 +50,7 @@
                                         <StackPane style="-fx-background-color: transparent;" alignment="CENTER">
                                             <children>
                                                 <ImageView fx:id="imgPoster" preserveRatio="true" fitWidth="480" />
-                                            <?xml version="1.0" encoding="UTF-8"?>
+                                            <?fxml version="1.0" encoding="UTF-8"?>
 
                                             <?import java.lang.*?>
                                             <?import javafx.geometry.*?>
@@ -181,4 +182,4 @@
                                                     </ScrollPane>
                                                 </center>
 
-                                            </BorderPane>
+</BorderPane>

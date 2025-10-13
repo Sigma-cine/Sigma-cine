@@ -14,6 +14,8 @@ import javafx.scene.layout.VBox;
 
 import sigmacine.dominio.entity.Pelicula;
 import java.util.List;
+import sigmacine.aplicacion.data.UsuarioDTO;
+import sigmacine.ui.controller.ControladorControlador;
 
 public class ContenidoCarteleraController {
 
@@ -29,22 +31,45 @@ public class ContenidoCarteleraController {
     @FXML private Label lblGenero, lblClasificacion, lblDuracion, lblDirector, lblReparto;
 
     private Pelicula pelicula;
+    private UsuarioDTO usuario;
+    private ControladorControlador coordinador;
+    private List<Pelicula> backPeliculas;
+    private String backTexto;
 
     @FXML
     private void initialize() {
         if (btnComprar != null) {
             btnComprar.setOnAction(e -> {
-                // placeholder for buy action
+                
             });
         }
     }
 
     @FXML
     private void onCartelera() {
+        System.out.println("[DEBUG] onCartelera invoked");
         try {
+            // If we have a coordinator, use it to show cartelera and preserve session
+            if (coordinador != null) {
+                // mostrarHome without changing user — mostrarCartelera isn't available on coordinador,
+                // so reload contenidoCartelera but pass the current usuario/coordinador
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
+                Parent root = loader.load();
+                ContenidoCarteleraController ctrl = loader.getController();
+                ctrl.setCoordinador(this.coordinador);
+                ctrl.setUsuario(this.usuario);
+
+                Stage stage = (Stage) btnCarteleraTop.getScene().getWindow();
+                javafx.scene.Scene current = stage.getScene();
+                double w = current != null ? current.getWidth() : 900;
+                double h = current != null ? current.getHeight() : 600;
+                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+                stage.setMaximized(true);
+                return;
+            }
+            // fallback: reload without session
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
             Parent root = loader.load();
-
             Stage stage = (Stage) btnCarteleraTop.getScene().getWindow();
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
@@ -58,10 +83,22 @@ public class ContenidoCarteleraController {
 
     @FXML
     private void onVolver() {
+        System.out.println("[DEBUG] onVolver invoked");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnBack.getScene().getWindow();
+
+            // If we have a controller reference, initialize it with the current usuario and coordinador
+            try {
+                Object ctrl = loader.getController();
+                if (ctrl instanceof ClienteController) {
+                    ClienteController c = (ClienteController) ctrl;
+                    c.init(this.usuario);
+                    c.setCoordinador(this.coordinador);
+                }
+            } catch (Exception ignore) {}
+
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
@@ -75,7 +112,8 @@ public class ContenidoCarteleraController {
 
     // Called by ResultadosBusquedaController when opening the detail view
     public void setBackResults(List<Pelicula> peliculas, String textoBuscado) {
-        // Optionally store to enable "volver a resultados" behavior later
+        this.backPeliculas = peliculas;
+        this.backTexto = textoBuscado;
     }
 
     public void setPelicula(Pelicula p) {
@@ -98,6 +136,9 @@ public class ContenidoCarteleraController {
         if (lblReparto != null) lblReparto.setText(safe(p.getReparto(), ""));
         if (txtSinopsis != null) txtSinopsis.setText(safe(p.getSinopsis()));
     }
+
+    public void setUsuario(UsuarioDTO u) { this.usuario = u; }
+    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
 
     private static String safe(String s) {
         return (s == null || s.trim().equalsIgnoreCase("null")) ? "" : s.trim();

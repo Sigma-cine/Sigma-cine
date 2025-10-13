@@ -7,6 +7,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import sigmacine.dominio.entity.Pelicula;
+import sigmacine.aplicacion.data.UsuarioDTO;
+import sigmacine.ui.controller.ControladorControlador;
 import java.util.List;
 
 public class ResultadosBusquedaController {
@@ -17,21 +19,20 @@ public class ResultadosBusquedaController {
 
     private List<Pelicula> peliculas;
     private String textoBuscado;
-    private sigmacine.ui.controller.ControladorControlador coordinador;
-    private sigmacine.aplicacion.data.UsuarioDTO usuario;
+    private ControladorControlador coordinador;
+    private UsuarioDTO usuario;
 
-    public void setCoordinador(sigmacine.ui.controller.ControladorControlador coordinador) {
+    public void setCoordinador(ControladorControlador coordinador) {
         this.coordinador = coordinador;
     }
 
-    public void setUsuario(sigmacine.aplicacion.data.UsuarioDTO usuario) {
+    public void setUsuario(UsuarioDTO usuario) {
         this.usuario = usuario;
     }
 
     public void setResultados(List<Pelicula> peliculas, String textoBuscado) {
         this.peliculas = peliculas;
         this.textoBuscado = textoBuscado;
-        System.out.println("[DEBUG] setResultados called: peliculas=" + (peliculas == null ? 0 : peliculas.size()) + " texto='" + textoBuscado + "'");
         mostrarResultados();
 
         if (btnVolver != null) {
@@ -41,22 +42,24 @@ public class ResultadosBusquedaController {
 
     private void volverAInicio() {
         try {
-            // If coordinator + usuario are available, delegate so the same session is preserved
-            if (coordinador != null && usuario != null) {
-                coordinador.mostrarHome(usuario);
-                return;
-            }
-
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
+            // initialize controller with current session so the user remains logged in
+            try {
+                Object ctrl = loader.getController();
+                if (ctrl instanceof ClienteController) {
+                    ClienteController c = (ClienteController) ctrl;
+                    c.init(this.usuario);
+                    c.setCoordinador(this.coordinador);
+                }
+            } catch (Exception ignore) {}
             // preserve current window size when switching
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new javafx.scene.Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.setTitle("Sigma Cine");
-            stage.setMaximized(true);
         } catch (Exception ex) {
             System.err.println("Error al volver a inicio: " + ex.getMessage());
             ex.printStackTrace();
@@ -78,12 +81,22 @@ public class ResultadosBusquedaController {
             return;
         }
         for (Pelicula p : peliculas) {
-            VBox tarjeta = new VBox(8);
-            tarjeta.setAlignment(Pos.CENTER);
-            // let the tarjeta fill the available width; keep a fixed height for consistent cards
-            tarjeta.setPrefHeight(420);
-            tarjeta.prefWidthProperty().bind(panelPeliculas.widthProperty().subtract(40)); // account for padding
-            tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 20; -fx-padding: 20; -fx-effect: dropshadow(gaussian, #000, 8, 0.2, 0, 2);");
+            // Card container
+            VBox tarjeta = new VBox(6);
+            tarjeta.setAlignment(Pos.TOP_LEFT);
+            // Fixed card height (slightly larger so sinopsis can display fully)
+            tarjeta.setPrefHeight(300);
+            tarjeta.prefWidthProperty().bind(panelPeliculas.widthProperty().subtract(40));
+            tarjeta.setStyle("-fx-background-color: #222; -fx-background-radius: 10; -fx-padding: 8; -fx-effect: dropshadow(gaussian, #000, 4, 0.12, 0, 1);");
+
+            // Poster column (left) - reserve 1/3 width
+            javafx.scene.layout.StackPane posterPane = new javafx.scene.layout.StackPane();
+            posterPane.prefWidthProperty().bind(tarjeta.widthProperty().multiply(1.0/3.0));
+            // Let poster pane height be determined by the info column; keep sensible minimums
+            posterPane.setMinWidth(80);
+            posterPane.setMinHeight(80);
+            posterPane.setStyle("-fx-background-color: transparent;");
+
             ImageView poster = new ImageView();
             poster.setPreserveRatio(true);
             // we will bind poster fitHeight later to match the info column height
@@ -91,7 +104,6 @@ public class ResultadosBusquedaController {
             javafx.scene.control.Label posterPlaceholder = new javafx.scene.control.Label("No image");
             posterPlaceholder.setStyle("-fx-text-fill: #999; -fx-font-size: 12px;");
             posterPlaceholder.setWrapText(true);
-            javafx.scene.layout.StackPane posterPane = new javafx.scene.layout.StackPane();
             posterPane.getChildren().addAll(poster, posterPlaceholder);
             javafx.scene.layout.StackPane.setAlignment(posterPlaceholder, Pos.CENTER);
             javafx.scene.layout.StackPane.setAlignment(poster, Pos.CENTER);
@@ -169,7 +181,6 @@ public class ResultadosBusquedaController {
             btnDetalle.setOnAction(e -> mostrarDetallePelicula(p));
             btnPane.getChildren().add(btnDetalle);
 
-            // Compose row and add to tarjeta
             javafx.scene.layout.HBox fila = new javafx.scene.layout.HBox(12);
             fila.setAlignment(Pos.TOP_LEFT);
             fila.setStyle("-fx-padding: 6 0 6 0;");
@@ -178,7 +189,6 @@ public class ResultadosBusquedaController {
             tarjeta.getChildren().addAll(fila);
             panelPeliculas.getChildren().add(tarjeta);
         }
-        // Simple layout pass
         javafx.application.Platform.runLater(() -> {
             try {
                 panelPeliculas.applyCss();
@@ -194,21 +204,25 @@ private void mostrarDetallePelicula(Pelicula p) {
         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(url);
         javafx.scene.Parent rootDetalle = loader.load();
 
-    DetallePeliculaController ctrl = loader.getController();
-    // pass current results and search text so detail can return to them
+    ContenidoCarteleraController ctrl = loader.getController();
+    // pass session info so detail can preserve and return with the same user
+    try {
+        ctrl.setCoordinador(this.coordinador);
+    } catch (Exception ignore) {}
+    try {
+        ctrl.setUsuario(this.usuario);
+    } catch (Exception ignore) {}
     ctrl.setBackResults(this.peliculas, this.textoBuscado);
     ctrl.setPelicula(p);
 
         javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
-        // Preserve current stage size when showing details
         javafx.scene.Scene current = stage.getScene();
         double w = current != null ? current.getWidth() : 900;
         double h = current != null ? current.getHeight() : 600;
         javafx.scene.Scene scene = new javafx.scene.Scene(rootDetalle, w > 0 ? w : 900, h > 0 ? h : 600);
-        // opcional: scene.getStylesheets().add(...);
         stage.setScene(scene);
         stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");
-        // stage.sizeToScene(); // úsalo solo si quieres que ajuste el tamaño a la nueva vista
+        
     } catch (Exception ex) {
         ex.printStackTrace();
     }

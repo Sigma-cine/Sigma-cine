@@ -95,10 +95,12 @@ public class ClienteController {
     public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
 
     private void onIniciarSesion() {
+        System.out.println("[DEBUG] onIniciarSesion invoked");
         if (coordinador != null) coordinador.mostrarLogin();
     }
 
     private void onRegistrarse() {
+        System.out.println("[DEBUG] onRegistrarse invoked");
         if (coordinador != null) coordinador.mostrarRegistro();
     }
 
@@ -220,9 +222,28 @@ public class ClienteController {
             // Si el controlador de contenidoCartelera.fxml necesita inicialización, invocamos init(usuario)
             try {
                 var ctrl = loader.getController();
-                java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
-                if (m != null) m.invoke(ctrl, this.usuario);
-            } catch (NoSuchMethodException ignore) {}
+                // try init(UsuarioDTO)
+                try {
+                    java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
+                    if (m != null) m.invoke(ctrl, this.usuario);
+                } catch (NoSuchMethodException ignore) {}
+
+                // fallback: try setUsuario(UsuarioDTO)
+                try {
+                    java.lang.reflect.Method su = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
+                    if (su != null) su.invoke(ctrl, this.usuario);
+                } catch (NoSuchMethodException ignore) {}
+
+                // also try to set the coordinator so the controller can navigate back while preserving session
+                try {
+                    java.lang.reflect.Method sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
+                    if (sc != null) sc.invoke(ctrl, this.coordinador);
+                } catch (NoSuchMethodException ignore) {}
+
+            } catch (Exception e) {
+                // log but continue to show the view
+                e.printStackTrace();
+            }
 
             // Reemplazamos la Scene entera para que ocupe toda la ventana
             Stage stage = (Stage) content.getScene().getWindow();

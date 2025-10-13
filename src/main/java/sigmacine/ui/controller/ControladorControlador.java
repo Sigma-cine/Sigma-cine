@@ -29,6 +29,13 @@ public class ControladorControlador {
             controller.setCoordinador(this);
             controller.setAuthFacade(authFacade);
 
+            // If controller provides a bindRoot method, call it so controllers can attach
+            // handlers/lookups for FXMLs that use absolute layouts or were not injecting fields.
+            try {
+                java.lang.reflect.Method m = controller.getClass().getMethod("bindRoot", javafx.scene.Parent.class);
+                if (m != null) m.invoke(controller, root);
+            } catch (NoSuchMethodException ignore) {}
+
             stage.setTitle("Sigma Cine - Login");
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
@@ -51,6 +58,11 @@ public class ControladorControlador {
         loader.setController(controller); // <-- clave
 
     Parent root = loader.load();
+    // call bindRoot on controller if available so RegisterController can lookup nodes
+    try {
+        java.lang.reflect.Method m = controller.getClass().getMethod("bindRoot", javafx.scene.Parent.class);
+        if (m != null) m.invoke(controller, root);
+    } catch (NoSuchMethodException ignore) {}
     stage.setTitle("Sigma Cine - Registrarse");
     javafx.scene.Scene current = stage.getScene();
     double w = current != null ? current.getWidth() : 900;

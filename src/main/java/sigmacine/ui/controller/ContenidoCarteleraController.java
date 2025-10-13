@@ -85,7 +85,7 @@ public class ContenidoCarteleraController {
     private void onVolver() {
         System.out.println("[DEBUG] onVolver invoked");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnBack.getScene().getWindow();
 

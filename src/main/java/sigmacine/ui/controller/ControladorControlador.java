@@ -99,7 +99,7 @@ public class ControladorControlador {
         boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
         String fxml = esAdmin
             ? "/sigmacine/ui/views/admin_dashboard.fxml"
-            : "/sigmacine/ui/views/cliente_home.fxml";
+            : "/sigmacine/ui/views/pagina_inicial.fxml";
                     
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
@@ -159,7 +159,7 @@ public class ControladorControlador {
     /** Carga la vista cliente_home y abre un popup modal para seleccionar la ciudad al inicio */
     public void mostrarClienteHomeConPopup(UsuarioDTO usuario) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
 
             ClienteController cliente = loader.getController();

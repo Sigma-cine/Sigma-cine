@@ -25,7 +25,7 @@ import sigmacine.aplicacion.session.Session;
 
 public class ClienteController {
 
-    // --- VISTA PRINCIPAL (cliente_home.fxml) ---
+    // --- VISTA PRINCIPAL (pagina_inicial.fxml) ---
     @FXML private Button btnPromoVerMas;
     @FXML private Button btnCartelera;
     @FXML private Button btnConfiteria;
@@ -61,6 +61,8 @@ public class ClienteController {
             cbCiudad.getItems().setAll("Bogotá", "Medellín", "Cali", "Barranquilla");
             cbCiudad.getSelectionModel().selectFirst();
         }
+        // Update UI to reflect session/user state in case the session was set before load
+        refreshSessionUI();
     }
 
     @FXML
@@ -83,30 +85,10 @@ public class ClienteController {
 
         if (btnIniciarSesion != null) {
             btnIniciarSesion.setOnAction(e -> onIniciarSesion());
-        
-
-            // Show user name label when logged in, otherwise show the Iniciar Sesión button
-            if (Session.isLoggedIn() && lblUserName != null) {
-                var u = Session.getCurrent();
-                String label = "";
-                if (u != null) {
-                    if (u.getNombre() != null && !u.getNombre().isBlank()) label = u.getNombre();
-                    else if (u.getEmail() != null) {
-                        String e = u.getEmail(); int at = e.indexOf('@'); label = at > 0 ? e.substring(0, at) : e;
-                    }
-                }
-                lblUserName.setText(label);
-                lblUserName.setVisible(true);
-                if (btnIniciarSesion != null) btnIniciarSesion.setVisible(false);
-                this.usuario = Session.getCurrent();
-            } else {
-                if (lblUserName != null) {
-                    lblUserName.setVisible(false);
-                }
-                if (btnIniciarSesion != null) btnIniciarSesion.setVisible(true);
-                if (btnIniciarSesion != null) btnIniciarSesion.setText("Iniciar sesión");
-            }
         }
+
+        // Ensure UI reflects current session (may have been set before this controller loaded)
+        refreshSessionUI();
         if (btnRegistrarse != null) {
             btnRegistrarse.setOnAction(e -> onRegistrarse());
             // disable register when already logged in
@@ -171,6 +153,30 @@ public class ClienteController {
         if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesión"); }
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
     }
+
+    /** Update the topbar controls to reflect the current session. */
+    private void refreshSessionUI() {
+        try {
+            boolean logged = Session.isLoggedIn();
+            if (logged) {
+                var u = Session.getCurrent();
+                String label = "";
+                if (u != null) {
+                    if (u.getNombre() != null && !u.getNombre().isBlank()) label = u.getNombre();
+                    else if (u.getEmail() != null) {
+                        String e = u.getEmail(); int at = e.indexOf('@'); label = at > 0 ? e.substring(0, at) : e;
+                    }
+                }
+                if (lblUserName != null) { lblUserName.setText(label); lblUserName.setVisible(true); }
+                if (btnIniciarSesion != null) btnIniciarSesion.setVisible(false);
+                if (btnRegistrarse != null) btnRegistrarse.setDisable(true);
+            } else {
+                if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
+                if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesión"); }
+                if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
     
     @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más (" + safeCiudad() + ")"); }
     @FXML private void onCard1(){ System.out.println("Card 1 → Ver más (" + safeCiudad() + ")"); }
@@ -185,7 +191,7 @@ public class ClienteController {
 
         try {
             // Load the main client home screen so both flows land on the same initial UI
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
@@ -199,7 +205,7 @@ public class ClienteController {
             stage.show();
             stage.setMaximized(true);
         } catch (Exception ex) {
-            throw new RuntimeException("Error cargando cliente_home.fxml", ex);
+            throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
         }
     }
 

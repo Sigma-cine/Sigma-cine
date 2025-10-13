@@ -20,7 +20,6 @@
                 <Button styleClass="toplink" text="Cartelera" />
                 <Button styleClass="toplink" text="Confitería" />
                 <Button styleClass="toplink" text="Sigma Card" />
-                <Button fx:id="btnCart" text="Cart"/>
 
                 <!-- Separador flexible -->
                 <Region HBox.hgrow="ALWAYS" />

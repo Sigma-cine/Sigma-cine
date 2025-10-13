@@ -24,7 +24,6 @@
                 <Button fx:id="btnCartelera"  text="Cartelera"  styleClass="toplink"/>
                 <Button fx:id="btnConfiteria" text="Confitería" styleClass="toplink"/>
                 <Button fx:id="btnSigmaCard"  text="Sigma Card" styleClass="toplink"/>
-                <Button fx:id="btnCart" text="Cart"/>
 
                 <!-- Separador flexible para empujar a la derecha -->
                 <Region HBox.hgrow="ALWAYS"/>

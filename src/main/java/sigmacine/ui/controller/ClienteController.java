@@ -42,7 +42,8 @@ public class ClienteController {
     @FXML private ChoiceBox<String> cbCiudad;
     @FXML private Button btnSeleccionarCiudad;
     @FXML private Button btnIniciarSesion;
-    @FXML private Button btnRegistrarse;
+        @FXML private javafx.scene.control.Label lblUserName;
+        @FXML private Button btnRegistrarse;
 
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
@@ -82,13 +83,28 @@ public class ClienteController {
 
         if (btnIniciarSesion != null) {
             btnIniciarSesion.setOnAction(e -> onIniciarSesion());
-            // reflect current session
-            if (Session.isLoggedIn()) {
+        
+
+            // Show user name label when logged in, otherwise show the Iniciar Sesión button
+            if (Session.isLoggedIn() && lblUserName != null) {
                 var u = Session.getCurrent();
-                btnIniciarSesion.setText(u != null && u.getEmail() != null ? u.getEmail() : "Cerrar sesión");
+                String label = "";
+                if (u != null) {
+                    if (u.getNombre() != null && !u.getNombre().isBlank()) label = u.getNombre();
+                    else if (u.getEmail() != null) {
+                        String e = u.getEmail(); int at = e.indexOf('@'); label = at > 0 ? e.substring(0, at) : e;
+                    }
+                }
+                lblUserName.setText(label);
+                lblUserName.setVisible(true);
+                if (btnIniciarSesion != null) btnIniciarSesion.setVisible(false);
                 this.usuario = Session.getCurrent();
             } else {
-                btnIniciarSesion.setText("Iniciar sesión");
+                if (lblUserName != null) {
+                    lblUserName.setVisible(false);
+                }
+                if (btnIniciarSesion != null) btnIniciarSesion.setVisible(true);
+                if (btnIniciarSesion != null) btnIniciarSesion.setText("Iniciar sesión");
             }
         }
         if (btnRegistrarse != null) {
@@ -151,7 +167,8 @@ public class ClienteController {
         // clear application session and update UI
         Session.clear();
         this.usuario = null;
-        if (btnIniciarSesion != null) btnIniciarSesion.setText("Iniciar sesión");
+        if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
+        if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesión"); }
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
     }
     

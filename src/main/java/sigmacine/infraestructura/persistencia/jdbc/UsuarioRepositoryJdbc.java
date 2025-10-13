@@ -2,7 +2,9 @@ package sigmacine.infraestructura.persistencia.jdbc;
 
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.dominio.repository.UsuarioRepository;
-import sigmacine.dominio.entity.Compra;
+import sigmacine.aplicacion.data.CompraProductoDTO;
+import sigmacine.aplicacion.data.HistorialCompraDTO;
+import sigmacine.dominio.entity.Boleto;
 import sigmacine.dominio.entity.Usuario;
 import sigmacine.dominio.valueobject.Email;
 import sigmacine.dominio.valueobject.PasswordHash;
@@ -12,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
+import sigmacine.infraestructura.persistencia.Mapper.CompraMapper;
 import java.sql.Date;
 
 public class UsuarioRepositoryJdbc implements UsuarioRepository {
@@ -41,7 +45,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
         """;
 
         try (Connection con = db.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, email.value());
 
@@ -58,12 +62,12 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
     public void guardar(Usuario u) {
         final String sql = """
             UPDATE USUARIO
-               SET CONTRASENA = ?,
-                   ROL        = ?
-             WHERE ID = ?
+            SET CONTRASENA = ?,
+                ROL        = ?
+            WHERE ID = ?
         """;
         try (Connection con = db.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, u.getPasswordHash().value());
             ps.setString(2, u.getRol().name());
@@ -88,13 +92,13 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
             try {
                 int id;
                 try (PreparedStatement ps = con.prepareStatement(nextIdSql);
-                     ResultSet rs = ps.executeQuery()) {
+                    ResultSet rs = ps.executeQuery()) {
                     rs.next();
                     id = rs.getInt("NEXT_ID");
                 }
 
                 try (PreparedStatement psU = con.prepareStatement(insertUsuario);
-                     PreparedStatement psC = con.prepareStatement(insertCliente)) {
+                    PreparedStatement psC = con.prepareStatement(insertCliente)) {
 
                     psU.setLong(1, id);
                     psU.setString(2, email.value());
@@ -146,13 +150,120 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
 
     @Override
     public Usuario buscarPorId(int id) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
     }
 
     @Override
-    public List<Compra> verHistorial(String emailPlano) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'verHistorial'");
+    public List<HistorialCompraDTO> verHistorial(String emailPlano) {
+                final String sql = """
+        SELECT
+            co.ID AS COMPRA_ID,
+            co.FECHA AS COMPRA_FECHA,
+            (
+                (SELECT COALESCE(SUM(b2.PRECIO_FINAL),0) FROM BOLETO b2 WHERE b2.COMPRA_ID = co.ID)
+                + (SELECT COALESCE(SUM(cp2.SUBTOTAL),0) FROM COMPRA_PRODUCTO cp2 WHERE cp2.COMPRA_ID = co.ID)
+            ) AS COMPRA_TOTAL,
+            MIN(se.ID) AS SEDE_ID,
+            MIN(se.CIUDAD) AS SEDE_CIUDAD,
+            MIN(f.FECHA) AS FUNCION_FECHA,
+            MIN(f.HORA) AS FUNCION_HORA,
+            (SELECT COUNT(*) FROM BOLETO b3 WHERE b3.COMPRA_ID = co.ID) AS CANT_BOLETOS,
+            (SELECT COALESCE(SUM(cp3.CANTIDAD),0) FROM COMPRA_PRODUCTO cp3 WHERE cp3.COMPRA_ID = co.ID) AS CANT_PRODUCTOS
+        FROM COMPRA co
+        JOIN CLIENTE c ON c.ID = co.CLIENTE_ID
+        JOIN USUARIO u ON u.ID = c.ID
+        LEFT JOIN BOLETO b ON b.COMPRA_ID = co.ID
+        LEFT JOIN FUNCION f ON f.ID = b.FUNCION_ID
+        LEFT JOIN SALA sa ON sa.ID = f.SALA_ID
+        LEFT JOIN SEDE se ON se.ID = sa.SEDE_ID
+        WHERE u.EMAIL = ?
+        GROUP BY co.ID, co.FECHA, co.TOTAL
+        ORDER BY co.FECHA DESC, co.ID DESC;
+
+        """;
+
+        try (Connection con = db.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, emailPlano);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                var lista = new ArrayList<HistorialCompraDTO>();
+                while (rs.next()) {
+                    lista.add(CompraMapper.mapHistorial(rs));
+                }
+                return lista;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error consultando historial de compras del usuario " + emailPlano, e);
+        }
+    }
+
+    @Override
+    public List<Boleto> obtenerBoletosPorCompra(Long compraId) {
+        final String sqlBoletos = "SELECT b.ID, b.PRECIO_FINAL, f.HORA, sa.NUMERO_SALA, p.TITULO, bs.SILLA_ID, s.FILA, s.NUMERO AS SILLA_NUMERO "
+                + "FROM BOLETO b "
+                + "LEFT JOIN BOLETO_SILLA bs ON bs.BOLETO_ID = b.ID "
+                + "LEFT JOIN SILLA s ON s.ID = bs.SILLA_ID "
+                + "LEFT JOIN FUNCION f ON f.ID = b.FUNCION_ID "
+                + "LEFT JOIN SALA sa ON sa.ID = f.SALA_ID "
+                + "LEFT JOIN PELICULA p ON p.ID = f.PELICULA_ID "
+                + "WHERE b.COMPRA_ID = ?";
+
+        try (Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sqlBoletos)) {
+            ps.setLong(1, compraId);
+            try (ResultSet rs = ps.executeQuery()) {
+                var lista = new ArrayList<Boleto>();
+                while (rs.next()) {
+                    Boleto b = new Boleto();
+                    b.setId(rs.getObject("ID", Long.class));
+                    // build asiento string from SILLA (fila + numero) if available
+                    String fila = rs.getString("FILA");
+                    Integer nro = rs.getObject("SILLA_NUMERO", Integer.class);
+                    String asiento = null;
+                    if (fila != null || nro != null) {
+                        asiento = (fila != null ? fila : "") + (nro != null ? String.valueOf(nro) : "");
+                    }
+                    b.setAsiento(asiento);
+                    java.math.BigDecimal precioBd = rs.getBigDecimal("PRECIO_FINAL");
+                    long precio = precioBd != null ? precioBd.longValue() : 0L;
+                    b.setPrecio(precio);
+                    b.setHorario(rs.getString("HORA"));
+                    b.setSala(rs.getString("NUMERO_SALA"));
+                    b.setPelicula(rs.getString("TITULO"));
+                    lista.add(b);
+                }
+                return lista;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error consultando boletos por compra " + compraId, e);
+        }
+    }
+
+    @Override
+    public List<CompraProductoDTO> obtenerProductosPorCompra(Long compraId) {
+        final String sqlProductos = "SELECT cp.PRODUCTO_ID, pr.NOMBRE, cp.CANTIDAD, cp.PRECIO_UNITARIO "
+                + "FROM COMPRA_PRODUCTO cp "
+                + "LEFT JOIN PRODUCTO pr ON pr.ID = cp.PRODUCTO_ID "
+                + "WHERE cp.COMPRA_ID = ?";
+
+        try (Connection con = db.getConnection();
+            PreparedStatement ps = con.prepareStatement(sqlProductos)) {
+            ps.setLong(1, compraId);
+            try (ResultSet rs = ps.executeQuery()) {
+                var lista = new ArrayList<CompraProductoDTO>();
+                while (rs.next()) {
+                    Long pid = rs.getObject("PRODUCTO_ID", Long.class);
+                    String nombre = rs.getString("NOMBRE");
+                    int cant = rs.getInt("CANTIDAD");
+                    java.math.BigDecimal precio = rs.getBigDecimal("PRECIO_UNITARIO");
+                    lista.add(new CompraProductoDTO(pid, nombre, cant, precio));
+                }
+                return lista;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error consultando productos por compra " + compraId, e);
+        }
     }
 }

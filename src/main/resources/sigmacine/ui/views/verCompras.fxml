@@ -29,30 +29,8 @@
 
                     <Label styleClass="section-title" text="Tus Últimas Compras" alignment="CENTER_LEFT" prefWidth="960.0" style="-fx-text-fill: white;" />
                     
-                    <HBox alignment="CENTER_LEFT" prefHeight="150.0" prefWidth="960.0" style="-fx-background-color: #1a1a1a; -fx-background-radius: 8;" spacing="20.0">
-                        <children>
-                            <StackPane prefHeight="130.0" prefWidth="90.0" style="-fx-background-color: #2c2c2c; -fx-background-radius: 4;">
-                                <children><Label styleClass="muted" text="Póster" style="-fx-text-fill: grey;" /></children>
-                            </StackPane>
-                            
-                            <VBox prefHeight="130.0" spacing="5.0" HBox.hgrow="ALWAYS">
-                                <children>
-                                    <Label styleClass="section-title" text="[Título de la Compra]" style="-fx-text-fill: white;" />
-                                    <Label styleClass="label" text="[Ubicación]" style="-fx-text-fill: white;" />
-                                    <Label styleClass="label" text="[Fecha y Hora]" style="-fx-text-fill: white;" />
-                                    <Label styleClass="muted" text="ID: [ID de Transacción]" style="-fx-text-fill: grey;" />
-                                    <Label styleClass="venue-box" text="Total: [Monto]" style="-fx-text-fill: #993726; -fx-font-weight: bold;">
-                                        <VBox.margin><Insets top="5.0" /></VBox.margin>
-                                    </Label>
-                                </children>
-                            </VBox>
-                            
-                            <Button styleClass="buy-btn" text="Ver Detalle" style="-fx-background-color: #993726; -fx-text-fill: white; -fx-background-radius: 20;" />
-                        </children>
-                        <padding>
-                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
-                        </padding>
-                    </HBox>
+                    <!-- El contenedor `comprasContainer` permanecerá vacío aquí; las tarjetas se agregan dinámicamente
+                         desde `VerHistorialController.crearTarjetaCompra(Compra)` -->
                 </VBox>
             </content>
         </ScrollPane>

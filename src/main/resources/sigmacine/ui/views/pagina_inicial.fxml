@@ -42,8 +42,13 @@
                 <!-- Carrito -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
 
-                <!-- Perfil -->
-                <MenuButton text="👤" styleClass="icon-btn">
+        <!-- Perfil / Sesión: botón para iniciar sesión, label para nombre y botón de registro -->
+        <Button fx:id="btnIniciarSesion" text="Iniciar sesión" styleClass="toplink" />
+        <Label fx:id="lblUserName" text="" styleClass="toplink" visible="false" />
+        <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
+
+        <!-- Perfil (menu de opciones) -->
+  <MenuButton fx:id="menuPerfil" text="👤" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
                         <MenuItem text="Buscar Tiquetes"/>

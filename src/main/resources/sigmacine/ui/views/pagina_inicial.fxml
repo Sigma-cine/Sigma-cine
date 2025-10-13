@@ -47,7 +47,7 @@
         <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
 
         <!-- Perfil (menu de opciones) -->
-        <MenuButton text="👤" styleClass="icon-btn">
+  <MenuButton fx:id="menuPerfil" text="👤" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
                         <MenuItem text="Buscar Tiquetes"/>

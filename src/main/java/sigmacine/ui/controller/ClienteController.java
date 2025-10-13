@@ -8,10 +8,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.MenuButton;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import javafx.scene.image.ImageView;
+import javafx.collections.ListChangeListener;
+import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 // Dependencias necesarias para instanciación manual
@@ -33,6 +36,7 @@ public class ClienteController {
     @FXML private Button btnCart;
     @FXML private MenuItem miCerrarSesion;
     @FXML private MenuItem miHistorial;
+    @FXML private MenuButton menuPerfil;
     @FXML private StackPane promoPane;
     @FXML private ImageView imgPublicidad;
     @FXML private TextField txtBuscar;
@@ -83,6 +87,9 @@ public class ClienteController {
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
 
+    // Disable profile menu when not logged in
+    updateMenuPerfilState();
+
         if (btnIniciarSesion != null) {
             btnIniciarSesion.setOnAction(e -> onIniciarSesion());
         }
@@ -102,6 +109,36 @@ public class ClienteController {
                 }
             });
             if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
+        }
+
+        // Mostrar/ocultar la publicidad dependiendo de si el contenedor 'content' tiene sub-vistas
+        if (content != null) {
+            content.getChildren().addListener((ListChangeListener<Node>) ch -> {
+                updatePublicidadVisibility();
+            });
+            // initial state
+            updatePublicidadVisibility();
+        }
+    }
+
+    /**
+     * Muestra la publicidad sólo cuando no hay sub-vistas cargadas en el StackPane `content`.
+     * También marca los nodes como managed=false cuando están ocultos para que no ocupen espacio.
+     */
+    private void updatePublicidadVisibility() {
+        try {
+            boolean hasContent = content != null && !content.getChildren().isEmpty();
+            boolean show = !hasContent;
+            if (imgPublicidad != null) {
+                imgPublicidad.setVisible(show);
+                imgPublicidad.setManaged(show);
+            }
+            if (promoPane != null) {
+                promoPane.setVisible(show);
+                promoPane.setManaged(show);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -152,6 +189,8 @@ public class ClienteController {
         if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
         if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesión"); }
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
+        // update menu after logout
+        updateMenuPerfilState();
     }
 
     /** Update the topbar controls to reflect the current session. */
@@ -174,6 +213,18 @@ public class ClienteController {
                 if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
                 if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesión"); }
                 if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    /** Enable/disable the profile MenuButton depending on session state. */
+    private void updateMenuPerfilState() {
+        try {
+            boolean logged = Session.isLoggedIn();
+            if (menuPerfil != null) {
+                menuPerfil.setDisable(!logged);
+                menuPerfil.setVisible(logged);
+                menuPerfil.setManaged(logged);
             }
         } catch (Exception ex) { ex.printStackTrace(); }
     }
@@ -248,6 +299,14 @@ public class ClienteController {
     @FXML
     private void onVerHistorial() {
         System.out.println("Navegando a Historial de Compras.");
+        if (!Session.isLoggedIn()) {
+            javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            a.setTitle("Acceso denegado");
+            a.setHeaderText(null);
+            a.setContentText("Debes iniciar sesión para ver tu historial de compras.");
+            a.showAndWait();
+            return;
+        }
         try {
             DatabaseConfig dbConfig = new DatabaseConfig();
             // Asume que VerHistorialService requiere un repositorio de Usuario para buscar el historial.

@@ -10,6 +10,7 @@ import sigmacine.dominio.entity.Pelicula;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import sigmacine.ui.controller.ControladorControlador;
 import java.util.List;
+import java.io.File;
 
 public class ResultadosBusquedaController {
     @FXML private javafx.scene.control.Button btnVolver;
@@ -114,13 +115,8 @@ public class ResultadosBusquedaController {
             try {
                 String posterRef = p.getPosterUrl();
                 if (posterRef != null && !posterRef.isBlank()) {
-                    String lower = posterRef.toLowerCase();
-                    if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
-                        poster.setImage(new Image(posterRef, true));
-                    } else {
-                        var res = getClass().getResource("/Images/" + posterRef);
-                        if (res != null) poster.setImage(new Image(res.toExternalForm(), false));
-                    }
+                    Image img = resolveImage(posterRef);
+                    if (img != null) poster.setImage(img);
                 }
             } catch (Exception ex) {
                 // leave poster null (placeholder will show)
@@ -226,5 +222,22 @@ private void mostrarDetallePelicula(Pelicula p) {
     } catch (Exception ex) {
         ex.printStackTrace();
     }
-}
+    }
+
+    private Image resolveImage(String ref) {
+        if (ref == null || ref.isBlank()) return null;
+        try {
+            String lower = ref.toLowerCase();
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                return new Image(ref, true);
+            }
+            java.net.URL res = getClass().getResource("/Images/" + ref);
+            if (res != null) return new Image(res.toExternalForm(), false);
+            File f = new File(ref);
+            if (f.exists()) return new Image(f.toURI().toString(), false);
+            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
+            if (res != null) return new Image(res.toExternalForm(), false);
+        } catch (Exception ignored) {}
+        return null;
+    }
 }

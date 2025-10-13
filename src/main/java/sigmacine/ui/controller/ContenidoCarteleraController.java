@@ -16,6 +16,7 @@ import sigmacine.dominio.entity.Pelicula;
 import java.util.List;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import sigmacine.ui.controller.ControladorControlador;
+import java.io.File;
 
 public class ContenidoCarteleraController {
 
@@ -120,9 +121,17 @@ public class ContenidoCarteleraController {
         this.pelicula = p;
         if (p == null) return;
 
-        String url = safe(p.getPosterUrl());
-        if (!url.isEmpty()) {
-            try { if (imgPoster != null) imgPoster.setImage(new Image(url, true)); } catch (Exception ignored) {}
+        String posterRef = safe(p.getPosterUrl());
+        if (!posterRef.isEmpty()) {
+            try {
+                Image resolved = resolveImage(posterRef);
+                if (imgPoster != null) {
+                    imgPoster.setImage(resolved);
+                }
+            } catch (Exception ignored) {
+                // Leave image null if resolution fails
+                if (imgPoster != null) imgPoster.setImage(null);
+            }
         } else {
             if (imgPoster != null) imgPoster.setImage(null);
         }
@@ -147,5 +156,41 @@ public class ContenidoCarteleraController {
     private static String safe(String s, String alt) {
         String t = safe(s);
         return t.isEmpty() ? alt : t;
+    }
+
+    /**
+     * Resolve an image reference to a JavaFX Image using the following order:
+     * 1. If ref is a http(s) or file: URL, use it directly (background loading for remote urls).
+     * 2. If there's a classpath resource under /Images/<ref>, use it.
+     * 3. If ref points to an existing local file, use its URI.
+     * 4. If ref is an absolute/leading-slash classpath resource, try that too.
+     * Returns null when nothing could be resolved.
+     */
+    private Image resolveImage(String ref) {
+        if (ref == null || ref.isBlank()) return null;
+        try {
+            String lower = ref.toLowerCase();
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                return new Image(ref, true);
+            }
+            // try classpath under /Images/
+            java.net.URL res = getClass().getResource("/Images/" + ref);
+            if (res != null) {
+                return new Image(res.toExternalForm(), false);
+            }
+            // try local file
+            File f = new File(ref);
+            if (f.exists()) {
+                return new Image(f.toURI().toString(), false);
+            }
+            // try as absolute/leading slash resource
+            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
+            if (res != null) {
+                return new Image(res.toExternalForm(), false);
+            }
+        } catch (Exception e) {
+            // ignore and return null
+        }
+        return null;
     }
 }

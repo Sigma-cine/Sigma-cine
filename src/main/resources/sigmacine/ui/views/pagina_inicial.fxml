@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.layout.StackPane?>
-  <?import javafx.scene.layout.Region?>
-  <?import javafx.scene.image.ImageView?>
-  <?import javafx.scene.image.Image?>
-  <?import javafx.scene.control.Label?>
-  <?import javafx.scene.control.Button?>
-  <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane prefHeight="600.0" prefWidth="1000.0"
+            style="-fx-background-color: #000000;"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sigmacine.ui.controller.ClienteController"
             stylesheets="@sigma.css">
-   <!-- ===== TOP BAR ===== -->
+
+    <!-- ===== TOP BAR ===== -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="12" BorderPane.alignment="CENTER"
-            styleClass="topbar">
+        <HBox alignment="CENTER_LEFT" spacing="12" BorderPane.alignment="CENTER" styleClass="topbar">
             <children>
 
-                <!-- Marca / Logo (texto por ahora; si usas ImageView, colócalo aquí) -->
+                <!-- Marca / Logo -->
                 <Label text="SIGMA CINE" styleClass="brand"/>
 
                 <!-- Navegación -->
@@ -30,19 +27,18 @@
                 <Button fx:id="btnConfiteria" text="Confitería" styleClass="toplink"/>
                 <Button fx:id="btnSigmaCard"  text="Sigma Card" styleClass="toplink"/>
 
-                <!-- Separador flexible para empujar a la derecha -->
+                <!-- Separador flexible -->
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <!-- Buscador -->
-                <TextField fx:id="txtBuscar" promptText="Buscar" prefWidth="200"
-                        styleClass="search"/>
-                <Button fx:id="btnBuscar" text="Buscar" onAction="#onBuscarTop" />
+                <TextField fx:id="txtBuscar" promptText="Buscar" prefWidth="220" styleClass="search"/>
+                <Button fx:id="btnBuscar" text="Buscar" onAction="#onBuscarTop"/>
 
-                <!-- Carrito -->
+                <!-- Carrito (sin onAction, lo manejas desde el controller) -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
 
-                <!-- Perfil -->
-                <MenuButton text="👤" styleClass="icon-btn">
+                <!-- Perfil / Menú -->
+                <MenuButton text="" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
                         <MenuItem text="Buscar Tiquetes"/>
@@ -54,113 +50,127 @@
                         <MenuItem text="Notificaciones"/>
                         <MenuItem text="Cartelera"/>
                         <SeparatorMenuItem/>
-                        <!-- El controller engancha este item en initialize() -->
                         <MenuItem fx:id="miCerrarSesion" text="Cerrar Sesión"/>
                     </items>
                 </MenuButton>
-                
+
             </children>
             <padding>
                 <Insets top="10" right="16" bottom="10" left="16"/>
             </padding>
         </HBox>
     </top>
-   <center>
-  <StackPane>
-    <children>
-      <StackPane fx:id="promoPane"
-                 prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
-                 style="-fx-background-color: #993726;"
-                 BorderPane.alignment="TOP_CENTER" />
 
-      <!-- contenedor dinámico donde se cargan las sub-vistas (buscar, confiteria, etc) -->
-      <StackPane fx:id="content" BorderPane.alignment="CENTER" />
-    </children>
+    <!-- ===== CONTENIDO ===== -->
+    <center>
+        <!-- Usamos un StackPane para superponer la franja de promo y el contenedor dinámico -->
+        <StackPane>
 
-    <ImageView fx:id="imgPublicidad"
-               fitHeight="110.0"
-               preserveRatio="true"
-               pickOnBounds="true"
-               StackPane.alignment="CENTER">
-      <image>
-        <Image url="/Images/publicidad.png"/>
-      </image>
-    </ImageView>
+            <!-- Franja superior de promoción -->
+            <StackPane fx:id="promoPane"
+                       prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
+                       style="-fx-background-color: #993726;"
+                       StackPane.alignment="TOP_CENTER"/>
 
-    <Label text="Promoción"
-           style="-fx-text-fill: #ffffff; -fx-font-weight: bold;"
-           StackPane.alignment="TOP_LEFT"
-           translateX="33" translateY="10">
-      <font><Font name="System Bold" size="13.0"/></font>
-    </Label>
+            <!-- Contenedor dinámico donde se cargan sub-vistas -->
+            <StackPane fx:id="content" BorderPane.alignment="CENTER"/>
 
-    <Button fx:id="btnPromoVerMas"
-            text="Ver más"
-            prefWidth="75.0" prefHeight="30.0"
-            style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-text-fill: #ffffff; -fx-font-weight: bold;"
-            StackPane.alignment="BOTTOM_LEFT"
-            translateX="32" translateY="-8">
-      <font><Font size="10.0"/></font>
-    </Button>
+            <!-- Imagen de publicidad dentro de la franja promo -->
+            <ImageView fx:id="imgPublicidad"
+                       fitHeight="110.0"
+                       preserveRatio="true"
+                       pickOnBounds="true"
+                       StackPane.alignment="TOP_CENTER">
+                <image>
+                    <Image url="/Images/publicidad.png"/>
+                </image>
+            </ImageView>
 
-  </StackPane>
-</center>
-<bottom>
-  <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="191.0" prefWidth="606.0" BorderPane.alignment="CENTER">
-    <children>
-      <GridPane alignment="CENTER" prefHeight="172.0" prefWidth="602.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="167.79999542236328" minWidth="10.0" prefWidth="167.79999542236328" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="163.39996337890625" minWidth="10.0" prefWidth="103.20000457763672" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="194.20001220703125" minWidth="10.0" prefWidth="140.00003662109378" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="215.39993286132818" minWidth="10.0" prefWidth="144.7999877929687" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="137.00000000000006" minWidth="10.0" prefWidth="26.600067138671875" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints maxHeight="113.9999755859375" minHeight="10.0" prefHeight="113.9999755859375" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="113.9999755859375" minHeight="10.0" prefHeight="41.800024414062506" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="62.5999755859375" minHeight="10.0" prefHeight="62.5999755859375" vgrow="SOMETIMES" />
-        </rowConstraints>
-        <children>
-          <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" />
-          <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" />
-          <ImageView fitHeight="106.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
-          <ImageView fitHeight="98.0" fitWidth="144.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" />
-          <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-          <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-          <Label style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-          <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-          <Button fx:id="btnCard1" onAction="#onCard1"
-                  contentDisplay="CENTER" mnemonicParsing="false"
-                  prefHeight="30.0" prefWidth="69.0"
-                  style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
-                  text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-            <font><Font size="10.0" /></font>
-          </Button>
-          <Button fx:id="btnCard2" onAction="#onCard2"
-                  contentDisplay="CENTER" mnemonicParsing="false"
-                  prefHeight="30.0" prefWidth="69.0"
-                  style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
-                  text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-            <font><Font size="10.0" /></font>
-          </Button>
-          <Button fx:id="btnCard3" onAction="#onCard3"
-                  contentDisplay="CENTER" mnemonicParsing="false"
-                  prefHeight="30.0" prefWidth="69.0"
-                  style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
-                  text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-            <font><Font size="10.0" /></font>
-          </Button>
-          <Button fx:id="btnCard4" onAction="#onCard4"
-                  contentDisplay="CENTER" mnemonicParsing="false"
-                  prefHeight="30.0" prefWidth="69.0"
-                  style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
-                  text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-            <font><Font size="10.0" /></font>
-          </Button>
-        </children>
-      </GridPane>
-    </children>
-  </HBox>
-</bottom>
+            <!-- Título de la promoción -->
+            <Label text="Promoción"
+                   style="-fx-text-fill: #ffffff; -fx-font-weight: bold;"
+                   StackPane.alignment="TOP_LEFT"
+                   translateX="33" translateY="10">
+                <font>
+                    <Font name="System Bold" size="13.0"/>
+                </font>
+            </Label>
+
+            <!-- Botón "Ver más" de la promo -->
+            <Button fx:id="btnPromoVerMas"
+                    text="Ver más"
+                    prefWidth="75.0" prefHeight="30.0"
+                    style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-text-fill: #ffffff; -fx-font-weight: bold;"
+                    StackPane.alignment="TOP_LEFT"
+                    translateX="32" translateY="60">
+                <font>
+                    <Font size="10.0"/>
+                </font>
+            </Button>
+
+        </StackPane>
+    </center>
+
+    <!-- ===== PIE / GRID de tarjetas rápidas ===== -->
+    <bottom>
+        <HBox prefHeight="191.0" BorderPane.alignment="CENTER">
+            <children>
+                <GridPane alignment="CENTER" prefHeight="172.0" prefWidth="602.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="103.2"/>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="140.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="144.8"/>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="26.6"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="SOMETIMES" prefHeight="114.0"/>
+                        <RowConstraints vgrow="SOMETIMES" prefHeight="41.8"/>
+                        <RowConstraints vgrow="SOMETIMES" prefHeight="62.6"/>
+                    </rowConstraints>
+                    <children>
+                        <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true"/>
+                        <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1"/>
+                        <ImageView fitHeight="106.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2"/>
+                        <ImageView fitHeight="98.0"  fitWidth="144.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3"/>
+
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                        <Label style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+
+                        <Button fx:id="btnCard1" onAction="#onCard1"
+                                contentDisplay="CENTER" mnemonicParsing="false"
+                                prefHeight="30.0" prefWidth="69.0"
+                                style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                                text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                            <font><Font size="10.0"/></font>
+                        </Button>
+                        <Button fx:id="btnCard2" onAction="#onCard2"
+                                contentDisplay="CENTER" mnemonicParsing="false"
+                                prefHeight="30.0" prefWidth="69.0"
+                                style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                                text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                            <font><Font size="10.0"/></font>
+                        </Button>
+                        <Button fx:id="btnCard3" onAction="#onCard3"
+                                contentDisplay="CENTER" mnemonicParsing="false"
+                                prefHeight="30.0" prefWidth="69.0"
+                                style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                                text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                            <font><Font size="10.0"/></font>
+                        </Button>
+                        <Button fx:id="btnCard4" onAction="#onCard4"
+                                contentDisplay="CENTER" mnemonicParsing="false"
+                                prefHeight="30.0" prefWidth="69.0"
+                                style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
+                                text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                            <font><Font size="10.0"/></font>
+                        </Button>
+                    </children>
+                </GridPane>
+            </children>
+        </HBox>
+    </bottom>
+
 </BorderPane>

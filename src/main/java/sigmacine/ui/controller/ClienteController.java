@@ -55,22 +55,14 @@ public class ClienteController {
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
 
-    // ============================
-    // CARRITO: overlay incrustado
-    // ============================
-    private Pane overlayCarrito;          // dimmer + wrapper, ocupa todo el stack central
-    private StackPane carritoWrapper;     // contenedor del panel del carrito (posicionado con layoutX/Y)
-    private Parent carritoNode;           // raíz de verCarrito.fxml
+    private Pane overlayCarrito;         
+    private StackPane carritoWrapper;    
+    private Parent carritoNode;           
     private boolean carritoVisible = false;
 
-    // Dimensiones del panel (coincidir con tu verCarrito.fxml)
-    private static final double CART_WIDTH  = 378;   // prefWidth del ScrollPane en tu FXML
-    private static final double CART_OFFSET_Y = 8;   // separación vertical bajo el botón Cart
-    private static final double CART_MARGIN   = 8;   // margen de seguridad a bordes del stack
-
-    // ============================
-    // Inicialización y lógica base
-    // ============================
+    private static final double CART_WIDTH  = 330;   
+    private static final double CART_OFFSET_Y = 8;   
+    private static final double CART_MARGIN   = 8;  
 
     public void init(UsuarioDTO usuario) { this.usuario = usuario; }
     public void init(UsuarioDTO usuario, String ciudad) {
@@ -102,7 +94,6 @@ public class ClienteController {
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
         if (miHistorial != null)     miHistorial.setOnAction(e -> onVerHistorial());
 
-        // Abrir/cerrar el carrito (overlay angosto pegado al botón Cart)
         if (btnCart != null) btnCart.setOnAction(e -> toggleCarritoOverlay());
 
         if (txtBuscar != null) {
@@ -222,44 +213,33 @@ public class ClienteController {
         }
     }
 
-    // =========================================================
-    // CARRITO: overlay angosto, pegado al botón "Cart"
-    // =========================================================
-
-    // Crea el overlay sobre el StackPane central (hermano de promoPane)
     private void ensureCarritoOverlay() {
         if (overlayCarrito != null) return;
 
         try {
-            // 1) Cargar verCarrito.fxml (tu panel angosto con fondo negro y scroll)
             FXMLLoader fx = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCarrito.fxml"));
             carritoNode = fx.load();
 
-            // 2) Wrapper para posicionar el panel por coordenadas (layoutX/Y)
             carritoWrapper = new StackPane(carritoNode);
             carritoWrapper.setPrefWidth(CART_WIDTH);
             carritoWrapper.setPickOnBounds(true);
 
-            // 3) Dimmer que cubre todo el stack central
             Pane dimmer = new Pane();
             dimmer.setStyle("-fx-background-color: rgba(0,0,0,0.55);");
             dimmer.setPickOnBounds(true);
-            dimmer.setOnMouseClicked(e -> hideCarritoOverlay()); // cerrar al clicar fuera
+            dimmer.setOnMouseClicked(e -> hideCarritoOverlay());
 
-            // 4) Overlay absoluto (dimmer + wrapper)
             overlayCarrito = new Pane(dimmer, carritoWrapper);
             overlayCarrito.setVisible(false);
             overlayCarrito.setManaged(false);
 
-            // 5) Insertar overlay sobre el StackPane PADRE del centro
             StackPane stackCentro = (StackPane) content.getParent();
             dimmer.prefWidthProperty().bind(stackCentro.widthProperty());
             dimmer.prefHeightProperty().bind(stackCentro.heightProperty());
             overlayCarrito.prefWidthProperty().bind(stackCentro.widthProperty());
             overlayCarrito.prefHeightProperty().bind(stackCentro.heightProperty());
-            stackCentro.getChildren().add(overlayCarrito); // al final → por encima
+            stackCentro.getChildren().add(overlayCarrito);
 
-            // 6) Cerrar con ESC
             overlayCarrito.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, ev -> {
                 if (ev.getCode() == KeyCode.ESCAPE) hideCarritoOverlay();
             });
@@ -270,25 +250,20 @@ public class ClienteController {
         }
     }
 
-    // Mostrar overlay: posiciona debajo del botón "Cart", alineado a la derecha del botón
     public void showCarritoOverlay() {
         ensureCarritoOverlay();
         StackPane stackCentro = (StackPane) content.getParent();
 
-        // Blur a todo lo de atrás
         for (javafx.scene.Node n : stackCentro.getChildren()) {
             if (n != overlayCarrito) n.setEffect(new GaussianBlur(12));
         }
 
-        // Coordenadas del botón Cart (en escena) → al sistema de stackCentro
         Bounds b = btnCart.localToScene(btnCart.getBoundsInLocal());
         javafx.geometry.Point2D p = stackCentro.sceneToLocal(b.getMaxX(), b.getMaxY());
 
-        // Calcular posición: borde derecho del carrito alineado con borde derecho del botón
         double x = p.getX() - CART_WIDTH;
         double y = p.getY() + CART_OFFSET_Y;
 
-        // Limitar a márgenes seguros del stack
         x = Math.max(CART_MARGIN, Math.min(x, stackCentro.getWidth() - CART_WIDTH - CART_MARGIN));
         y = Math.max(CART_MARGIN, Math.min(y, stackCentro.getHeight() - carritoWrapper.prefHeight(-1) - CART_MARGIN));
 
@@ -301,7 +276,6 @@ public class ClienteController {
         carritoVisible = true;
     }
 
-    // Ocultar overlay y quitar blur
     public void hideCarritoOverlay() {
         if (overlayCarrito == null) return;
         StackPane stackCentro = (StackPane) content.getParent();
@@ -315,13 +289,11 @@ public class ClienteController {
         carritoVisible = false;
     }
 
-    // Toggle desde el botón "Cart"
     public void toggleCarritoOverlay() {
         if (carritoVisible) hideCarritoOverlay();
         else showCarritoOverlay();
     }
 
-    // (Utilitario por si lo necesitas más adelante)
     @SuppressWarnings("unused")
     private void positionNearButton(Button button, Stage popup) {
         Bounds b = button.localToScreen(button.getBoundsInLocal());

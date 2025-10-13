@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import sigmacine.aplicacion.facade.AuthFacade;
+import sigmacine.aplicacion.session.Session;
 
 public class LoginController {
 
@@ -61,6 +62,8 @@ public void onIrARegistro() {
 
         feedback.setStyle("-fx-text-fill: #090;");
         feedback.setText("Bienvenido al Cine Sigma");
+        // store in session so other controllers know user is logged in
+        Session.setCurrent(usuario);
         if (coordinador != null) {
             // Después de autenticarse, mostrar la vista principal para el usuario
             // Ir directamente al home del usuario (no volver a abrir el popup de ciudad)

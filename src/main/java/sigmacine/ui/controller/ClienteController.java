@@ -20,6 +20,7 @@ import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
 import sigmacine.ui.controller.ControladorControlador;
+import sigmacine.aplicacion.session.Session;
 
 
 public class ClienteController {
@@ -79,8 +80,22 @@ public class ClienteController {
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
 
-    if (btnIniciarSesion != null) btnIniciarSesion.setOnAction(e -> onIniciarSesion());
-    if (btnRegistrarse != null) btnRegistrarse.setOnAction(e -> onRegistrarse());
+        if (btnIniciarSesion != null) {
+            btnIniciarSesion.setOnAction(e -> onIniciarSesion());
+            // reflect current session
+            if (Session.isLoggedIn()) {
+                var u = Session.getCurrent();
+                btnIniciarSesion.setText(u != null && u.getEmail() != null ? u.getEmail() : "Cerrar sesión");
+                this.usuario = Session.getCurrent();
+            } else {
+                btnIniciarSesion.setText("Iniciar sesión");
+            }
+        }
+        if (btnRegistrarse != null) {
+            btnRegistrarse.setOnAction(e -> onRegistrarse());
+            // disable register when already logged in
+            btnRegistrarse.setDisable(Session.isLoggedIn());
+        }
 
         if (txtBuscar != null) {
             txtBuscar.setOnKeyPressed(ev -> {
@@ -96,11 +111,33 @@ public class ClienteController {
 
     private void onIniciarSesion() {
         System.out.println("[DEBUG] onIniciarSesion invoked");
+        // if already logged in, perform logout; otherwise show login
+        if (Session.isLoggedIn()) {
+            // ask for confirmation before logging out
+            javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+            a.setTitle("Cerrar sesión");
+            a.setHeaderText("¿Desea cerrar sesión?");
+            a.setContentText("Salir de la cuenta " + (Session.getCurrent() != null ? Session.getCurrent().getEmail() : "") );
+            var opt = a.showAndWait();
+            if (opt.isPresent() && opt.get() == javafx.scene.control.ButtonType.OK) {
+                onLogout();
+            }
+            return;
+        }
         if (coordinador != null) coordinador.mostrarLogin();
     }
 
     private void onRegistrarse() {
         System.out.println("[DEBUG] onRegistrarse invoked");
+        if (Session.isLoggedIn()) {
+            // already logged in — don't allow registering a new account
+            javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            a.setTitle("Ya has iniciado sesión");
+            a.setHeaderText(null);
+            a.setContentText("Ya has iniciado sesión. Cierra sesión si deseas registrar una nueva cuenta.");
+            a.showAndWait();
+            return;
+        }
         if (coordinador != null) coordinador.mostrarRegistro();
     }
 
@@ -111,6 +148,11 @@ public class ClienteController {
 
     private void onLogout() {
         System.out.println("Cerrar sesión de: " + (usuario != null ? usuario.getEmail() : "desconocido"));
+        // clear application session and update UI
+        Session.clear();
+        this.usuario = null;
+        if (btnIniciarSesion != null) btnIniciarSesion.setText("Iniciar sesión");
+        if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
     }
     
     @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más (" + safeCiudad() + ")"); }

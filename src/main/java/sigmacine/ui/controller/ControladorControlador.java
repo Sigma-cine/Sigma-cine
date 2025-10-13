@@ -22,7 +22,12 @@ public class ControladorControlador {
     }
 
     public void mostrarLogin() {
+        // if already logged in, show home instead
         try {
+            if (sigmacine.aplicacion.session.Session.isLoggedIn()) {
+                mostrarHome(sigmacine.aplicacion.session.Session.getCurrent());
+                return;
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/login.fxml"));
             Parent root = loader.load();
             LoginController controller = loader.getController();
@@ -50,6 +55,15 @@ public class ControladorControlador {
 
     public void mostrarRegistro() {
     try {
+        if (sigmacine.aplicacion.session.Session.isLoggedIn()) {
+            // already logged in: show info dialog instead of registration
+            javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            a.setTitle("Ya has iniciado sesión");
+            a.setHeaderText(null);
+            a.setContentText("Ya existe una sesión iniciada. Cierra sesión para registrar una nueva cuenta.");
+            a.showAndWait();
+            return;
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/registrarse.fxml"));
 
         // Instanciamos el controller pasando AuthFacade

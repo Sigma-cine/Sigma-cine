@@ -247,9 +247,8 @@ public class ClienteController {
             overlayCarrito.setVisible(false);
             overlayCarrito.setManaged(false);
 
-            // content está dentro de un VBox dentro de BorderPane; su parent esperado es VBox
-            // Para superponer, necesitamos un StackPane: content es StackPane, usamos su parent
-            javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+            // Usamos el propio StackPane 'content' como contenedor de overlay
+            javafx.scene.layout.StackPane stackCentro = content;
             dimmer.prefWidthProperty().bind(stackCentro.widthProperty());
             dimmer.prefHeightProperty().bind(stackCentro.heightProperty());
             overlayCarrito.prefWidthProperty().bind(stackCentro.widthProperty());
@@ -267,7 +266,7 @@ public class ClienteController {
 
     private void showCarritoOverlay() {
         ensureCarritoOverlay();
-        javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+    javafx.scene.layout.StackPane stackCentro = content;
 
         // blur al fondo
         for (javafx.scene.Node n : stackCentro.getChildren()) {
@@ -293,8 +292,8 @@ public class ClienteController {
     }
 
     private void hideCarritoOverlay() {
-        if (overlayCarrito == null) return;
-        javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+    if (overlayCarrito == null) return;
+    javafx.scene.layout.StackPane stackCentro = content;
         overlayCarrito.setVisible(false);
         overlayCarrito.setManaged(false);
         for (javafx.scene.Node n : stackCentro.getChildren()) n.setEffect(null);

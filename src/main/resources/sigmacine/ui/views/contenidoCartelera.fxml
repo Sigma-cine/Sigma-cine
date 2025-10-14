@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="517.0" prefWidth="883.0"
-            stylesheets="@sigma.css"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="sigmacine.ui.controller.DetallePeliculaController">
 
-    <!-- ===== TOP BAR ===== -->
+<BorderPane prefWidth="960.0" prefHeight="600.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ContenidoCarteleraController">
+
     <top>
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="topbar">
             <children>
+                <Button fx:id="btnBack" styleClass="toplink" text="← Volver" onAction="#onVolver" />
                 <Label styleClass="brand" text="SIGMA CINE" />
-                <Button styleClass="toplink" text="Cartelera" />
+                <Button fx:id="btnCarteleraTop" styleClass="toplink" text="Cartelera" onAction="#onCartelera" />
                 <Button styleClass="toplink" text="Confitería" />
                 <Button styleClass="toplink" text="Sigma Card" />
                 <Region HBox.hgrow="ALWAYS" />
@@ -47,7 +46,19 @@
         </HBox>
     </top>
 
-    <!-- CENTER: vertical detail layout (title -> poster -> info -> trailer) inside a ScrollPane -->
+    <left>
+        <VBox prefHeight="421.0" prefWidth="437.0" spacing="12" style="-fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
+            <children>
+                <Label fx:id="lblSinopsisTitulo" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" styleClass="section-title" text="SINOPSIS" />
+                <ImageView fx:id="imgPoster" fitWidth="320.0" preserveRatio="true" />
+                <TextArea fx:id="txtSinopsis" editable="false" prefHeight="220.0" prefRowCount="12" prefWidth="405.0" style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" wrapText="true" />
+            </children>
+            <padding>
+                <Insets bottom="16" left="16" right="16" top="16" />
+            </padding>
+        </VBox>
+    </left>
+
     <center>
         <ScrollPane fitToWidth="true" style="-fx-background: #0D0D0D; -fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
             <content>
@@ -55,18 +66,8 @@
                     <children>
                         <Label fx:id="lblTituloPelicula" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 22;" />
 
-                        <StackPane style="-fx-background-color: transparent;" alignment="CENTER">
-                            <children>
-                                <ImageView fx:id="imgPoster" preserveRatio="true" fitWidth="480" />
-                            </children>
-                        </StackPane>
-
                         <VBox spacing="8" prefWidth="820" style="-fx-background-color: transparent;">
                             <children>
-                                <Label fx:id="lblSinopsisTitulo" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" text="SINOPSIS" />
-                                <TextArea fx:id="txtSinopsis" editable="false" wrapText="true" prefHeight="120"
-                                          style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" />
-
                                 <Label text="FICHA TÉCNICA" style="-fx-text-fill: #e5e7eb; -fx-font-weight: bold; -fx-font-size: 14;"/>
                                 <GridPane hgap="10" vgap="6" style="-fx-background-color: transparent;">
                                     <columnConstraints>
@@ -87,8 +88,7 @@
                                         <Label fx:id="lblDirector" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-text-fill: #ffffff;"/>
 
                                         <Label text="Reparto:" GridPane.rowIndex="4" style="-fx-text-fill: #cbd5e1;"/>
-                                        <Label fx:id="lblReparto" GridPane.columnIndex="1" GridPane.rowIndex="4"
-                                               style="-fx-text-fill: #ffffff;" wrapText="true"/>
+                                        <Label fx:id="lblReparto" GridPane.columnIndex="1" GridPane.rowIndex="4" style="-fx-text-fill: #ffffff;" wrapText="true"/>
                                     </children>
                                 </GridPane>
 
@@ -121,4 +121,5 @@
             </content>
         </ScrollPane>
     </center>
+
 </BorderPane>

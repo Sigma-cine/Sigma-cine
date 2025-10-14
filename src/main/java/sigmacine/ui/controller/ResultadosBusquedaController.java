@@ -7,7 +7,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import sigmacine.dominio.entity.Pelicula;
+import sigmacine.aplicacion.data.UsuarioDTO;
+import sigmacine.ui.controller.ControladorControlador;
 import java.util.List;
+import java.io.File;
 
 public class ResultadosBusquedaController {
     @FXML private javafx.scene.control.Button btnVolver;
@@ -17,6 +20,16 @@ public class ResultadosBusquedaController {
 
     private List<Pelicula> peliculas;
     private String textoBuscado;
+    private ControladorControlador coordinador;
+    private UsuarioDTO usuario;
+
+    public void setCoordinador(ControladorControlador coordinador) {
+        this.coordinador = coordinador;
+    }
+
+    public void setUsuario(UsuarioDTO usuario) {
+        this.usuario = usuario;
+    }
 
     public void setResultados(List<Pelicula> peliculas, String textoBuscado) {
         this.peliculas = peliculas;
@@ -30,9 +43,18 @@ public class ResultadosBusquedaController {
 
     private void volverAInicio() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
+            // initialize controller with current session so the user remains logged in
+            try {
+                Object ctrl = loader.getController();
+                if (ctrl instanceof ClienteController) {
+                    ClienteController c = (ClienteController) ctrl;
+                    c.init(this.usuario);
+                    c.setCoordinador(this.coordinador);
+                }
+            } catch (Exception ignore) {}
             // preserve current window size when switching
             javafx.scene.Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
@@ -92,17 +114,19 @@ public class ResultadosBusquedaController {
             // Try load poster (remote URL or classpath resource under /Images)
             try {
                 String posterRef = p.getPosterUrl();
+                System.out.println("[BÚSQUEDA] Cargando póster para: " + p.getTitulo() + " con URL: " + posterRef);
                 if (posterRef != null && !posterRef.isBlank()) {
-                    String lower = posterRef.toLowerCase();
-                    if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
-                        poster.setImage(new Image(posterRef, true));
+                    Image img = resolveImage(posterRef);
+                    if (img != null) {
+                        poster.setImage(img);
+                        System.out.println("[BÚSQUEDA] ✓ Póster cargado para: " + p.getTitulo());
                     } else {
-                        var res = getClass().getResource("/Images/" + posterRef);
-                        if (res != null) poster.setImage(new Image(res.toExternalForm(), false));
+                        System.out.println("[BÚSQUEDA] ✗ NO se pudo cargar el póster para: " + p.getTitulo());
                     }
                 }
             } catch (Exception ex) {
-                // leave poster null (placeholder will show)
+                System.err.println("[BÚSQUEDA] ERROR cargando póster: " + ex.getMessage());
+                ex.printStackTrace();
             }
 
             // Info column (center) - reserve 1/3 width
@@ -160,7 +184,6 @@ public class ResultadosBusquedaController {
             btnDetalle.setOnAction(e -> mostrarDetallePelicula(p));
             btnPane.getChildren().add(btnDetalle);
 
-            // Compose row and add to tarjeta
             javafx.scene.layout.HBox fila = new javafx.scene.layout.HBox(12);
             fila.setAlignment(Pos.TOP_LEFT);
             fila.setStyle("-fx-padding: 6 0 6 0;");
@@ -169,7 +192,6 @@ public class ResultadosBusquedaController {
             tarjeta.getChildren().addAll(fila);
             panelPeliculas.getChildren().add(tarjeta);
         }
-        // Simple layout pass
         javafx.application.Platform.runLater(() -> {
             try {
                 panelPeliculas.applyCss();
@@ -185,23 +207,85 @@ private void mostrarDetallePelicula(Pelicula p) {
         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(url);
         javafx.scene.Parent rootDetalle = loader.load();
 
-    DetallePeliculaController ctrl = loader.getController();
-    // pass current results and search text so detail can return to them
+    ContenidoCarteleraController ctrl = loader.getController();
+    // pass session info so detail can preserve and return with the same user
+    try {
+        ctrl.setCoordinador(this.coordinador);
+    } catch (Exception ignore) {}
+    try {
+        ctrl.setUsuario(this.usuario);
+    } catch (Exception ignore) {}
     ctrl.setBackResults(this.peliculas, this.textoBuscado);
     ctrl.setPelicula(p);
 
         javafx.stage.Stage stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
-        // Preserve current stage size when showing details
         javafx.scene.Scene current = stage.getScene();
         double w = current != null ? current.getWidth() : 900;
         double h = current != null ? current.getHeight() : 600;
         javafx.scene.Scene scene = new javafx.scene.Scene(rootDetalle, w > 0 ? w : 900, h > 0 ? h : 600);
-        // opcional: scene.getStylesheets().add(...);
         stage.setScene(scene);
         stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");
-        // stage.sizeToScene(); // úsalo solo si quieres que ajuste el tamaño a la nueva vista
+        
     } catch (Exception ex) {
         ex.printStackTrace();
     }
-}
+    }
+
+    private Image resolveImage(String ref) {
+        System.out.println("[RESOLVE_IMAGE] Intentando resolver: " + ref);
+        if (ref == null || ref.isBlank()) {
+            System.out.println("[RESOLVE_IMAGE] URL es null o vacía");
+            return null;
+        }
+        try {
+            String lower = ref.toLowerCase();
+            // 1. URLs externas
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                System.out.println("[RESOLVE_IMAGE] Es URL externa");
+                return new Image(ref, true);
+            }
+            
+            // 2. Si contiene la ruta completa "src\main\resources\Images\", extraer solo el nombre
+            if (ref.contains("src\\main\\resources\\Images\\") || ref.contains("src/main/resources/Images/")) {
+                String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
+                if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
+                
+                System.out.println("[RESOLVE_IMAGE] Extrayendo nombre de archivo: " + fileName);
+                java.net.URL res = getClass().getResource("/Images/" + fileName);
+                if (res != null) {
+                    System.out.println("[RESOLVE_IMAGE] ✓ Encontrado en: " + res.toExternalForm());
+                    return new Image(res.toExternalForm(), false);
+                } else {
+                    System.out.println("[RESOLVE_IMAGE] ✗ NO encontrado en /Images/" + fileName);
+                }
+            }
+            
+            // 3. Probar como recurso directo /Images/...
+            java.net.URL res = getClass().getResource("/Images/" + ref);
+            if (res != null) {
+                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado en /Images/" + ref);
+                return new Image(res.toExternalForm(), false);
+            }
+            
+            // 4. Probar como archivo local
+            File f = new File(ref);
+            if (f.exists()) {
+                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado como archivo local");
+                return new Image(f.toURI().toString(), false);
+            }
+            
+            // 5. Probar con / al inicio
+            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
+            if (res != null) {
+                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado con / al inicio");
+                return new Image(res.toExternalForm(), false);
+            }
+            
+            System.out.println("[RESOLVE_IMAGE] ✗ NO se pudo resolver la imagen");
+        } catch (Exception ex) {
+            System.err.println("[RESOLVE_IMAGE] ERROR: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return null;
+    }
 }

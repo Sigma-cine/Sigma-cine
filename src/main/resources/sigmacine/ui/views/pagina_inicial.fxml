@@ -41,8 +41,13 @@
                 <!-- Carrito -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
 
-                <!-- Perfil -->
-                <MenuButton text="👤" styleClass="icon-btn">
+        <!-- Perfil / Sesión: botón para iniciar sesión, label para nombre y botón de registro -->
+        <Button fx:id="btnIniciarSesion" text="Iniciar sesión" styleClass="toplink" />
+        <Label fx:id="lblUserName" text="" styleClass="toplink" visible="false" />
+        <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
+
+        <!-- Perfil (menu de opciones) -->
+  <MenuButton fx:id="menuPerfil" text="👤" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
                         <MenuItem text="Buscar Tiquetes"/>
@@ -65,32 +70,32 @@
             </padding>
         </HBox>
     </top>
-   <center>
+  <center>
   <StackPane>
     <children>
       <StackPane fx:id="promoPane"
-                 prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
-                 style="-fx-background-color: #993726;"
-                 BorderPane.alignment="TOP_CENTER" />
+              prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
+              style="-fx-background-color: #993726;"
+              BorderPane.alignment="TOP_CENTER" />
 
       <!-- contenedor dinámico donde se cargan las sub-vistas (buscar, confiteria, etc) -->
       <StackPane fx:id="content" BorderPane.alignment="CENTER" />
     </children>
 
     <ImageView fx:id="imgPublicidad"
-               fitHeight="110.0"
-               preserveRatio="true"
-               pickOnBounds="true"
-               StackPane.alignment="CENTER">
+              fitHeight="110.0"
+              preserveRatio="true"
+              pickOnBounds="true"
+              StackPane.alignment="CENTER">
       <image>
         <Image url="/Images/publicidad.png"/>
       </image>
     </ImageView>
 
     <Label text="Promoción"
-           style="-fx-text-fill: #ffffff; -fx-font-weight: bold;"
-           StackPane.alignment="TOP_LEFT"
-           translateX="33" translateY="10">
+          style="-fx-text-fill: #ffffff; -fx-font-weight: bold;"
+          StackPane.alignment="TOP_LEFT"
+          translateX="33" translateY="10">
       <font><Font name="System Bold" size="13.0"/></font>
     </Label>
 
@@ -106,7 +111,7 @@
   </StackPane>
 </center>
 <bottom>
-  <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="191.0" prefWidth="606.0" BorderPane.alignment="CENTER">
+  <HBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="420.0" prefWidth="606.0" BorderPane.alignment="CENTER">
     <children>
       <GridPane alignment="CENTER" prefHeight="172.0" prefWidth="602.0">
         <columnConstraints>
@@ -124,12 +129,10 @@
         <children>
           <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" />
           <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" />
-          <ImageView fitHeight="106.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
-          <ImageView fitHeight="98.0" fitWidth="144.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" />
+          <ImageView fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
           <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
           <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
           <Label style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-          <Label style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
           <Button fx:id="btnCard1" onAction="#onCard1"
                   contentDisplay="CENTER" mnemonicParsing="false"
                   prefHeight="30.0" prefWidth="69.0"
@@ -149,13 +152,6 @@
                   prefHeight="30.0" prefWidth="69.0"
                   style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
                   text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-            <font><Font size="10.0" /></font>
-          </Button>
-          <Button fx:id="btnCard4" onAction="#onCard4"
-                  contentDisplay="CENTER" mnemonicParsing="false"
-                  prefHeight="30.0" prefWidth="69.0"
-                  style="-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;"
-                  text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
             <font><Font size="10.0" /></font>
           </Button>
         </children>

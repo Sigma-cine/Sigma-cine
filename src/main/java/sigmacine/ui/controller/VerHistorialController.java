@@ -2,16 +2,14 @@ package sigmacine.ui.controller;
 
 import java.util.List;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
-
 import sigmacine.aplicacion.service.VerHistorialService;
-import sigmacine.dominio.entity.Compra;
-import sigmacine.dominio.entity.Boleto;
-import sigmacine.dominio.entity.Usuario;
+import sigmacine.aplicacion.data.HistorialCompraDTO;
 
 public class VerHistorialController {
     
@@ -36,6 +34,11 @@ public class VerHistorialController {
     
     public void setUsuarioEmail(String email) {
         this.usuarioEmail = email;
+        // Si la vista ya fue inicializada y el contenedor existe, recargar historial inmediatamente.
+        if (this.comprasContainer != null) {
+            this.comprasContainer.getChildren().clear();
+            cargarHistorialDeCompras();
+        }
     }
 
     @FXML
@@ -49,6 +52,58 @@ public class VerHistorialController {
         if (comprasContainer != null) {
             comprasContainer.getChildren().clear(); 
             cargarHistorialDeCompras();
+            // Limpiar nodos promocionales que puedan haber quedado en la escena
+            javafx.application.Platform.runLater(() -> limpiarNodosPromocionales());
+        }
+    }
+
+    // Elimina botones "Ver más" y labels genéricos que puedan provenir de la vista de inicio
+    private void limpiarNodosPromocionales() {
+        try {
+            if (comprasContainer == null) return;
+            var scene = comprasContainer.getScene();
+            if (scene == null) return;
+            var root = scene.getRoot();
+            eliminarRecursivo(root);
+        } catch (Exception e) {
+            // no bloquear la carga si falla la limpieza
+            System.err.println("Advertencia: no se pudo limpiar nodos promocionales: " + e.getMessage());
+        }
+    }
+
+    private void eliminarRecursivo(javafx.scene.Parent parent) {
+        if (parent == null) return;
+        if (parent instanceof javafx.scene.layout.Pane) {
+            javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
+            // copiamos la lista para evitar ConcurrentModification
+            java.util.List<javafx.scene.Node> copia = new java.util.ArrayList<>(pane.getChildren());
+            for (javafx.scene.Node n : copia) {
+                boolean removed = false;
+                if (n instanceof javafx.scene.control.Button) {
+                    javafx.scene.control.Button b = (javafx.scene.control.Button) n;
+                    String t = b.getText();
+                    if (t != null && t.trim().equalsIgnoreCase("Ver más")) {
+                        pane.getChildren().remove(n);
+                        removed = true;
+                    }
+                }
+                if (!removed && n instanceof javafx.scene.control.Label) {
+                    javafx.scene.control.Label lab = (javafx.scene.control.Label) n;
+                    String lt = lab.getText();
+                    if (lt != null && lt.trim().equalsIgnoreCase("Label")) {
+                        pane.getChildren().remove(n);
+                        removed = true;
+                    }
+                }
+                if (!removed && n instanceof javafx.scene.Parent) {
+                    eliminarRecursivo((javafx.scene.Parent) n);
+                }
+            }
+        } else {
+            java.util.List<javafx.scene.Node> children = parent.getChildrenUnmodifiable();
+            for (javafx.scene.Node n : children) {
+                if (n instanceof javafx.scene.Parent) eliminarRecursivo((javafx.scene.Parent) n);
+            }
         }
     }
     
@@ -59,16 +114,15 @@ public class VerHistorialController {
         }
 
         try {
-            // El servicio debe devolver List<Compra>
-            List<Compra> historial = historialService.verHistorial(usuarioEmail);
+            List<HistorialCompraDTO> historial = historialService.verHistorial(usuarioEmail);
 
             if (historial.isEmpty()) {
                 comprasContainer.getChildren().add(new Label("No has realizado ninguna compra aún."));
                 return;
             }
 
-            for (Compra compra : historial) {
-                HBox tarjetaCompra = crearTarjetaCompra(compra);
+            for (HistorialCompraDTO dto : historial) {
+                HBox tarjetaCompra = crearTarjetaCompra(dto);
                 comprasContainer.getChildren().add(tarjetaCompra);
             }
 
@@ -80,44 +134,94 @@ public class VerHistorialController {
         }
     }
 
-    private HBox crearTarjetaCompra(Compra compra) {
-        
-        String titulo = "Compra de Confitería y/o Sin Boletos";
-        String ubicacion = "N/A";
+    private HBox crearTarjetaCompra(HistorialCompraDTO dto) {
+
+        String titulo = dto.getCantBoletos() > 0 ? "Compra de Entradas" : "Compra de Confitería";
+        String ubicacion = dto.getSedeCiudad() != null ? dto.getSedeCiudad() : "N/A";
         String fechaHora = "N/A";
-        
-        if (!compra.getBoletos().isEmpty()) {
-            Boleto primerBoleto = compra.getBoletos().get(0);
-            titulo = primerBoleto.getPelicula();
-            ubicacion = primerBoleto.getSala();
-            fechaHora = primerBoleto.getHorario();
-        }
-        
+        if (dto.getCompraFecha() != null) fechaHora = dto.getCompraFecha().toString();
+        else if (dto.getFuncionFecha() != null) fechaHora = dto.getFuncionFecha().toString();
+
         HBox tarjeta = new HBox(20);
         tarjeta.setPadding(new javafx.geometry.Insets(10, 15, 10, 15));
         tarjeta.setPrefHeight(150);
-        tarjeta.getStyleClass().add("tarjeta-compra");
+    tarjeta.getStyleClass().addAll("tarjeta-compra", "card-wrap", "centered-container");
         
-        VBox detalles = new VBox(5);
-        detalles.getChildren().add(new Label(titulo));
-        detalles.getChildren().add(new Label("Ubicación: " + ubicacion));
-        detalles.getChildren().add(new Label("Fecha/Hora: " + fechaHora));
-        detalles.getChildren().add(new Label("ID: " + compra.getId()));
-        
-        Label total = new Label("Total: " + compra.getTotal());
+        VBox detalles = new VBox(6);
+        // Título de la compra / película
+        Label tituloLbl = new Label(titulo);
+        tituloLbl.getStyleClass().add("section-subtitle");
+        detalles.getChildren().add(tituloLbl);
+
+        // Ubicación (sala) si está
+        Label ubicacionLbl = new Label("Ubicación: " + ubicacion);
+        ubicacionLbl.getStyleClass().add("small-muted");
+        detalles.getChildren().add(ubicacionLbl);
+
+    // Mostrar fecha si está disponible
+    String fechaText = fechaHora;
+        Label fechaLbl = new Label("Fecha/Hora: " + fechaText);
+        fechaLbl.getStyleClass().add("small-muted");
+        detalles.getChildren().add(fechaLbl);
+
+        // ID de la compra
+        Label idLbl = new Label("ID: " + (dto.getCompraId() != null ? dto.getCompraId().toString() : "N/A"));
+        idLbl.getStyleClass().add("small-muted");
+        detalles.getChildren().add(idLbl);
+        // Mostrar cantidades de boletos/productos si disponibles
+        if (dto.getCantBoletos() > 0) {
+            Label boletosLbl = new Label("Boletos: " + dto.getCantBoletos());
+            boletosLbl.getStyleClass().add("small-muted");
+            detalles.getChildren().add(boletosLbl);
+        }
+        if (dto.getCantProductos() > 0) {
+            Label productosLbl = new Label("Productos: " + dto.getCantProductos());
+            productosLbl.getStyleClass().add("small-muted");
+            detalles.getChildren().add(productosLbl);
+        }
+
+        // Mostrar total con dos decimales
+        String totalStr = dto.getTotal() != null ? String.format("%.2f", dto.getTotal().doubleValue()) : "0.00";
+        Label total = new Label("Total: " + totalStr);
         total.getStyleClass().add("venue-box");
         detalles.getChildren().add(total);
-        
+
         HBox.setHgrow(detalles, javafx.scene.layout.Priority.ALWAYS);
 
-        Button verDetalleBtn = new Button("Ver Detalle");
-        verDetalleBtn.getStyleClass().add("buy-btn");
-        
         Region posterPlaceholder = new Region();
         posterPlaceholder.setPrefSize(100, 130);
-        posterPlaceholder.setStyle("-fx-background-color: #333333;");
-        
-        tarjeta.getChildren().addAll(posterPlaceholder, detalles, verDetalleBtn);
+        posterPlaceholder.setStyle("-fx-background-color: #111111; -fx-border-radius: 4; -fx-background-radius: 4;");
+
+        // Añadir imagen, detalles y botón "Ver detalle"
+        Button btnDetalle = new Button("Ver detalle");
+        btnDetalle.getStyleClass().add("primary-btn");
+        btnDetalle.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/detalleCompra.fxml"));
+                // inyectar DTO y repositorio en el controller
+                loader.setControllerFactory(cls -> {
+                    if (cls == sigmacine.ui.controller.DetalleCompraController.class) {
+                        return new sigmacine.ui.controller.DetalleCompraController(dto, this.historialService.repo);
+                    }
+                    try { return cls.getDeclaredConstructor().newInstance(); } catch (Exception ex) { throw new RuntimeException(ex); }
+                });
+                javafx.scene.Parent root = loader.load();
+                javafx.stage.Stage stage = new javafx.stage.Stage();
+                stage.setTitle("Detalle compra " + (dto.getCompraId() != null ? dto.getCompraId() : ""));
+                stage.setScene(new javafx.scene.Scene(root));
+                stage.initOwner(comprasContainer.getScene().getWindow());
+                stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                stage.showAndWait();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        VBox accionBox = new VBox();
+        accionBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        accionBox.getChildren().add(btnDetalle);
+
+        tarjeta.getChildren().addAll(posterPlaceholder, detalles, accionBox);
         return tarjeta;
     }
     

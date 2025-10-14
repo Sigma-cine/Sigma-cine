@@ -177,7 +177,6 @@ public class ControladorControlador {
             // Mostrar el popup de ciudad solo la primera vez que se ejecuta la aplicación
             Preferences prefs = Preferences.userNodeForPackage(ControladorControlador.class);
             boolean yaMostrado = prefs.getBoolean("cityPopupShown", false);
-            System.out.println("[DEBUG] cityPopupShown (prefs)=" + yaMostrado + " cityPopupShownInSession=" + cityPopupShownInSession);
             if (!yaMostrado && !cityPopupShownInSession) {
                 FXMLLoader popup = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/ciudad.fxml"));
                 Parent popupRoot = popup.load();
@@ -198,7 +197,6 @@ public class ControladorControlador {
                 // marcar como mostrado para no volver a abrir en ejecuciones posteriores
                 prefs.putBoolean("cityPopupShown", true);
                 cityPopupShownInSession = true;
-                System.out.println("[DEBUG] city popup shown now; prefs and session flag updated.");
                 dialog.showAndWait();
             }
 

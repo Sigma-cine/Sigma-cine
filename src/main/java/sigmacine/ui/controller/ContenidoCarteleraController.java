@@ -48,7 +48,6 @@ public class ContenidoCarteleraController {
 
     @FXML
     private void onCartelera() {
-        System.out.println("[DEBUG] onCartelera invoked");
         try {
             // If we have a coordinator, use it to show cartelera and preserve session
             if (coordinador != null) {
@@ -84,7 +83,6 @@ public class ContenidoCarteleraController {
 
     @FXML
     private void onVolver() {
-        System.out.println("[DEBUG] onVolver invoked");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();

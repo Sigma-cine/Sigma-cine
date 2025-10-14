@@ -67,16 +67,16 @@ public class ClienteController {
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
     private ControladorControlador coordinador;
+    // Evita disparar múltiples cargas de posters cuando la vista se crea desde distintos flujos
+    private boolean postersRequested = false;
     
 
     public void init(UsuarioDTO usuario) { 
-        System.out.println("[INIT] init(usuario) llamado");
         this.usuario = usuario;
         // Cargar películas después de que la escena esté montada
         esperarYCargarPeliculas();
     }
     public void init(UsuarioDTO usuario, String ciudad) {
-        System.out.println("[INIT] init(usuario, ciudad) llamado con ciudad: " + ciudad);
         this.usuario = usuario;
         this.ciudadSeleccionada = ciudad;
         // Cargar películas después de que la escena esté montada
@@ -84,23 +84,20 @@ public class ClienteController {
     }
     
     private void esperarYCargarPeliculas() {
+        if (postersRequested) {
+            return;
+        }
+        postersRequested = true;
         // Intentar buscar un elemento que debería existir para verificar si la escena está lista
         if (btnCartelera != null && btnCartelera.getScene() != null) {
-            // La escena ya está lista, cargar inmediatamente
-            System.out.println("[DEBUG] Escena ya está montada, cargando películas...");
             Platform.runLater(() -> cargarPeliculasInicio());
         } else if (btnCartelera != null) {
-            // Esperar a que se monte la escena
-            System.out.println("[DEBUG] Esperando a que la escena se monte...");
             btnCartelera.sceneProperty().addListener((obs, oldScene, newScene) -> {
                 if (newScene != null) {
-                    System.out.println("[DEBUG] Escena montada, cargando películas...");
                     Platform.runLater(() -> cargarPeliculasInicio());
                 }
             });
         } else {
-            // Como último recurso, usar Thread con delay
-            System.out.println("[DEBUG] btnCartelera es null, usando Thread con delay...");
             new Thread(() -> {
                 try {
                     Thread.sleep(1000); // Esperar 1 segundo
@@ -123,11 +120,7 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
-        System.out.println("[DEBUG] ClienteController.initialize() comenzó");
-        System.out.println("[DEBUG] imgCard1 en initialize: " + imgCard1);
-        System.out.println("[DEBUG] imgCard2 en initialize: " + imgCard2);
-        System.out.println("[DEBUG] imgCard3 en initialize: " + imgCard3);
-        System.out.println("[DEBUG] imgCard4 en initialize: " + imgCard4);
+        
         
         if (promoPane != null && imgPublicidad != null) {
             imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
@@ -140,7 +133,7 @@ public class ClienteController {
         }
 
     if (btnCartelera!= null) btnCartelera.setOnAction(e -> mostrarCartelera());
-        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
+        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
@@ -179,6 +172,8 @@ public class ClienteController {
         }
 
         // Las películas se cargarán cuando se llame init() o init(usuario, ciudad)
+        // Si esta vista se usa en `cliente_home.fxml` sin invocar init(), aseguramos la carga aquí.
+        esperarYCargarPeliculas();
     }
 
     /**
@@ -205,7 +200,7 @@ public class ClienteController {
     public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
 
     private void onIniciarSesion() {
-        System.out.println("[DEBUG] onIniciarSesion invoked");
+        
         // if already logged in, perform logout; otherwise show login
         if (Session.isLoggedIn()) {
             // ask for confirmation before logging out
@@ -223,7 +218,7 @@ public class ClienteController {
     }
 
     private void onRegistrarse() {
-        System.out.println("[DEBUG] onRegistrarse invoked");
+        
         if (Session.isLoggedIn()) {
             // already logged in — don't allow registering a new account
             javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
@@ -242,7 +237,7 @@ public class ClienteController {
     }
 
     private void onLogout() {
-        System.out.println("Cerrar sesión de: " + (usuario != null ? usuario.getEmail() : "desconocido"));
+        
         // clear application session and update UI
         Session.clear();
         this.usuario = null;
@@ -289,11 +284,11 @@ public class ClienteController {
         } catch (Exception ex) { ex.printStackTrace(); }
     }
     
-    @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard1(){ System.out.println("Card 1 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard2(){ System.out.println("Card 2 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard3(){ System.out.println("Card 3 → Ver más (" + safeCiudad() + ")"); }
-    @FXML private void onCard4(){ System.out.println("Card 4 → Ver más (" + safeCiudad() + ")"); }
+    @FXML private void onPromoVerMas() { }
+    @FXML private void onCard1(){ }
+    @FXML private void onCard2(){ }
+    @FXML private void onCard3(){ }
+    @FXML private void onCard4(){ }
 
 
     private void onSeleccionarCiudad() {
@@ -327,7 +322,7 @@ public class ClienteController {
     
     private void doSearch(String texto) {
         if (texto == null) texto = "";
-        System.out.println("doSearch invoked with: '" + texto + "'");
+        
         try {
             DatabaseConfig db = new DatabaseConfig();
             var repo = new PeliculaRepositoryJdbc(db);
@@ -358,7 +353,7 @@ public class ClienteController {
 
     @FXML
     private void onVerHistorial() {
-        System.out.println("Navegando a Historial de Compras.");
+        
         if (!Session.isLoggedIn()) {
             javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Acceso denegado");
@@ -398,7 +393,7 @@ public class ClienteController {
     }
     
     public void mostrarCartelera() {
-        System.out.println("Volviendo a Cartelera (Contenido a pantalla completa).");
+        
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
             Parent carteleraView = loader.load();
@@ -448,9 +443,7 @@ public class ClienteController {
      * Llena los pósters y títulos de las películas.
      */
     private void cargarPeliculasInicio() {
-        System.out.println("[DEBUG] cargarPeliculasInicio() invocado");
-        System.out.println("[DEBUG] footerGrid = " + footerGrid);
-        System.out.println("[DEBUG] imgCard1 = " + imgCard1);
+        
         
         try {
             DatabaseConfig db = new DatabaseConfig();
@@ -459,29 +452,29 @@ public class ClienteController {
             // Buscar todas las películas (o filtrar por estado "En Cartelera")
             List<Pelicula> peliculas = repo.buscarPorTitulo(""); // buscar todas
             
-            System.out.println("[DEBUG] Películas encontradas: " + (peliculas != null ? peliculas.size() : 0));
+            
             
             // Si no hay películas, salir
             if (peliculas == null || peliculas.isEmpty()) {
-                System.out.println("No se encontraron películas para mostrar en la página inicial.");
+                
                 return;
             }
             
             // Si los campos @FXML están null, intentar ubicar el GridPane desde la raíz de la escena
             if (footerGrid == null) {
                 footerGrid = localizarFooterGridDesdeRoot();
-                System.out.println("[DEBUG] localizarFooterGridDesdeRoot => " + footerGrid);
+                
             }
             // Si aún no lo tenemos, como fallback intentar lookup
             if (footerGrid == null) {
-                System.out.println("[DEBUG] Campos @FXML null, intentando buscar con lookup...");
+                
                 buscarYCargarConLookup(peliculas);
                 return;
             }
             
             // Independientemente de que existan placeholders en el FXML, renderizamos dinámicamente
             // para controlar tamaño y centrado con precisión.
-            System.out.println("[DEBUG] Renderizando dinámicamente el footer (forzado)");
+            
             renderizarFooterDinamico(footerGrid, peliculas);
             return;
             
@@ -585,6 +578,7 @@ public class ClienteController {
                 verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
                 verMas.setPrefWidth(96);
                 verMas.setPrefHeight(34);
+                verMas.setOnAction(e -> abrirDetallePelicula(p));
                 javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
                 javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
                 javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);
@@ -602,7 +596,7 @@ public class ClienteController {
     }
     
     private void buscarYCargarConLookup(List<Pelicula> peliculas) {
-        System.out.println("[DEBUG] buscarYCargarConLookup() - Buscando elementos con lookup...");
+        
         try {
             // Intentar obtener los ImageView directamente por fx:id
             ImageView img1 = buscarImageView("#imgCard1");
@@ -659,7 +653,7 @@ public class ClienteController {
     }
     
     private void buscarYCargarEnGrid(List<Pelicula> peliculas) {
-        System.out.println("[DEBUG] Buscando elementos en footerGrid...");
+        
         try {
             // Buscar todos los nodos del GridPane
             for (javafx.scene.Node node : footerGrid.getChildren()) {
@@ -675,13 +669,13 @@ public class ClienteController {
                     if (rowIndex == 0 && colIndex >= 0 && colIndex < peliculas.size()) {
                         Pelicula pelicula = peliculas.get(colIndex);
                         String posterUrl = pelicula.getPosterUrl();
-                        System.out.println("[DEBUG] Cargando en columna " + colIndex + ": " + pelicula.getTitulo());
+                        
                         
                         if (posterUrl != null && !posterUrl.isBlank()) {
                             Image posterImage = resolveImage(posterUrl);
                             if (posterImage != null) {
                                 img.setImage(posterImage);
-                                System.out.println("✓ Póster cargado para: " + pelicula.getTitulo());
+                                
                             }
                         }
                     }
@@ -697,7 +691,7 @@ public class ClienteController {
                     if (rowIndex == 1 && colIndex >= 0 && colIndex < peliculas.size()) {
                         Pelicula pelicula = peliculas.get(colIndex);
                         lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
-                        System.out.println("[DEBUG] Título cargado en columna " + colIndex + ": " + pelicula.getTitulo());
+                        
                     }
                 }
             }
@@ -721,15 +715,15 @@ public class ClienteController {
         // Cargar el póster
         if (img != null) {
             String posterUrl = pelicula.getPosterUrl();
-            System.out.println("Cargando card para: " + pelicula.getTitulo() + " con URL: " + posterUrl);
+            
             
             if (posterUrl != null && !posterUrl.isBlank()) {
                 Image posterImage = resolveImage(posterUrl);
                 if (posterImage != null) {
                     img.setImage(posterImage);
-                    System.out.println("✓ Póster cargado exitosamente para: " + pelicula.getTitulo());
+                    
                 } else {
-                    System.err.println("✗ No se pudo cargar el póster para: " + pelicula.getTitulo());
+                    
                 }
             }
         }
@@ -758,10 +752,10 @@ public class ClienteController {
                 String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
                 if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
                 
-                System.out.println("  → Extrayendo nombre de archivo: " + fileName);
+                
                 java.net.URL res = getClass().getResource("/Images/" + fileName);
                 if (res != null) {
-                    System.out.println("  → Encontrado en: " + res.toExternalForm());
+                    
                     return new Image(res.toExternalForm(), false);
                 }
             }
@@ -783,5 +777,41 @@ public class ClienteController {
         }
         
         return null;
+    }
+
+    /**
+     * Abre la pantalla de detalle de película (contenidoCartelera.fxml) para la película indicada.
+     * Mantiene la sesión de usuario y el coordinador para navegación.
+     */
+    private void abrirDetallePelicula(Pelicula p) {
+        if (p == null) return;
+        try {
+            var url = getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml");
+            if (url == null) throw new IllegalStateException("No se encontró contenidoCartelera.fxml");
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent rootDetalle = loader.load();
+
+            ContenidoCarteleraController ctrl = loader.getController();
+            try { ctrl.setCoordinador(this.coordinador); } catch (Exception ignore) {}
+            try { ctrl.setUsuario(this.usuario); } catch (Exception ignore) {}
+            ctrl.setPelicula(p);
+
+            Stage stage = null;
+            if (content != null && content.getScene() != null) stage = (Stage) content.getScene().getWindow();
+            else if (footerGrid != null && footerGrid.getScene() != null) stage = (Stage) footerGrid.getScene().getWindow();
+            else if (btnCartelera != null && btnCartelera.getScene() != null) stage = (Stage) btnCartelera.getScene().getWindow();
+            if (stage == null) return;
+
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(rootDetalle, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");
+            stage.setMaximized(true);
+        } catch (Exception ex) {
+            System.err.println("Error abriendo detalle: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 }

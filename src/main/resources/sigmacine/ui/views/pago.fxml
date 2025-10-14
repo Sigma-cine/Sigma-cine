@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -8,6 +7,10 @@
             fx:controller="sigmacine.ui.controller.PagoController"
             prefWidth="480" prefHeight="520"
             style="-fx-background-color:#000; -fx-padding:24;" >
+
+    <fx:define>
+        <ToggleGroup fx:id="group" />
+    </fx:define>
 
     <top>
         <VBox spacing="6">
@@ -33,7 +36,6 @@
                 </HBox>
 
                 <Label text="Método de pago" style="-fx-text-fill:#bbb; -fx-font-weight:bold;" />
-                <ToggleGroup fx:id="group" />
                 <VBox spacing="8">
                     <children>
                         <RadioButton fx:id="rbCredito" text="Tarjeta de crédito" toggleGroup="$group" selected="true" style="-fx-text-fill:#ddd;" />

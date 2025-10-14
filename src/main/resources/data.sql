@@ -16,21 +16,21 @@ INSERT INTO SALA (ID, NUMERO_SALA, CAPACIDAD, TIPO, SEDE_ID) VALUES(3, 103, 80, 
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (1, 'Dune: Part Two', 'Ciencia ficción', 'PG-13', 166, 'Denis Villeneuve', 'Timothée Chalamet, Zendaya',
- 'https://www.youtube.com/watch?v=Way9Dexny3w',
- 'Sigue el viaje mítico de Paul Atreides mientras se une a Chani y los Fremen en una guerra de venganza contra los conspiradores que destruyeron a su familia.',
- 'En Cartelera', 'https://cdn.ejemplo.com/posters/dune2.jpg', TRUE);
+'https://www.youtube.com/watch?v=Way9Dexny3w',
+'Sigue el viaje mítico de Paul Atreides mientras se une a Chani y los Fremen en una guerra de venganza contra los conspiradores que destruyeron a su familia.',
+'En Cartelera', 'src\\main\\resources\\Images\\dune_poster.png', TRUE);
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (2, 'Joker', 'Thriller psicológico', 'R', 122, 'Todd Phillips', 'Joaquin Phoenix, Robert De Niro',
- 'https://www.youtube.com/watch?v=zL2Q9C0cK5s',
- 'Un comediante fracasado desciende a la locura y se convierte en una figura icónica del crimen.',
- 'En Cartelera', 'https://cdn.ejemplo.com/posters/joker.jpg', TRUE);
+'https://www.youtube.com/watch?v=zL2Q9C0cK5s',
+'Un comediante fracasado desciende a la locura y se convierte en una figura icónica del crimen.',
+'En Cartelera', 'src\\main\\resources\\Images\\joker_poster.png', TRUE);
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (3, 'Godzilla x Kong: The New Empire', 'Acción, Ciencia ficción', 'PG-13', 115, 'Adam Wingard', 'Rebecca Hall, Brian Tyree Henry',
- 'https://www.youtube.com/watch?v=qqj12z9f48E',
- 'Kong y Godzilla se unen para luchar contra una amenaza colosal desconocida que se esconde en nuestro mundo.',
- 'Próximamente', 'https://cdn.ejemplo.com/posters/gxk.jpg', FALSE);
+'https://www.youtube.com/watch?v=qqj12z9f48E',
+'Kong y Godzilla se unen para luchar contra una amenaza colosal desconocida que se esconde en nuestro mundo.',
+'Próximamente', 'src\\main\\resources\\Images\\godzillavskong_poster.png', FALSE);
 
 
 INSERT INTO PELICULA_TRAILER (ID, PELICULA_ID, URL) VALUES (1, 1, 'https://www.youtube.com/watch?v=Way9Dexny3w');

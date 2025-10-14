@@ -17,6 +17,7 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.application.Platform;
 // Dependencias necesarias para instanciación manual
 import sigmacine.aplicacion.service.VerHistorialService;
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
@@ -24,6 +25,9 @@ import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
 import sigmacine.ui.controller.ControladorControlador;
 import sigmacine.aplicacion.session.Session;
+import sigmacine.dominio.entity.Pelicula;
+import javafx.scene.image.Image;
+import java.util.List;
 
 
 public class ClienteController {
@@ -49,15 +53,63 @@ public class ClienteController {
         @FXML private javafx.scene.control.Label lblUserName;
         @FXML private Button btnRegistrarse;
 
+    // Footer movie cards (pagina_inicial.fxml)
+    @FXML private javafx.scene.layout.GridPane footerGrid;
+    @FXML private ImageView imgCard1;
+    @FXML private Label lblCard1;
+    @FXML private ImageView imgCard2;
+    @FXML private Label lblCard2;
+    @FXML private ImageView imgCard3;
+    @FXML private Label lblCard3;
+    @FXML private ImageView imgCard4;
+    @FXML private Label lblCard4;
+
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
     private ControladorControlador coordinador;
     
 
-    public void init(UsuarioDTO usuario) { this.usuario = usuario; }
+    public void init(UsuarioDTO usuario) { 
+        System.out.println("[INIT] init(usuario) llamado");
+        this.usuario = usuario;
+        // Cargar películas después de que la escena esté montada
+        esperarYCargarPeliculas();
+    }
     public void init(UsuarioDTO usuario, String ciudad) {
+        System.out.println("[INIT] init(usuario, ciudad) llamado con ciudad: " + ciudad);
         this.usuario = usuario;
         this.ciudadSeleccionada = ciudad;
+        // Cargar películas después de que la escena esté montada
+        esperarYCargarPeliculas();
+    }
+    
+    private void esperarYCargarPeliculas() {
+        // Intentar buscar un elemento que debería existir para verificar si la escena está lista
+        if (btnCartelera != null && btnCartelera.getScene() != null) {
+            // La escena ya está lista, cargar inmediatamente
+            System.out.println("[DEBUG] Escena ya está montada, cargando películas...");
+            Platform.runLater(() -> cargarPeliculasInicio());
+        } else if (btnCartelera != null) {
+            // Esperar a que se monte la escena
+            System.out.println("[DEBUG] Esperando a que la escena se monte...");
+            btnCartelera.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    System.out.println("[DEBUG] Escena montada, cargando películas...");
+                    Platform.runLater(() -> cargarPeliculasInicio());
+                }
+            });
+        } else {
+            // Como último recurso, usar Thread con delay
+            System.out.println("[DEBUG] btnCartelera es null, usando Thread con delay...");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000); // Esperar 1 segundo
+                    Platform.runLater(() -> cargarPeliculasInicio());
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+        }
     }
     public void initCiudad(UsuarioDTO usuario) {
         this.usuario = usuario;
@@ -71,6 +123,12 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
+        System.out.println("[DEBUG] ClienteController.initialize() comenzó");
+        System.out.println("[DEBUG] imgCard1 en initialize: " + imgCard1);
+        System.out.println("[DEBUG] imgCard2 en initialize: " + imgCard2);
+        System.out.println("[DEBUG] imgCard3 en initialize: " + imgCard3);
+        System.out.println("[DEBUG] imgCard4 en initialize: " + imgCard4);
+        
         if (promoPane != null && imgPublicidad != null) {
             imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
             imgPublicidad.setFitHeight(110);
@@ -119,6 +177,8 @@ public class ClienteController {
             // initial state
             updatePublicidadVisibility();
         }
+
+        // Las películas se cargarán cuando se llame init() o init(usuario, ciudad)
     }
 
     /**
@@ -381,5 +441,347 @@ public class ClienteController {
             content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de cartelera."));
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Carga las películas desde la BD y las muestra en las 4 cards del footer.
+     * Llena los pósters y títulos de las películas.
+     */
+    private void cargarPeliculasInicio() {
+        System.out.println("[DEBUG] cargarPeliculasInicio() invocado");
+        System.out.println("[DEBUG] footerGrid = " + footerGrid);
+        System.out.println("[DEBUG] imgCard1 = " + imgCard1);
+        
+        try {
+            DatabaseConfig db = new DatabaseConfig();
+            PeliculaRepositoryJdbc repo = new PeliculaRepositoryJdbc(db);
+            
+            // Buscar todas las películas (o filtrar por estado "En Cartelera")
+            List<Pelicula> peliculas = repo.buscarPorTitulo(""); // buscar todas
+            
+            System.out.println("[DEBUG] Películas encontradas: " + (peliculas != null ? peliculas.size() : 0));
+            
+            // Si no hay películas, salir
+            if (peliculas == null || peliculas.isEmpty()) {
+                System.out.println("No se encontraron películas para mostrar en la página inicial.");
+                return;
+            }
+            
+            // Si los campos @FXML están null, intentar ubicar el GridPane desde la raíz de la escena
+            if (footerGrid == null) {
+                footerGrid = localizarFooterGridDesdeRoot();
+                System.out.println("[DEBUG] localizarFooterGridDesdeRoot => " + footerGrid);
+            }
+            // Si aún no lo tenemos, como fallback intentar lookup
+            if (footerGrid == null) {
+                System.out.println("[DEBUG] Campos @FXML null, intentando buscar con lookup...");
+                buscarYCargarConLookup(peliculas);
+                return;
+            }
+            
+            // Independientemente de que existan placeholders en el FXML, renderizamos dinámicamente
+            // para controlar tamaño y centrado con precisión.
+            System.out.println("[DEBUG] Renderizando dinámicamente el footer (forzado)");
+            renderizarFooterDinamico(footerGrid, peliculas);
+            return;
+            
+        } catch (Exception ex) {
+            System.err.println("Error cargando películas para la página inicial: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Localiza el GridPane del footer navegando la raíz de la escena en lugar de @FXML.
+     */
+    private javafx.scene.layout.GridPane localizarFooterGridDesdeRoot() {
+        try {
+            // Tomar cualquier nodo inyectado para llegar a la escena
+            javafx.scene.Scene sc = null;
+            if (promoPane != null) sc = promoPane.getScene();
+            if (sc == null && content != null) sc = content.getScene();
+            if (sc == null && imgPublicidad != null) sc = imgPublicidad.getScene();
+            if (sc == null && btnBuscar != null) sc = btnBuscar.getScene();
+            if (sc == null) return null;
+
+            javafx.scene.Parent root = sc.getRoot();
+            if (root instanceof javafx.scene.layout.BorderPane) {
+                javafx.scene.layout.BorderPane bp = (javafx.scene.layout.BorderPane) root;
+                javafx.scene.Node bottom = bp.getBottom();
+                if (bottom instanceof javafx.scene.layout.HBox) {
+                    for (javafx.scene.Node ch : ((javafx.scene.layout.HBox) bottom).getChildren()) {
+                        if (ch instanceof javafx.scene.layout.GridPane) {
+                            return (javafx.scene.layout.GridPane) ch;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
+        return null;
+    }
+
+    /**
+     * Construye tarjetas de películas en el footer al estilo de ResultadosBusqueda (programático).
+     */
+    private void renderizarFooterDinamico(javafx.scene.layout.GridPane grid, List<Pelicula> peliculas) {
+        try {
+            if (grid == null) return;
+            grid.getChildren().clear();
+
+            // Quitar restricciones de columnas/filas del FXML que estaban forzando tamaños pequeños
+            if (grid.getColumnConstraints() != null) grid.getColumnConstraints().clear();
+            if (grid.getRowConstraints() != null) grid.getRowConstraints().clear();
+
+            // Mantener el GridPane al ancho de su contenido para centrar el bloque completo en el HBox
+            grid.setMaxWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+            grid.setPrefWidth(javafx.scene.layout.Region.USE_COMPUTED_SIZE);
+            grid.setPadding(new javafx.geometry.Insets(12, 64, 12, 64)); // margen y ligero padding superior
+
+            // Espaciados entre tarjetas
+            grid.setHgap(64); // separación horizontal mayor
+            grid.setVgap(16); // separación vertical mayor
+            grid.setAlignment(javafx.geometry.Pos.CENTER);
+            // Ligeramente elevado visualmente
+            grid.setTranslateY(-30);
+
+            // Mostrar solo 3 películas por defecto, centradas
+            int max = Math.min(3, peliculas.size());
+            // Con constraints limpiadas, usamos columnas 0..(max-1) y el GridPane centrará el bloque
+            int startCol = 0;
+
+            for (int i = 0; i < max; i++) {
+                Pelicula p = peliculas.get(i);
+                int col = startCol + i;
+
+                // Poster más grande
+                ImageView poster = new ImageView();
+                poster.setPreserveRatio(true);
+                poster.setFitWidth(220); // ancho mayor
+                String posterRef = p.getPosterUrl();
+                if (posterRef != null && !posterRef.isBlank()) {
+                    Image img = resolveImage(posterRef);
+                    if (img != null) poster.setImage(img);
+                }
+                javafx.scene.layout.GridPane.setColumnIndex(poster, col);
+                javafx.scene.layout.GridPane.setRowIndex(poster, 0);
+                javafx.scene.layout.GridPane.setMargin(poster, new javafx.geometry.Insets(0, 0, 8, 0));
+                grid.getChildren().add(poster);
+
+                // Título centrado y con wrap
+                Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Sin título");
+                titulo.setWrapText(true);
+                titulo.setMaxWidth(220);
+                titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
+                titulo.setAlignment(javafx.geometry.Pos.CENTER);
+                titulo.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+                javafx.scene.layout.GridPane.setColumnIndex(titulo, col);
+                javafx.scene.layout.GridPane.setRowIndex(titulo, 1);
+                javafx.scene.layout.GridPane.setHalignment(titulo, javafx.geometry.HPos.CENTER);
+                javafx.scene.layout.GridPane.setMargin(titulo, new javafx.geometry.Insets(0, 0, 8, 0));
+                grid.getChildren().add(titulo);
+
+                // Botón "Ver más" (opcional, sin acción por ahora)
+                Button verMas = new Button("Ver más");
+                verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+                verMas.setPrefWidth(96);
+                verMas.setPrefHeight(34);
+                javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
+                javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
+                javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);
+                grid.getChildren().add(verMas);
+            }
+
+            // Forzar layout una vez añadidos
+            javafx.application.Platform.runLater(() -> {
+                try { grid.applyCss(); grid.layout(); } catch (Exception ignore) {}
+            });
+        } catch (Exception ex) {
+            System.err.println("Error renderizando footer dinámico: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    private void buscarYCargarConLookup(List<Pelicula> peliculas) {
+        System.out.println("[DEBUG] buscarYCargarConLookup() - Buscando elementos con lookup...");
+        try {
+            // Intentar obtener los ImageView directamente por fx:id
+            ImageView img1 = buscarImageView("#imgCard1");
+            ImageView img2 = buscarImageView("#imgCard2");
+            ImageView img3 = buscarImageView("#imgCard3");
+            
+            Label lbl1 = buscarLabel("#lblCard1");
+            Label lbl2 = buscarLabel("#lblCard2");
+            Label lbl3 = buscarLabel("#lblCard3");
+            
+            if (peliculas.size() > 0 && img1 != null) {
+                cargarCard(img1, lbl1, peliculas.get(0));
+            }
+            if (peliculas.size() > 1 && img2 != null) {
+                cargarCard(img2, lbl2, peliculas.get(1));
+            }
+            if (peliculas.size() > 2 && img3 != null) {
+                cargarCard(img3, lbl3, peliculas.get(2));
+            }
+            
+        } catch (Exception ex) {
+            System.err.println("Error en buscarYCargarConLookup: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    private ImageView buscarImageView(String fxId) {
+        try {
+            // Buscar en todos los campos @FXML conocidos
+            if (btnCartelera != null && btnCartelera.getScene() != null) {
+                return (ImageView) btnCartelera.getScene().lookup(fxId);
+            }
+            if (content != null && content.getScene() != null) {
+                return (ImageView) content.getScene().lookup(fxId);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando ImageView " + fxId + ": " + ex.getMessage());
+        }
+        return null;
+    }
+    
+    private Label buscarLabel(String fxId) {
+        try {
+            if (btnCartelera != null && btnCartelera.getScene() != null) {
+                return (Label) btnCartelera.getScene().lookup(fxId);
+            }
+            if (content != null && content.getScene() != null) {
+                return (Label) content.getScene().lookup(fxId);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando Label " + fxId + ": " + ex.getMessage());
+        }
+        return null;
+    }
+    
+    private void buscarYCargarEnGrid(List<Pelicula> peliculas) {
+        System.out.println("[DEBUG] Buscando elementos en footerGrid...");
+        try {
+            // Buscar todos los nodos del GridPane
+            for (javafx.scene.Node node : footerGrid.getChildren()) {
+                if (node instanceof ImageView) {
+                    ImageView img = (ImageView) node;
+                    Integer colIndex = javafx.scene.layout.GridPane.getColumnIndex(node);
+                    Integer rowIndex = javafx.scene.layout.GridPane.getRowIndex(node);
+                    
+                    if (colIndex == null) colIndex = 0;
+                    if (rowIndex == null) rowIndex = 0;
+                    
+                    // Solo procesar ImageViews en la fila 0 (pósters)
+                    if (rowIndex == 0 && colIndex >= 0 && colIndex < peliculas.size()) {
+                        Pelicula pelicula = peliculas.get(colIndex);
+                        String posterUrl = pelicula.getPosterUrl();
+                        System.out.println("[DEBUG] Cargando en columna " + colIndex + ": " + pelicula.getTitulo());
+                        
+                        if (posterUrl != null && !posterUrl.isBlank()) {
+                            Image posterImage = resolveImage(posterUrl);
+                            if (posterImage != null) {
+                                img.setImage(posterImage);
+                                System.out.println("✓ Póster cargado para: " + pelicula.getTitulo());
+                            }
+                        }
+                    }
+                } else if (node instanceof Label) {
+                    Label lbl = (Label) node;
+                    Integer colIndex = javafx.scene.layout.GridPane.getColumnIndex(node);
+                    Integer rowIndex = javafx.scene.layout.GridPane.getRowIndex(node);
+                    
+                    if (colIndex == null) colIndex = 0;
+                    if (rowIndex == null) rowIndex = 0;
+                    
+                    // Solo procesar Labels en la fila 1 (títulos)
+                    if (rowIndex == 1 && colIndex >= 0 && colIndex < peliculas.size()) {
+                        Pelicula pelicula = peliculas.get(colIndex);
+                        lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
+                        System.out.println("[DEBUG] Título cargado en columna " + colIndex + ": " + pelicula.getTitulo());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando elementos en footerGrid: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Carga el póster y título de una película en una card (ImageView + Label).
+     */
+    private void cargarCard(ImageView img, Label lbl, Pelicula pelicula) {
+        if (pelicula == null) return;
+        
+        // Poner el título
+        if (lbl != null) {
+            lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
+        }
+        
+        // Cargar el póster
+        if (img != null) {
+            String posterUrl = pelicula.getPosterUrl();
+            System.out.println("Cargando card para: " + pelicula.getTitulo() + " con URL: " + posterUrl);
+            
+            if (posterUrl != null && !posterUrl.isBlank()) {
+                Image posterImage = resolveImage(posterUrl);
+                if (posterImage != null) {
+                    img.setImage(posterImage);
+                    System.out.println("✓ Póster cargado exitosamente para: " + pelicula.getTitulo());
+                } else {
+                    System.err.println("✗ No se pudo cargar el póster para: " + pelicula.getTitulo());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Resuelve la ruta de una imagen probando varias estrategias:
+     * 1. Si es URL http/https, la carga directamente
+     * 2. Si está en src\main\resources\Images\, extrae solo el nombre del archivo
+     * 3. Prueba cargar desde /Images/nombre
+     * 4. Prueba como archivo local si existe
+     */
+    private Image resolveImage(String ref) {
+        if (ref == null || ref.isBlank()) return null;
+        
+        try {
+            String lower = ref.toLowerCase();
+            
+            // 1. URLs externas
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                return new Image(ref, true);
+            }
+            
+            // 2. Si contiene la ruta completa "src\main\resources\Images\", extraer solo el nombre
+            if (ref.contains("src\\main\\resources\\Images\\") || ref.contains("src/main/resources/Images/")) {
+                String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
+                if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
+                
+                System.out.println("  → Extrayendo nombre de archivo: " + fileName);
+                java.net.URL res = getClass().getResource("/Images/" + fileName);
+                if (res != null) {
+                    System.out.println("  → Encontrado en: " + res.toExternalForm());
+                    return new Image(res.toExternalForm(), false);
+                }
+            }
+            
+            // 3. Probar como recurso directo /Images/...
+            java.net.URL res = getClass().getResource("/Images/" + ref);
+            if (res != null) return new Image(res.toExternalForm(), false);
+            
+            // 4. Probar como archivo local
+            java.io.File f = new java.io.File(ref);
+            if (f.exists()) return new Image(f.toURI().toString(), false);
+            
+            // 5. Probar con / al inicio
+            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
+            if (res != null) return new Image(res.toExternalForm(), false);
+            
+        } catch (Exception ex) {
+            System.err.println("  → Error resolviendo imagen: " + ex.getMessage());
+        }
+        
+        return null;
     }
 }

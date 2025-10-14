@@ -49,9 +49,9 @@
     <left>
         <VBox prefHeight="421.0" prefWidth="437.0" spacing="12" style="-fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
             <children>
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" styleClass="section-title" text="SINOPSIS" />
-                <ImageView fitHeight="241.0" fitWidth="405.0" preserveRatio="true" />
-                <TextArea editable="false" prefHeight="147.0" prefRowCount="12" prefWidth="405.0" style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" text="Texto de ejemplo de sinopsis..." wrapText="true" />
+                <Label fx:id="lblSinopsisTitulo" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" styleClass="section-title" text="SINOPSIS" />
+                <ImageView fx:id="imgPoster" fitWidth="320.0" preserveRatio="true" />
+                <TextArea fx:id="txtSinopsis" editable="false" prefHeight="220.0" prefRowCount="12" prefWidth="405.0" style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" wrapText="true" />
             </children>
             <padding>
                 <Insets bottom="16" left="16" right="16" top="16" />
@@ -66,17 +66,8 @@
                     <children>
                         <Label fx:id="lblTituloPelicula" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 22;" />
 
-                        <StackPane style="-fx-background-color: transparent;" alignment="CENTER">
-                            <children>
-                                <ImageView fx:id="imgPoster" preserveRatio="true" fitWidth="480" />
-                            </children>
-                        </StackPane>
-
                         <VBox spacing="8" prefWidth="820" style="-fx-background-color: transparent;">
                             <children>
-                                <Label fx:id="lblSinopsisTitulo" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;" text="SINOPSIS" />
-                                <TextArea fx:id="txtSinopsis" editable="false" wrapText="true" prefHeight="120" style="-fx-control-inner-background: #0D0D0D; -fx-text-fill: white; -fx-border-color: #2a2a2a;" />
-
                                 <Label text="FICHA TÉCNICA" style="-fx-text-fill: #e5e7eb; -fx-font-weight: bold; -fx-font-size: 14;"/>
                                 <GridPane hgap="10" vgap="6" style="-fx-background-color: transparent;">
                                     <columnConstraints>

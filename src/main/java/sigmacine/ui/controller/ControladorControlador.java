@@ -179,7 +179,7 @@ public class ControladorControlador {
             boolean yaMostrado = prefs.getBoolean("cityPopupShown", false);
             System.out.println("[DEBUG] cityPopupShown (prefs)=" + yaMostrado + " cityPopupShownInSession=" + cityPopupShownInSession);
             if (!yaMostrado && !cityPopupShownInSession) {
-                FXMLLoader popup = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/ciudad.fxml"));
+                FXMLLoader popup = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/Ciudad.fxml"));
                 Parent popupRoot = popup.load();
                 CiudadController cc = popup.getController();
                 cc.setOnCiudadSelected(ciudad -> {

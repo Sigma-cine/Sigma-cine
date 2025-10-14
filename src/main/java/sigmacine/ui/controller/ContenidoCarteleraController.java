@@ -1,35 +1,48 @@
 package sigmacine.ui.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import sigmacine.dominio.entity.Pelicula;
-import java.util.List;
+import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
-import sigmacine.ui.controller.ControladorControlador;
+import sigmacine.dominio.entity.Pelicula;
+
 import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class ContenidoCarteleraController {
 
     @FXML private Button btnCarteleraTop;
     @FXML private Button btnBack;
 
-    // Detail view controls
-    @FXML private ImageView imgPoster;
     @FXML private TextArea txtSinopsis;
     @FXML private Label lblSinopsisTitulo;
     @FXML private VBox panelFunciones;
     @FXML private Button btnComprar;
     @FXML private Label lblGenero, lblClasificacion, lblDuracion, lblDirector, lblReparto;
+    @FXML private GridPane gridSala;
+    @FXML private Label lblResumen, lblTitulo, lblHoraPill;
+    @FXML private ListView<String> lvFunciones;
+    @FXML private ImageView imgPoster;
+    @FXML private Button btnContinuar;
+
+    @FXML private StackPane trailerContainer;
+    @FXML private ScrollPane spCenter;
+    @FXML private VBox detalleRoot;
 
     private Pelicula pelicula;
     private UsuarioDTO usuario;
@@ -37,42 +50,41 @@ public class ContenidoCarteleraController {
     private List<Pelicula> backPeliculas;
     private String backTexto;
 
+    private ClienteController host;
+    public void setHost(ClienteController host) { this.host = host; }
+
     @FXML
     private void initialize() {
+        if (trailerContainer != null && trailerContainer.getChildren().isEmpty()) {
+            trailerContainer.setMouseTransparent(true);
+            trailerContainer.setPickOnBounds(false);
+        }
+        if (spCenter != null) spCenter.setPannable(false);
+
         if (btnComprar != null) {
-            btnComprar.setOnAction(e -> {
-                
-            });
+            btnComprar.setDisable(false);
+            btnComprar.setMouseTransparent(false);
+            btnComprar.setPickOnBounds(true);
+            btnComprar.setFocusTraversable(true);
+            btnComprar.setViewOrder(-1000);
+            btnComprar.toFront();
+            if (btnComprar.getParent() != null) btnComprar.getParent().toFront();
+
+            btnComprar.setOnAction(e -> onComprarTickets());
         }
     }
 
     @FXML
     private void onCartelera() {
-        System.out.println("[DEBUG] onCartelera invoked");
         try {
-            // If we have a coordinator, use it to show cartelera and preserve session
-            if (coordinador != null) {
-                // mostrarHome without changing user — mostrarCartelera isn't available on coordinador,
-                // so reload contenidoCartelera but pass the current usuario/coordinador
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
-                Parent root = loader.load();
-                ContenidoCarteleraController ctrl = loader.getController();
-                ctrl.setCoordinador(this.coordinador);
-                ctrl.setUsuario(this.usuario);
-
-                Stage stage = (Stage) btnCarteleraTop.getScene().getWindow();
-                javafx.scene.Scene current = stage.getScene();
-                double w = current != null ? current.getWidth() : 900;
-                double h = current != null ? current.getHeight() : 600;
-                stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-                stage.setMaximized(true);
-                return;
-            }
-            // fallback: reload without session
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
             Parent root = loader.load();
+            ContenidoCarteleraController ctrl = loader.getController();
+            ctrl.setCoordinador(this.coordinador);
+            ctrl.setUsuario(this.usuario);
+
             Stage stage = (Stage) btnCarteleraTop.getScene().getWindow();
-            javafx.scene.Scene current = stage.getScene();
+            Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
@@ -84,23 +96,20 @@ public class ContenidoCarteleraController {
 
     @FXML
     private void onVolver() {
-        System.out.println("[DEBUG] onVolver invoked");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnBack.getScene().getWindow();
 
-            // If we have a controller reference, initialize it with the current usuario and coordinador
             try {
                 Object ctrl = loader.getController();
-                if (ctrl instanceof ClienteController) {
-                    ClienteController c = (ClienteController) ctrl;
+                if (ctrl instanceof ClienteController c) {
                     c.init(this.usuario);
                     c.setCoordinador(this.coordinador);
                 }
             } catch (Exception ignore) {}
 
-            javafx.scene.Scene current = stage.getScene();
+            Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
@@ -111,7 +120,6 @@ public class ContenidoCarteleraController {
         }
     }
 
-    // Called by ResultadosBusquedaController when opening the detail view
     public void setBackResults(List<Pelicula> peliculas, String textoBuscado) {
         this.backPeliculas = peliculas;
         this.backTexto = textoBuscado;
@@ -125,11 +133,8 @@ public class ContenidoCarteleraController {
         if (!posterRef.isEmpty()) {
             try {
                 Image resolved = resolveImage(posterRef);
-                if (imgPoster != null) {
-                    imgPoster.setImage(resolved);
-                }
+                if (imgPoster != null) imgPoster.setImage(resolved);
             } catch (Exception ignored) {
-                // Leave image null if resolution fails
                 if (imgPoster != null) imgPoster.setImage(null);
             }
         } else {
@@ -152,20 +157,11 @@ public class ContenidoCarteleraController {
     private static String safe(String s) {
         return (s == null || s.trim().equalsIgnoreCase("null")) ? "" : s.trim();
     }
-
     private static String safe(String s, String alt) {
         String t = safe(s);
         return t.isEmpty() ? alt : t;
     }
 
-    /**
-     * Resolve an image reference to a JavaFX Image using the following order:
-     * 1. If ref is a http(s) or file: URL, use it directly (background loading for remote urls).
-     * 2. If there's a classpath resource under /Images/<ref>, use it.
-     * 3. If ref points to an existing local file, use its URI.
-     * 4. If ref is an absolute/leading-slash classpath resource, try that too.
-     * Returns null when nothing could be resolved.
-     */
     private Image resolveImage(String ref) {
         if (ref == null || ref.isBlank()) return null;
         try {
@@ -173,24 +169,99 @@ public class ContenidoCarteleraController {
             if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
                 return new Image(ref, true);
             }
-            // try classpath under /Images/
             java.net.URL res = getClass().getResource("/Images/" + ref);
             if (res != null) {
                 return new Image(res.toExternalForm(), false);
             }
-            // try local file
             File f = new File(ref);
             if (f.exists()) {
                 return new Image(f.toURI().toString(), false);
             }
-            // try as absolute/leading slash resource
             res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
             if (res != null) {
                 return new Image(res.toExternalForm(), false);
             }
-        } catch (Exception e) {
-            // ignore and return null
-        }
+        } catch (Exception ignored) {}
         return null;
+    }
+
+    @FXML private void onComprarTickets(javafx.event.ActionEvent e) { onComprarTickets(); }
+
+    @FXML
+    private void onComprarTickets() {
+        try {
+            if (isEmbedded()) {
+                String titulo = (lblTitulo != null && lblTitulo.getText() != null && !lblTitulo.getText().isBlank())
+                        ? lblTitulo.getText() : "Película";
+                String hora = (lvFunciones != null && lvFunciones.getSelectionModel() != null
+                        && lvFunciones.getSelectionModel().getSelectedItem() != null)
+                        ? lvFunciones.getSelectionModel().getSelectedItem()
+                        : "1:10 pm";
+
+                Set<String> ocupados   = Set.of("B3","B4","C7","E2","F8");
+                Set<String> accesibles = Set.of("E3","E4","E5","E6");
+
+                host.mostrarAsientos(titulo, hora, ocupados, accesibles);
+                return;
+            }
+
+            String titulo = (lblTitulo != null && lblTitulo.getText() != null && !lblTitulo.getText().isBlank())
+                    ? lblTitulo.getText() : "Película";
+            String hora = (lvFunciones != null && lvFunciones.getSelectionModel() != null
+                    && lvFunciones.getSelectionModel().getSelectedItem() != null)
+                    ? lvFunciones.getSelectionModel().getSelectedItem()
+                    : "1:10 pm";
+
+            URL url = getClass().getResource("/sigmacine/ui/views/asientos.fxml");
+            if (url == null) {
+                var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                a.setHeaderText("No se encontró asientos.fxml");
+                a.setContentText("Ruta esperada: /sigmacine/ui/views/asientos.fxml");
+                a.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent root = loader.load();
+
+            AsientosController ctrl = loader.getController();
+            Set<String> ocupados   = Set.of("B3","B4","C7","E2","F8");
+            Set<String> accesibles = Set.of("E3","E4","E5","E6");
+            ctrl.setFuncion(titulo, hora, ocupados, accesibles);
+
+            String posterResource = (pelicula != null && pelicula.getPosterUrl() != null && !pelicula.getPosterUrl().isBlank())
+                    ? pelicula.getPosterUrl() : null;
+            if (posterResource != null) {
+                var is = getClass().getResourceAsStream(posterResource);
+                if (is != null) ctrl.setPoster(new Image(is));
+            }
+
+            Stage stage = (Stage) btnComprar.getScene().getWindow();
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 1100;
+            double h = current != null ? current.getHeight() : 620;
+
+            stage.setScene(new Scene(root, w, h));
+            stage.setMaximized(true);
+            stage.setTitle("Selecciona tus asientos");
+            stage.show();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            a.setHeaderText("Error abriendo Asientos");
+            a.setContentText(String.valueOf(ex));
+            a.showAndWait();
+        }
+    }
+
+    private boolean isEmbedded() {
+        try {
+            return host != null
+                    && btnComprar != null
+                    && host.isSameScene(btnComprar);
+        } catch (Throwable t) {
+            return false;
+        }
     }
 }

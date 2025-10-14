@@ -19,4 +19,19 @@ public class CompraProductoDTO {
     public String getNombre() { return nombre; }
     public int getCantidad() { return cantidad; }
     public BigDecimal getPrecioUnitario() { return precioUnitario; }
+
+    @Override
+    public String toString() {
+        BigDecimal total = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+        return nombre + (cantidad > 1 ? " (" + cantidad + ")" : "") + " - $" + format(total);
+    }
+
+    public String getTotalFormateado() {
+        BigDecimal total = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+        return "$" + format(total);
+    }
+
+    private String format(BigDecimal v) {
+        return v.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
+    }
 }

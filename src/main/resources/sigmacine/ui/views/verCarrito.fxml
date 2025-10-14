@@ -43,9 +43,10 @@
                   <children>
                     <Label style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="TOTAL" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Label style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="[Precio]" />
+                    <Label fx:id="lblTotalGlobal" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;" text="[Precio]" />
                   </children>
                 </HBox>
+                <!-- (Eliminados botones de sesión para simplificar el carrito) -->
               </children>
             </VBox>
                   <Region prefHeight="200.0" prefWidth="200.0" />
@@ -53,7 +54,7 @@
             <!-- Botón pagar -->
             <HBox alignment="CENTER">
               <children>
-                <Button style="-fx-background-color: #8B2E21; -fx-font-size: 13px; -fx-text-fill: white; -fx-padding: 7 18; -fx-background-radius: 20; -fx-font-weight: bold;" text="Proceder el pago" />
+                <Button fx:id="btnProcederPago" onAction="#onProcederPago" style="-fx-background-color: #8B2E21; -fx-font-size: 13px; -fx-text-fill: white; -fx-padding: 7 18; -fx-background-radius: 20; -fx-font-weight: bold;" text="Proceder al pago" />
               </children>
             </HBox>
 

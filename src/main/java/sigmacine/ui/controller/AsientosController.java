@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
 
 import java.net.URL;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,14 @@ public class AsientosController implements Initializable {
     private String hora   = "1:10 pm";
     private Image poster;
 
+    // --- Carrito ---
+    private final sigmacine.aplicacion.service.CarritoService carrito = sigmacine.aplicacion.service.CarritoService.getInstance();
+    private final List<sigmacine.aplicacion.data.CompraProductoDTO> asientoItems = new ArrayList<>();
+    private static final BigDecimal PRECIO_ASIENTO = new BigDecimal("12.00"); // Precio base por asiento
+
+    // Popup del carrito (implementación ligera reutilizando verCarrito.fxml)
+    private Stage cartStage;
+
     // session/coordinator wiring
     private UsuarioDTO usuario;
     private ControladorControlador coordinador;
@@ -63,6 +72,17 @@ public class AsientosController implements Initializable {
         // Hook up top bar actions
         if (btnCartelera != null) btnCartelera.setOnAction(e -> goCartelera());
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
+        if (btnCart != null) btnCart.setOnAction(e -> toggleCartPopup());
+        if (btnIniciarSesion != null) btnIniciarSesion.setOnAction(e -> {
+            if (sigmacine.aplicacion.session.Session.isLoggedIn()) return; // ya logueado
+            if (coordinador != null) { coordinador.mostrarLogin(); refreshSessionUI(); }
+            else onIniciarSesion();
+        });
+        if (btnRegistrarse != null) btnRegistrarse.setOnAction(e -> {
+            if (sigmacine.aplicacion.session.Session.isLoggedIn()) return; // no permitir si ya está logueado
+            if (coordinador != null) coordinador.mostrarRegistro();
+            else onRegistrarse();
+        });
         if (btnRegistrarse != null) btnRegistrarse.setOnAction(e -> onRegistrarse());
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> { sigmacine.aplicacion.session.Session.clear(); refreshSessionUI(); });
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial());
@@ -251,6 +271,7 @@ public class AsientosController implements Initializable {
                             seleccion.remove(code);
                         }
                         actualizarResumen();
+                        sincronizarAsientosConCarrito();
                     });
                 }
 
@@ -291,6 +312,29 @@ public class AsientosController implements Initializable {
             lblResumen.setText(n + (n == 1 ? " Silla seleccionada" : " Sillas seleccionadas"));
         }
         if (btnContinuar != null) btnContinuar.setDisable(n == 0);
+    }
+
+    /**
+     * Sincroniza los asientos seleccionados con el CarritoService:
+     * - Elimina los ítems previos de esta función (asientoItems).
+     * - Añade un item por cada asiento seleccionado con nombre "Asiento <code> - <película> (<hora>)".
+     * - Mantiene una lista local para poder limpiar en la próxima actualización.
+     */
+    private void sincronizarAsientosConCarrito() {
+        // Quitar del observable los items anteriores vinculados a la selección de asientos actual
+        if (!asientoItems.isEmpty()) {
+            for (var dto : asientoItems) {
+                carrito.removeItem(dto);
+            }
+            asientoItems.clear();
+        }
+        if (seleccion.isEmpty()) return;
+        for (String code : seleccion.stream().sorted().toList()) {
+            String nombre = "Asiento " + code + " - " + (titulo != null ? titulo : "Película") + (hora != null ? " (" + hora + ")" : "");
+            var dto = new sigmacine.aplicacion.data.CompraProductoDTO(null, nombre, 1, PRECIO_ASIENTO);
+            carrito.addItem(dto);
+            asientoItems.add(dto);
+        }
     }
 
     public void setFuncion(String titulo,
@@ -338,7 +382,8 @@ public class AsientosController implements Initializable {
 
     @FXML
     private void onContinuar() {
-        System.out.println("[Asientos] seleccionados => " + getSeleccionados());
+        // Petición del usuario: que no haga nada (no navegar). Se puede dejar un log opcional.
+        System.out.println("[Asientos] Continuar presionado - sin acción (configurado así por requerimiento)");
     }
 
     private Set<String> shiftAccesiblesToFirstRowPlus2(Set<String> entrada) {
@@ -352,5 +397,46 @@ public class AsientosController implements Initializable {
             } catch (NumberFormatException ignore) {}
         }
         return out;
+    }
+
+    // ---------------- Carrito popup ----------------
+    private void toggleCartPopup() {
+        if (cartStage != null && cartStage.isShowing()) {
+            cartStage.close();
+        } else {
+            openCartPopup();
+        }
+    }
+
+    private void openCartPopup() {
+        try {
+            if (cartStage == null) {
+                var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCarrito.fxml"));
+                Parent root = loader.load();
+                cartStage = new Stage();
+                cartStage.initOwner(gridSala.getScene().getWindow());
+                cartStage.initModality(javafx.stage.Modality.NONE); // no bloquea
+                cartStage.setResizable(false);
+                cartStage.setTitle("Carrito");
+                cartStage.setScene(new Scene(root));
+                // Cerrar con ESC
+                cartStage.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, ev -> {
+                    if (ev.getCode() == KeyCode.ESCAPE) cartStage.close();
+                });
+            }
+            // Reposicionar cerca del botón Cart si es posible
+            if (btnCart != null && btnCart.getScene() != null) {
+                javafx.geometry.Bounds b = btnCart.localToScreen(btnCart.getBoundsInLocal());
+                if (b != null) {
+                    cartStage.setX(b.getMaxX() - 600); // ancho estimado
+                    cartStage.setY(b.getMaxY() + 8);
+                }
+            }
+            cartStage.show();
+            cartStage.toFront();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "No se pudo abrir el carrito: " + ex.getMessage()).showAndWait();
+        }
     }
 }

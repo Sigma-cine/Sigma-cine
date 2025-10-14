@@ -23,7 +23,7 @@
             <children>
 
                 <!-- Marca / Logo (texto por ahora; si usas ImageView, colócalo aquí) -->
-                <Label text="SIGMA CINE" styleClass="brand"/>
+                <Label text="SIGMA CINE" styleClass="brand" onMouseClicked="#onBrandClick" style="-fx-cursor: hand;"/>
 
                 <!-- Navegación -->
                 <Button fx:id="btnCartelera"  text="Cartelera"  styleClass="toplink"/>

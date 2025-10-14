@@ -18,9 +18,13 @@ public class LoginController {
 
     private ControladorControlador coordinador;
     private AuthFacade authFacade;
+    // Optional callback to run when login succeeds. If set, it takes precedence
+    // over the default behaviour of navigating to home via the coordinator.
+    private Runnable onSuccess;
 
     public void setCoordinador(ControladorControlador coordinador) { this.coordinador = coordinador; }
     public void setAuthFacade(AuthFacade authFacade) { this.authFacade = authFacade; }
+    public void setOnSuccess(Runnable onSuccess) { this.onSuccess = onSuccess; }
 
     @FXML
     private void initialize() {
@@ -64,6 +68,12 @@ public void onIrARegistro() {
         feedback.setText("Bienvenido al Cine Sigma");
         // store in session so other controllers know user is logged in
         Session.setCurrent(usuario);
+        // If a custom success callback is provided (e.g. the caller opened login as a modal),
+        // let it handle post-login navigation/cleanup. Otherwise fall back to the coordinator.
+        if (onSuccess != null) {
+            try { onSuccess.run(); } catch (Exception ex) { ex.printStackTrace(); }
+            return;
+        }
         if (coordinador != null) {
             // Después de autenticarse, mostrar la vista principal para el usuario
             // Ir directamente al home del usuario (no volver a abrir el popup de ciudad)

@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-
-<BorderPane prefWidth="960.0" prefHeight="600.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ContenidoCarteleraController">
-
+<BorderPane prefWidth="960.0" prefHeight="600.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.VerDetallePeliculaController">
     <top>
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="topbar">
             <children>
@@ -24,7 +21,6 @@
                         <Button styleClass="toplink" text="Cart" />
                     </children>
                 </VBox>
-                <!-- Session controls (same ids as pagina_inicial.fxml) -->
                 <Button fx:id="btnIniciarSesion" text="Iniciar sesión" styleClass="toplink" />
                 <Label fx:id="lblUserName" text="" styleClass="toplink" visible="false" />
                 <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
@@ -51,14 +47,11 @@
         </HBox>
     </top>
 
-    <!-- Left column removed: layout will be a single vertical column in the center -->
-
     <center>
         <ScrollPane fitToWidth="true" style="-fx-background: #0D0D0D; -fx-background-color: #0D0D0D;" BorderPane.alignment="CENTER">
             <content>
                 <VBox fx:id="detalleRoot" spacing="16" style="-fx-background-color: transparent;" alignment="TOP_CENTER">
                     <children>
-                        <!-- Two-column row: left=title+poster (50%), right=sinopsis+ficha+buy (50%) -->
                         <HBox spacing="24" alignment="TOP_CENTER" prefWidth="820">
                             <children>
                                 <VBox spacing="12" alignment="TOP_CENTER" prefWidth="410">
@@ -107,7 +100,6 @@
                             </children>
                         </HBox>
 
-                        <!-- Trailer centered below -->
                         <Label text="TRAILER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
                         <HBox alignment="CENTER" prefWidth="820">
                             <children>
@@ -127,5 +119,5 @@
             </content>
         </ScrollPane>
     </center>
-
 </BorderPane>
+ 

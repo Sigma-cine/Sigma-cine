@@ -201,19 +201,23 @@ public class ResultadosBusquedaController {
     }
 private void mostrarDetallePelicula(Pelicula p) {
     try {
-        var url = getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml");
-        if (url == null) throw new IllegalStateException("No se encontró detalle_pelicula.fxml");
+        var url = getClass().getResource("/sigmacine/ui/views/verdetallepelicula.fxml");
+        if (url == null) throw new IllegalStateException("No se encontró verdetallepelicula.fxml");
 
         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(url);
         javafx.scene.Parent rootDetalle = loader.load();
 
-    ContenidoCarteleraController ctrl = loader.getController();
+    VerDetallePeliculaController ctrl = loader.getController();
     // pass session info so detail can preserve and return with the same user
     try {
         ctrl.setCoordinador(this.coordinador);
     } catch (Exception ignore) {}
     try {
         ctrl.setUsuario(this.usuario);
+    } catch (Exception ignore) {}
+    // Ensure the controller refreshes its session-aware UI
+    try {
+        ctrl.refreshSessionUI();
     } catch (Exception ignore) {}
     ctrl.setBackResults(this.peliculas, this.textoBuscado);
     ctrl.setPelicula(p);
@@ -287,5 +291,26 @@ private void mostrarDetallePelicula(Pelicula p) {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    @FXML
+    private void onBrandClick() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            javafx.scene.Parent root = loader.load();
+            Object ctrl = loader.getController();
+            if (ctrl instanceof ClienteController) {
+                ClienteController c = (ClienteController) ctrl;
+                c.setCoordinador(this.coordinador);
+                c.init(this.usuario);
+            }
+            javafx.stage.Stage stage = (javafx.stage.Stage) panelPeliculas.getScene().getWindow();
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 1000;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new javafx.scene.Scene(root, w, h));
+            stage.setTitle("Sigma Cine");
+            stage.setMaximized(true);
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 }

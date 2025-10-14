@@ -18,6 +18,8 @@ import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.application.Platform;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 // Dependencias necesarias para instanciación manual
 import sigmacine.aplicacion.service.VerHistorialService;
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
@@ -197,9 +199,59 @@ public class ClienteController {
                 promoPane.setVisible(show);
                 promoPane.setManaged(show);
             }
+            // Also hide footer posters when another view is shown (e.g., historial)
+            try {
+                if (footerGrid == null) {
+                    footerGrid = localizarFooterGridDesdeRoot();
+                    // don't crash if still null
+                }
+                if (footerGrid != null) {
+                    footerGrid.setVisible(show);
+                    footerGrid.setManaged(show);
+                    if (!show) {
+                        // clear images so posters visually disappear and free resources
+                        try {
+                            for (javafx.scene.Node n : footerGrid.getChildren()) {
+                                if (n instanceof ImageView) {
+                                    ((ImageView) n).setImage(null);
+                                }
+                            }
+                        } catch (Exception ignore) {}
+                    } else {
+                        // if footer becomes visible again, ensure posters are (re)loaded
+                        Platform.runLater(() -> {
+                            try { cargarPeliculasInicio(); } catch (Exception ignore) {}
+                        });
+                    }
+                }
+            } catch (Exception ignore) {}
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    @FXML
+    private void onBrandClick() {
+        try {
+            // If already on main, optionally no-op; else ensure we are on pagina_inicial
+            Stage stage = null;
+            try { stage = (Stage) (content != null ? content.getScene().getWindow() : btnCartelera.getScene().getWindow()); } catch (Exception ignore) {}
+            if (stage == null) return;
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            javafx.scene.Parent root = loader.load();
+            Object ctrl = loader.getController();
+            if (ctrl instanceof ClienteController) {
+                ClienteController c = (ClienteController) ctrl;
+                c.setCoordinador(this.coordinador);
+                c.init(this.usuario);
+            }
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 1000;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w, h));
+            stage.setTitle("Sigma Cine");
+            stage.setMaximized(true);
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 
     public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
@@ -251,6 +303,27 @@ public class ClienteController {
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
         // update menu after logout
         updateMenuPerfilState();
+        // Navigate back to main pagina_inicial.fxml so the app returns to a neutral state
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            Parent root = loader.load();
+            ClienteController ctrl = loader.getController();
+            // initialize without a user so the controller sets up default UI and posters
+            ctrl.init(null);
+            ctrl.setCoordinador(this.coordinador);
+
+            Stage stage = (Stage) btnIniciarSesion.getScene().getWindow();
+            javafx.scene.Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle("Sigma Cine - Cliente");
+            stage.setMaximized(true);
+        } catch (Exception ex) {
+            // if navigation fails, ignore and keep current UI but logged out
+            System.err.println("No se pudo navegar a pagina_inicial tras cerrar sesión: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     /** Update the topbar controls to reflect the current session. */
@@ -374,7 +447,7 @@ public class ClienteController {
             var historialService = new VerHistorialService(usuarioRepo);
             
             // Carga el FXML (ruta verificada y correcta)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/VerCompras.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
             
             VerHistorialController historialController = new VerHistorialController(historialService);
             historialController.setClienteController(this);
@@ -400,8 +473,38 @@ public class ClienteController {
     public void mostrarCartelera() {
         System.out.println("Volviendo a Cartelera (Contenido a pantalla completa).");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
-            Parent carteleraView = loader.load();
+            java.net.URL url = getClass().getResource("/sigmacine/ui/views/cartelera.fxml");
+            Parent carteleraView;
+            FXMLLoader loader = null;
+            if (url != null) {
+                loader = new FXMLLoader(url);
+                carteleraView = loader.load();
+                // allow controller wiring if present
+                try {
+                    var ctrl = loader.getController();
+                    try {
+                        java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
+                        if (m != null) m.invoke(ctrl, this.usuario);
+                    } catch (NoSuchMethodException ignore) {}
+                    try {
+                        java.lang.reflect.Method su = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
+                        if (su != null) su.invoke(ctrl, this.usuario);
+                    } catch (NoSuchMethodException ignore) {}
+                    try {
+                        java.lang.reflect.Method sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
+                        if (sc != null) sc.invoke(ctrl, this.coordinador);
+                    } catch (NoSuchMethodException ignore) {}
+                    try {
+                        java.lang.reflect.Method rf = ctrl.getClass().getMethod("refreshSessionUI");
+                        if (rf != null) rf.invoke(ctrl);
+                    } catch (NoSuchMethodException ignore) {}
+                } catch (Exception e) { e.printStackTrace(); }
+            } else {
+                // fallback: reuse the previous detail view but prevent empty load — call doSearch to show results instead
+                System.out.println("cartelera.fxml not found, showing results instead");
+                cargarPeliculasInicio();
+                return;
+            }
 
             // Si el controlador de contenidoCartelera.fxml necesita inicialización, invocamos init(usuario)
             try {
@@ -422,6 +525,12 @@ public class ClienteController {
                 try {
                     java.lang.reflect.Method sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
                     if (sc != null) sc.invoke(ctrl, this.coordinador);
+                } catch (NoSuchMethodException ignore) {}
+
+                // If controller exposes refreshSessionUI(), call it so the topbar updates immediately
+                try {
+                    java.lang.reflect.Method rf = ctrl.getClass().getMethod("refreshSessionUI");
+                    if (rf != null) rf.invoke(ctrl);
                 } catch (NoSuchMethodException ignore) {}
 
             } catch (Exception e) {
@@ -585,6 +694,57 @@ public class ClienteController {
                 verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
                 verMas.setPrefWidth(96);
                 verMas.setPrefHeight(34);
+                // When clicked, navigate to the detalle de película screen for this movie
+                verMas.setOnAction(ev -> {
+                    try {
+                        // Prepare detail root
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verdetallepelicula.fxml"));
+                        Parent detailRoot = loader.load();
+                        Object ctrl = loader.getController();
+                        if (ctrl instanceof sigmacine.ui.controller.VerDetallePeliculaController) {
+                            sigmacine.ui.controller.VerDetallePeliculaController detalle = (sigmacine.ui.controller.VerDetallePeliculaController) ctrl;
+                            detalle.setPelicula(p);
+                            detalle.setUsuario(this.usuario);
+                            detalle.setCoordinador(this.coordinador);
+                        }
+
+                        Stage stage = (Stage) content.getScene().getWindow();
+                        javafx.scene.Scene current = stage.getScene();
+                        double w = current != null ? current.getWidth() : 900;
+                        double h = current != null ? current.getHeight() : 600;
+
+                        // Fade out current root, then set new scene and fade in
+                        Parent currentRoot = current != null ? current.getRoot() : null;
+                        if (currentRoot != null) {
+                            FadeTransition fadeOut = new FadeTransition(Duration.millis(220), currentRoot);
+                            fadeOut.setFromValue(1.0);
+                            fadeOut.setToValue(0.0);
+                            fadeOut.setOnFinished(fe -> {
+                                try {
+                                    Scene newScene = new Scene(detailRoot, w > 0 ? w : 900, h > 0 ? h : 600);
+                                    stage.setScene(newScene);
+                                    stage.setTitle("Sigma Cine - Detalle película");
+                                    stage.setMaximized(true);
+                                    // start fade-in
+                                    FadeTransition fadeIn = new FadeTransition(Duration.millis(220), newScene.getRoot());
+                                    newScene.getRoot().setOpacity(0.0);
+                                    fadeIn.setFromValue(0.0);
+                                    fadeIn.setToValue(1.0);
+                                    fadeIn.play();
+                                } catch (Exception ex) { ex.printStackTrace(); }
+                            });
+                            fadeOut.play();
+                        } else {
+                            // fallback: just set scene without animation
+                            stage.setScene(new Scene(detailRoot, w > 0 ? w : 900, h > 0 ? h : 600));
+                            stage.setTitle("Sigma Cine - Detalle película");
+                            stage.setMaximized(true);
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("Error abriendo detalle de película: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
+                });
                 javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
                 javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
                 javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);

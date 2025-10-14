@@ -59,7 +59,23 @@ public class DetallePeliculaController {
     private void initialize() {
         if (btnComprar != null) {
             btnComprar.setOnAction(e -> {
-                // TODO: navegación a flujo de compra con 'pelicula'
+                // Añadir esta película como producto al carrito (si existe un ClienteController en escena)
+                try {
+                    // buscamos un padre que tenga el controlador ClienteController en el scene
+                    Stage s = (Stage) btnComprar.getScene().getWindow();
+                    Object userData = s.getUserData();
+                    // si coordinador está disponible, intentar delegar
+                    if (userData instanceof sigmacine.ui.controller.ClienteController) {
+                        sigmacine.ui.controller.ClienteController cc = (sigmacine.ui.controller.ClienteController) userData;
+                        cc.addToCart(pelicula != null ? Long.valueOf(pelicula.getId()) : null, pelicula != null ? pelicula.getTitulo() : "Entrada", java.math.BigDecimal.valueOf(12000));
+                        cc.showCarritoOverlay();
+                        return;
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                // fallback: abrir overlay localmente
+                System.out.println("Agregar al carrito: " + (pelicula != null ? pelicula.getTitulo() : "(desconocido)"));
             });
         }
         if (btnRegresarBusqueda != null) {

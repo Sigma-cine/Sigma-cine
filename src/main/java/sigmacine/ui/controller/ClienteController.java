@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.TextField;
 
 import javafx.scene.effect.GaussianBlur;
@@ -38,6 +39,8 @@ import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 import sigmacine.ui.controller.ControladorControlador;
 import sigmacine.aplicacion.session.Session;
+import sigmacine.aplicacion.service.CarritoService;
+import sigmacine.aplicacion.data.CompraProductoDTO;
 
 public class ClienteController {
 
@@ -448,6 +451,17 @@ public class ClienteController {
     public void toggleCarritoOverlay() {
         if (carritoVisible) hideCarritoOverlay();
         else showCarritoOverlay();
+    }
+
+    /** Public API para añadir un producto simple al carrito (cantidad 1). */
+    public void addToCart(Long productoId, String nombre, java.math.BigDecimal precio) {
+        if (productoId == null || nombre == null || precio == null) return;
+        CompraProductoDTO dto = new CompraProductoDTO(productoId, nombre, 1, precio);
+        CarritoService.getInstance().addItem(dto);
+        // si el overlay está visible, forzar actualización (el controlador de la vista escucha la lista)
+        if (carritoVisible && carritoNode != null) {
+            // no-op: la vista ya observa la lista en VerCarritoController
+        }
     }
 
     @SuppressWarnings("unused")

@@ -16,21 +16,21 @@ INSERT INTO SALA (ID, NUMERO_SALA, CAPACIDAD, TIPO, SEDE_ID) VALUES(3, 103, 80, 
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (1, 'Dune: Part Two', 'Ciencia ficción', 'PG-13', 166, 'Denis Villeneuve', 'Timothée Chalamet, Zendaya',
- 'https://www.youtube.com/watch?v=Way9Dexny3w',
- 'Sigue el viaje mítico de Paul Atreides mientras se une a Chani y los Fremen en una guerra de venganza contra los conspiradores que destruyeron a su familia.',
- 'En Cartelera', 'https://cdn.ejemplo.com/posters/dune2.jpg', TRUE);
+'https://www.youtube.com/watch?v=Way9Dexny3w',
+'Sigue el viaje mítico de Paul Atreides mientras se une a Chani y los Fremen en una guerra de venganza contra los conspiradores que destruyeron a su familia.',
+'En Cartelera', 'src\\main\\resources\\Images\\dune_poster.png', TRUE);
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (2, 'Joker', 'Thriller psicológico', 'R', 122, 'Todd Phillips', 'Joaquin Phoenix, Robert De Niro',
- 'https://www.youtube.com/watch?v=zL2Q9C0cK5s',
- 'Un comediante fracasado desciende a la locura y se convierte en una figura icónica del crimen.',
- 'En Cartelera', 'https://cdn.ejemplo.com/posters/joker.jpg', TRUE);
+'https://www.youtube.com/watch?v=zL2Q9C0cK5s',
+'Un comediante fracasado desciende a la locura y se convierte en una figura icónica del crimen.',
+'En Cartelera', 'src\\main\\resources\\Images\\joker_poster.png', TRUE);
 
 INSERT INTO PELICULA (ID, TITULO, GENERO, CLASIFICACION, DURACION, DIRECTOR, REPARTO, TRAILER, SINOPSIS, ESTADO, POSTER_URL, ESTADO_BOOL) VALUES
 (3, 'Godzilla x Kong: The New Empire', 'Acción, Ciencia ficción', 'PG-13', 115, 'Adam Wingard', 'Rebecca Hall, Brian Tyree Henry',
- 'https://www.youtube.com/watch?v=qqj12z9f48E',
- 'Kong y Godzilla se unen para luchar contra una amenaza colosal desconocida que se esconde en nuestro mundo.',
- 'Próximamente', 'https://cdn.ejemplo.com/posters/gxk.jpg', FALSE);
+'https://www.youtube.com/watch?v=qqj12z9f48E',
+'Kong y Godzilla se unen para luchar contra una amenaza colosal desconocida que se esconde en nuestro mundo.',
+'Próximamente', 'src\\main\\resources\\Images\\godzillavskong_poster.png', FALSE);
 
 
 INSERT INTO PELICULA_TRAILER (ID, PELICULA_ID, URL) VALUES (1, 1, 'https://www.youtube.com/watch?v=Way9Dexny3w');
@@ -57,9 +57,9 @@ INSERT INTO SILLA (ID, FILA, NUMERO, TIPO, ESTADO_BOOL, SALA_ID) VALUES(4, 'A', 
 INSERT INTO SILLA (ID, FILA, NUMERO, TIPO, ESTADO_BOOL, SALA_ID) VALUES(5, 'A', 2, 'Estandar',   TRUE, 2);
 INSERT INTO SILLA (ID, FILA, NUMERO, TIPO, ESTADO_BOOL, SALA_ID) VALUES(6, 'B', 1, 'Estandar',   TRUE, 3);
 
-INSERT INTO COMPRA (ID, TOTAL, FECHA, CLIENTE_ID) VALUES(1, 19.50, '2025-09-15', 2);
+INSERT INTO COMPRA (ID, TOTAL, FECHA, CLIENTE_ID) VALUES(1, 49.50, '2025-09-15', 2);
 
-INSERT INTO PAGO (ID, METODO, MONTO, ESTADO, ESTADO_BOOL, FECHA, COMPRA_ID) VALUES(1, 'Tarjeta de crédito', 19.50, 'Completado', TRUE, '2025-09-15', 1);
+INSERT INTO PAGO (ID, METODO, MONTO, ESTADO, ESTADO_BOOL, FECHA, COMPRA_ID) VALUES(1, 'Tarjeta de crédito', 49.50, 'Completado', TRUE, '2025-09-15', 1);
 
 INSERT INTO RESERVA (ID, CODIGO, FECHA_VENCIMIENTO, ESTADO, ESTADO_BOOL, PRECIO_FINAL, CLIENTE_ID, FUNCION_ID) VALUES(1, 'RSV-001', '2025-09-15', 'Pendiente', TRUE, 30.00, 2, 1);
 

@@ -145,7 +145,7 @@ public class VerHistorialController {
         HBox tarjeta = new HBox(20);
         tarjeta.setPadding(new javafx.geometry.Insets(10, 15, 10, 15));
         tarjeta.setPrefHeight(150);
-        tarjeta.getStyleClass().add("tarjeta-compra");
+    tarjeta.getStyleClass().addAll("tarjeta-compra", "card-wrap", "centered-container");
         
         VBox detalles = new VBox(6);
         // Título de la compra / película

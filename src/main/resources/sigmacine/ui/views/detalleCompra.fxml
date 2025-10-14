@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="300.0" prefWidth="420.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.DetalleCompraController">
+<BorderPane prefHeight="520.0" prefWidth="720.0" stylesheets="@sigma.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.DetalleCompraController">
     <center>
         <VBox spacing="8.0" alignment="TOP_LEFT" styleClass="detail-card">
             <children>
@@ -40,13 +40,13 @@
                 </GridPane>
                 <Separator />
                 <Label text="Boletos adquiridos" styleClass="section-subtitle" />
-                <ScrollPane fitToWidth="true" prefViewportHeight="120">
+                <ScrollPane fitToWidth="true" prefViewportHeight="200">
                     <content>
                         <VBox fx:id="boletosList" spacing="6" styleClass="detail-lists" />
                     </content>
                 </ScrollPane>
                 <Label text="Productos adquiridos" styleClass="section-subtitle" />
-                <ScrollPane fitToWidth="true" prefViewportHeight="120">
+                <ScrollPane fitToWidth="true" prefViewportHeight="200">
                     <content>
                         <VBox fx:id="productosList" spacing="6" styleClass="detail-lists" />
                     </content>

@@ -36,7 +36,10 @@
                 <!-- Carrito -->
                 <Button fx:id="btnCart" text="Cart" styleClass="toplink"/>
 
-                <!-- Perfil -->
+                <!-- Perfil: botón para iniciar sesión; cuando el usuario esté logeado se mostrará el nombre en lugar del botón -->
+                <Button fx:id="btnIniciarSesion" text="Iniciar sesión" styleClass="toplink" />
+                <Label fx:id="lblUserName" text="" styleClass="toplink" visible="false" />
+                <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink" />
                 <MenuButton text="👤" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
@@ -67,12 +70,13 @@
     </center>
     
     <bottom>
-        <HBox alignment="CENTER_RIGHT" styleClass="footer">
+        <HBox alignment="TOP_CENTER" styleClass="footer" prefHeight="420.0">
             <children>
-                <Label text="© Sigma Cine" styleClass="footer-text"/>
+                <!-- Contenedor donde el controller pintará dinámicamente 3 películas (poster, título y botón) -->
+                <GridPane fx:id="footerGrid" alignment="CENTER" />
             </children>
             <padding>
-                <Insets top="8" right="16" bottom="8" left="16"/>
+                <Insets top="0" right="16" bottom="8" left="16"/>
             </padding>
         </HBox>
     </bottom>

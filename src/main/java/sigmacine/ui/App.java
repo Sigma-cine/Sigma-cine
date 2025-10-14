@@ -37,8 +37,26 @@ public class App extends Application {
         AuthFacade authFacade = new AuthFacade(loginService, registroService); 
 
 
-        ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
-        coordinador.mostrarLogin();
+    ControladorControlador coordinador = new ControladorControlador(stage, authFacade);
+
+    // Arrancar en la vista cliente_home y mostrar popup de selección de ciudad
+    // Si hubiera un usuario por defecto (guest) podemos usar un DTO vacío
+    sigmacine.aplicacion.data.UsuarioDTO guest = new sigmacine.aplicacion.data.UsuarioDTO();
+    guest.setId(0); // id 0 = invitado
+    guest.setEmail("");
+    guest.setNombre("Invitado");
+
+    // Si por ejecuciones previas la preferencia ya estaba marcada, la removemos
+    // para que el selector de ciudad se muestre una vez ahora. Después de mostrarse
+    // se guardará en Preferences y no volverá a aparecer en siguientes ejecuciones.
+    try {
+        java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(sigmacine.ui.controller.ControladorControlador.class);
+        if (prefs.getBoolean("cityPopupShown", false)) {
+            prefs.remove("cityPopupShown");
+        }
+    } catch (Exception ignored) {}
+
+    coordinador.mostrarClienteHomeConPopup(guest);
 
 
        /*  //Este codigo es para omitir el login

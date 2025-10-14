@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.ClienteController">
+<BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sigmacine.ui.controller.CiudadController">
     <center>
         <StackPane prefHeight="235.0" prefWidth="262.0" style="-fx-background-color: black; -fx-background-radius: 15; -fx-padding: 20;" BorderPane.alignment="CENTER">
             <children>

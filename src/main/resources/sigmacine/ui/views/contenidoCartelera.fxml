@@ -21,7 +21,7 @@
                 <TextField prefWidth="200" promptText="Buscar" styleClass="search" />
                 <VBox fx:id="carritoPanel" spacing="16">
                     <children>
-                        <Button fx:id="btnCart" text="Cart"/>
+                        <Button styleClass="toplink" text="Cart" />
                     </children>
                 </VBox>
                 <MenuButton styleClass="icon-btn" text="👤">

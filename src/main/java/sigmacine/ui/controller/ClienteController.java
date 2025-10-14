@@ -89,6 +89,7 @@ public class ClienteController {
     public void init(UsuarioDTO usuario, String ciudad) {
         this.usuario = usuario;
         this.ciudadSeleccionada = ciudad;
+        sigmacine.aplicacion.session.Session.setSelectedCity(ciudad);
         esperarYCargarPeliculas();
     }
     
@@ -348,6 +349,7 @@ public class ClienteController {
             Parent root = loader.load();
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
+            sigmacine.aplicacion.session.Session.setSelectedCity(ciudad);
 
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");

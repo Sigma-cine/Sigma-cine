@@ -111,7 +111,7 @@
                                 <VBox fx:id="panelFunciones" spacing="8" />
                                 <HBox alignment="CENTER_RIGHT">
                                     <children>
-                                        <Button fx:id="btnComprar" style="-fx-background-color: #8A2F24; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 18 8 18;" text="Comprar Tiquete" />
+                                        <Button fx:id="btnComprar" text="Comprar Tiquete" onAction="#onComprarTickets" style="-fx-background-color:#8A2F24; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:20; -fx-padding:8 18 8 18;" />
                                     </children>
                                 </HBox>
                             </children>
@@ -121,7 +121,7 @@
                         </VBox>
 
                         <Label text="TRAILER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
-                        <StackPane fx:id="trailerContainer" prefHeight="360" prefWidth="820" />
+                        <StackPane fx:id="trailerContainer" prefHeight="360" prefWidth="820" mouseTransparent="true" pickOnBounds="false"/>
                     </children>
                     <padding>
                         <Insets top="12" right="12" left="12" bottom="24" />

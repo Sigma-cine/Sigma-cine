@@ -114,18 +114,14 @@ public class ResultadosBusquedaController {
             // Try load poster (remote URL or classpath resource under /Images)
             try {
                 String posterRef = p.getPosterUrl();
-                System.out.println("[BÚSQUEDA] Cargando póster para: " + p.getTitulo() + " con URL: " + posterRef);
                 if (posterRef != null && !posterRef.isBlank()) {
                     Image img = resolveImage(posterRef);
                     if (img != null) {
                         poster.setImage(img);
-                        System.out.println("[BÚSQUEDA] ✓ Póster cargado para: " + p.getTitulo());
                     } else {
-                        System.out.println("[BÚSQUEDA] ✗ NO se pudo cargar el póster para: " + p.getTitulo());
                     }
                 }
             } catch (Exception ex) {
-                System.err.println("[BÚSQUEDA] ERROR cargando póster: " + ex.getMessage());
                 ex.printStackTrace();
             }
 
@@ -236,16 +232,13 @@ private void mostrarDetallePelicula(Pelicula p) {
     }
 
     private Image resolveImage(String ref) {
-        System.out.println("[RESOLVE_IMAGE] Intentando resolver: " + ref);
         if (ref == null || ref.isBlank()) {
-            System.out.println("[RESOLVE_IMAGE] URL es null o vacía");
             return null;
         }
         try {
             String lower = ref.toLowerCase();
             // 1. URLs externas
             if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
-                System.out.println("[RESOLVE_IMAGE] Es URL externa");
                 return new Image(ref, true);
             }
             
@@ -254,40 +247,33 @@ private void mostrarDetallePelicula(Pelicula p) {
                 String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
                 if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
                 
-                System.out.println("[RESOLVE_IMAGE] Extrayendo nombre de archivo: " + fileName);
                 java.net.URL res = getClass().getResource("/Images/" + fileName);
                 if (res != null) {
-                    System.out.println("[RESOLVE_IMAGE] ✓ Encontrado en: " + res.toExternalForm());
                     return new Image(res.toExternalForm(), false);
                 } else {
-                    System.out.println("[RESOLVE_IMAGE] ✗ NO encontrado en /Images/" + fileName);
                 }
             }
             
             // 3. Probar como recurso directo /Images/...
             java.net.URL res = getClass().getResource("/Images/" + ref);
             if (res != null) {
-                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado en /Images/" + ref);
                 return new Image(res.toExternalForm(), false);
             }
             
             // 4. Probar como archivo local
             File f = new File(ref);
             if (f.exists()) {
-                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado como archivo local");
                 return new Image(f.toURI().toString(), false);
             }
             
             // 5. Probar con / al inicio
             res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
             if (res != null) {
-                System.out.println("[RESOLVE_IMAGE] ✓ Encontrado con / al inicio");
                 return new Image(res.toExternalForm(), false);
             }
             
-            System.out.println("[RESOLVE_IMAGE] ✗ NO se pudo resolver la imagen");
         } catch (Exception ex) {
-            System.err.println("[RESOLVE_IMAGE] ERROR: " + ex.getMessage());
+                System.err.println("Error resolviendo imagen: " + ex.getMessage());
             ex.printStackTrace();
         }
         return null;

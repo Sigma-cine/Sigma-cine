@@ -28,8 +28,8 @@ public class LoginController {
 
     @FXML
     private void initialize() {
-        if (loginButton != null) loginButton.setOnAction(e -> { System.out.println("[DEBUG] loginButton clicked"); onLogin(); });
-        if (registrarLink != null) registrarLink.setOnAction(e -> { System.out.println("[DEBUG] registrarLink clicked"); if (coordinador != null) coordinador.mostrarRegistro(); });
+        if (loginButton != null) loginButton.setOnAction(e -> { onLogin(); });
+        if (registrarLink != null) registrarLink.setOnAction(e -> { if (coordinador != null) coordinador.mostrarRegistro(); });
     }
     @FXML
 public void onIrARegistro() {
@@ -119,8 +119,8 @@ public void onIrARegistro() {
             }
 
             // Ensure handlers are attached
-            if (loginButton != null) loginButton.setOnAction(e -> { System.out.println("[DEBUG] loginButton clicked (bound)"); onLogin(); });
-            if (registrarLink != null) registrarLink.setOnAction(e -> { System.out.println("[DEBUG] registrarLink clicked (bound)"); if (coordinador != null) coordinador.mostrarRegistro(); });
+            if (loginButton != null) loginButton.setOnAction(e -> { onLogin(); });
+            if (registrarLink != null) registrarLink.setOnAction(e -> { if (coordinador != null) coordinador.mostrarRegistro(); });
         } catch (Exception ex) {
             System.err.println("Error binding LoginController root: " + ex.getMessage());
             ex.printStackTrace();

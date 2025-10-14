@@ -70,12 +70,13 @@
     </center>
     
     <bottom>
-        <HBox alignment="CENTER_RIGHT" styleClass="footer">
+        <HBox alignment="TOP_CENTER" styleClass="footer" prefHeight="420.0">
             <children>
-                <Label text="© Sigma Cine" styleClass="footer-text"/>
+                <!-- Contenedor donde el controller pintará dinámicamente 3 películas (poster, título y botón) -->
+                <GridPane fx:id="footerGrid" alignment="CENTER" />
             </children>
             <padding>
-                <Insets top="8" right="16" bottom="8" left="16"/>
+                <Insets top="0" right="16" bottom="8" left="16"/>
             </padding>
         </HBox>
     </bottom>

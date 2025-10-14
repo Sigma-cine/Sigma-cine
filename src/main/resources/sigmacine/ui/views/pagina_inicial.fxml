@@ -36,7 +36,7 @@
                 <Label fx:id="lblUserName" text="" styleClass="toplink" visible="false"/>
                 <Button fx:id="btnRegistrarse" text="Registrarse" styleClass="toplink"/>
 
-                <!-- Menú de perfil (se habilita/oculta según sesión) -->
+                <!-- Menú de perfil -->
                 <MenuButton fx:id="menuPerfil" text="" styleClass="icon-btn">
                     <items>
                         <MenuItem text="Mi Cuenta"/>
@@ -53,118 +53,118 @@
                     </items>
                 </MenuButton>
             </children>
-            <padding>
-                <Insets top="10" right="16" bottom="10" left="16"/>
-            </padding>
+            <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
         </HBox>
     </top>
 
-    <!-- ===== CENTRO: TODO en un solo StackPane ===== -->
+    <!-- ===== CENTRO EN VBOX (promo + content + cards) ===== -->
     <center>
-        <StackPane>
-            <children>
-                <!-- Franja de promoción (fondo) -->
-                <StackPane fx:id="promoPane"
-                           prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
-                           style="-fx-background-color:#993726;"/>
+        <VBox spacing="0">
 
-                <!-- Imagen de publicidad -->
-                <ImageView fx:id="imgPublicidad"
-                           fitHeight="110.0"
-                           preserveRatio="true"
-                           pickOnBounds="true"
-                           StackPane.alignment="CENTER">
-                    <image>
-                        <Image url="/Images/publicidad.png"/>
-                    </image>
-                </ImageView>
+            <!-- Promo (franja + imagen + título + botón) -->
+            <StackPane fx:id="promoPane"
+                       prefHeight="110.0" minHeight="110.0" maxHeight="110.0"
+                       style="-fx-background-color:#993726;">
+                <children>
+                    <ImageView fx:id="imgPublicidad"
+                               fitHeight="110.0"
+                               preserveRatio="true"
+                               pickOnBounds="true"
+                               StackPane.alignment="CENTER">
+                        <image>
+                            <Image url="/Images/publicidad.png"/>
+                        </image>
+                    </ImageView>
 
-                <!-- Título de la promo -->
-                <Label fx:id="lblPromo"
-                       text="Promoción"
-                       style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
-                       StackPane.alignment="TOP_LEFT"
-                       translateX="33" translateY="10">
-                    <font><Font name="System Bold" size="13.0"/></font>
-                </Label>
+                    <Label fx:id="lblPromo"
+                           text="Promoción"
+                           style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                           StackPane.alignment="TOP_LEFT"
+                           translateX="33" translateY="10">
+                        <font><Font name="System Bold" size="13.0"/></font>
+                    </Label>
 
-                <!-- Botón Ver más de la promo -->
-                <Button fx:id="btnPromoVerMas"
-                        text="Ver más"
-                        prefWidth="75.0" prefHeight="30.0"
-                        style="-fx-background-color:#993726; -fx-background-radius:14; -fx-text-fill:#ffffff; -fx-font-weight:bold;"
-                        StackPane.alignment="BOTTOM_LEFT"
-                        translateX="32" translateY="-8">
-                    <font><Font size="10.0"/></font>
-                </Button>
+                    <Button fx:id="btnPromoVerMas"
+                            text="Ver más"
+                            prefWidth="75.0" prefHeight="30.0"
+                            style="-fx-background-color:#993726; -fx-background-radius:14; -fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                            StackPane.alignment="BOTTOM_LEFT"
+                            translateX="32" translateY="-8">
+                        <font><Font size="10.0"/></font>
+                    </Button>
+                </children>
+            </StackPane>
 
-                <!-- Tarjetas inferiores (footer), centradas -->
-                <HBox fx:id="bottomCardsLayer"
-                      alignment="CENTER"
-                      prefHeight="191.0" prefWidth="606.0"
-                      StackPane.alignment="BOTTOM_CENTER">
-                    <children>
-                        <GridPane fx:id="footerGrid" alignment="CENTER" prefHeight="172.0" prefWidth="602.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
-                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="103.2"/>
-                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="140.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="144.8"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints vgrow="SOMETIMES" prefHeight="114.0"/>
-                                <RowConstraints vgrow="SOMETIMES" prefHeight="41.8"/>
-                                <RowConstraints vgrow="SOMETIMES" prefHeight="62.6"/>
-                            </rowConstraints>
-                            <children>
-                                <!-- Fila 0: pósters -->
-                                <ImageView fx:id="imgCard1" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true"/>
-                                <ImageView fx:id="imgCard2" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1"/>
-                                <ImageView fx:id="imgCard3" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2"/>
-                                <ImageView fx:id="imgCard4" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3"/>
+            <!-- Contenedor dinámico para vistas (colapsa cuando está vacío) -->
+            <StackPane fx:id="content" VBox.vgrow="ALWAYS" pickOnBounds="false"/>
 
-                                <!-- Fila 1: títulos -->
-                                <Label fx:id="lblCard1" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;" text="" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
-                                <Label fx:id="lblCard2" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;" text="" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
-                                <Label fx:id="lblCard3" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;" text="" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
-                                <Label fx:id="lblCard4" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;" text="" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+            <!-- Cards del footer -->
+            <HBox fx:id="bottomCardsLayer"
+                  alignment="CENTER"
+                  prefHeight="191.0" prefWidth="606.0"
+                  style="-fx-background-color: transparent;">
+                <children>
+                    <GridPane fx:id="footerGrid" alignment="CENTER" prefHeight="172.0" prefWidth="602.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="167.8"/>
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints vgrow="SOMETIMES" prefHeight="114.0"/>
+                            <RowConstraints vgrow="SOMETIMES" prefHeight="41.8"/>
+                            <RowConstraints vgrow="SOMETIMES" prefHeight="62.6"/>
+                        </rowConstraints>
+                        <children>
+                            <!-- Fila 0: pósters -->
+                            <ImageView fx:id="imgCard1" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true"/>
+                            <ImageView fx:id="imgCard2" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1"/>
+                            <ImageView fx:id="imgCard3" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2"/>
+                            <ImageView fx:id="imgCard4" fitHeight="115.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3"/>
 
-                                <!-- Fila 2: botones Ver más -->
-                                <Button fx:id="btnCard1" onAction="#onCard1"
-                                        prefHeight="30.0" prefWidth="69.0"
-                                        style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
-                                        text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                                    <font><Font size="10.0"/></font>
-                                </Button>
-                                <Button fx:id="btnCard2" onAction="#onCard2"
-                                        prefHeight="30.0" prefWidth="69.0"
-                                        style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
-                                        text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                                    <font><Font size="10.0"/></font>
-                                </Button>
-                                <Button fx:id="btnCard3" onAction="#onCard3"
-                                        prefHeight="30.0" prefWidth="69.0"
-                                        style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
-                                        text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                                    <font><Font size="10.0"/></font>
-                                </Button>
-                                <Button fx:id="btnCard4" onAction="#onCard4"
-                                        prefHeight="30.0" prefWidth="69.0"
-                                        style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
-                                        text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                                    <font><Font size="10.0"/></font>
-                                </Button>
-                            </children>
-                            <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
-                        </GridPane>
-                    </children>
-                    <padding><Insets top="0" right="0" bottom="8" left="0"/></padding>
-                </HBox>
+                            <!-- Fila 1: títulos -->
+                            <Label fx:id="lblCard1" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                                   GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                            <Label fx:id="lblCard2" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                                   GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                            <Label fx:id="lblCard3" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                                   GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                            <Label fx:id="lblCard4" style="-fx-text-fill:#ffffff; -fx-font-weight:bold;"
+                                   GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
 
-                <!-- CONTENEDOR DINÁMICO (siempre al final para quedar arriba) -->
-                <StackPane fx:id="content"/>
-            </children>
-        </StackPane>
+                            <!-- Fila 2: botones Ver más -->
+                            <Button fx:id="btnCard1" onAction="#onCard1"
+                                    prefHeight="30.0" prefWidth="69.0"
+                                    style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
+                                    text="Ver más" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                                <font><Font size="10.0"/></font>
+                            </Button>
+                            <Button fx:id="btnCard2" onAction="#onCard2"
+                                    prefHeight="30.0" prefWidth="69.0"
+                                    style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
+                                    text="Ver más" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                                <font><Font size="10.0"/></font>
+                            </Button>
+                            <Button fx:id="btnCard3" onAction="#onCard3"
+                                    prefHeight="30.0" prefWidth="69.0"
+                                    style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
+                                    text="Ver más" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                                <font><Font size="10.0"/></font>
+                            </Button>
+                            <Button fx:id="btnCard4" onAction="#onCard4"
+                                    prefHeight="30.0" prefWidth="69.0"
+                                    style="-fx-background-color:#993726; -fx-background-radius:14; -fx-font-weight:bold; -fx-text-fill:#ffffff;"
+                                    text="Ver más" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                                <font><Font size="10.0"/></font>
+                            </Button>
+                        </children>
+                        <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+                    </GridPane>
+                </children>
+                <padding><Insets top="0" right="0" bottom="8" left="0"/></padding>
+            </HBox>
+        </VBox>
     </center>
 
 </BorderPane>

@@ -27,6 +27,7 @@ import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Controlador principal del cliente (pagina_inicial.fxml).
@@ -71,8 +72,8 @@ public class ClienteController {
     private String ciudadSeleccionada;
     private ControladorControlador coordinador;
 
-    public void setCoordinador(ControladorControlador c) { 
-        this.coordinador = c; 
+    public void setCoordinador(ControladorControlador c) {
+        this.coordinador = c;
     }
 
     public void init(UsuarioDTO usuario) {
@@ -91,7 +92,7 @@ public class ClienteController {
     public void initCiudad(UsuarioDTO usuario) {
         this.usuario = usuario;
         if (cbCiudad != null) {
-            cbCiudad.getItems().setAll("Bogot�", "Medell�n", "Cali", "Barranquilla");
+            cbCiudad.getItems().setAll("Bogot\u00E1", "Medell\u00EDn", "Cali", "Barranquilla");
             cbCiudad.getSelectionModel().selectFirst();
         }
         refreshSessionUI();
@@ -107,7 +108,7 @@ public class ClienteController {
 
         if (btnSeleccionarCiudad != null) btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
         if (btnCartelera != null)        btnCartelera.setOnAction(e -> mostrarCartelera());
-        if (btnConfiteria != null)       btnConfiteria.setOnAction(e -> System.out.println("Ir a Confiter�a (" + safeCiudad() + ")"));
+        if (btnConfiteria != null)       btnConfiteria.setOnAction(e -> System.out.println("Ir a Confiter\u00EDa (" + safeCiudad() + ")"));
         if (miCerrarSesion != null)      miCerrarSesion.setOnAction(e -> onLogout());
         if (miHistorial != null)         miHistorial.setOnAction(e -> onVerHistorial());
 
@@ -128,7 +129,6 @@ public class ClienteController {
             content.getChildren().addListener((ListChangeListener<Node>) c -> updatePublicidadVisibility());
             updatePublicidadVisibility();
         }
-
     }
 
     private void esperarYCargarPeliculas() {
@@ -210,8 +210,15 @@ public class ClienteController {
                 ImageView poster = new ImageView();
                 poster.setPreserveRatio(true);
                 poster.setFitWidth(220);
+                poster.setSmooth(true);
+                poster.setCache(true);
+
                 if (p.getPosterUrl() != null && !p.getPosterUrl().isBlank()) {
                     Image img = resolveImage(p.getPosterUrl());
+                    if (img == null) img = resolveImage("placeholder.png");
+                    if (img != null) poster.setImage(img);
+                } else {
+                    Image img = resolveImage("placeholder.png");
                     if (img != null) poster.setImage(img);
                 }
                 javafx.scene.layout.GridPane.setColumnIndex(poster, col);
@@ -219,7 +226,7 @@ public class ClienteController {
                 javafx.scene.layout.GridPane.setMargin(poster, new javafx.geometry.Insets(0, 0, 8, 0));
                 grid.getChildren().add(poster);
 
-                Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Sin t�tulo");
+                Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Sin t\u00EDtulo");
                 titulo.setWrapText(true);
                 titulo.setMaxWidth(220);
                 titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
@@ -231,10 +238,16 @@ public class ClienteController {
                 javafx.scene.layout.GridPane.setMargin(titulo, new javafx.geometry.Insets(0, 0, 8, 0));
                 grid.getChildren().add(titulo);
 
-                Button verMas = new Button("Ver m�s");
+                // === NUEVO: bot�n Ver m�s que abre contenidoCartelera.fxml con la pel�cula ===
+                Button verMas = new Button("Ver m\u00E1s");
                 verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
                 verMas.setPrefWidth(96);
                 verMas.setPrefHeight(34);
+                verMas.setOnAction(ev -> irADetallePelicula(p));  // <<--- navegaci�n al detalle
+                // Tambi�n navegar al hacer click en el poster o el t�tulo
+                poster.setOnMouseClicked(ev -> irADetallePelicula(p));
+                titulo.setOnMouseClicked(ev -> irADetallePelicula(p));
+
                 javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
                 javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
                 javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);
@@ -242,6 +255,31 @@ public class ClienteController {
             }
 
             Platform.runLater(() -> { try { grid.applyCss(); grid.layout(); } catch (Exception ignored) {} });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /** Abre contenidoCartelera.fxml y pasa la pel�cula seleccionada. */
+    private void irADetallePelicula(Pelicula pelicula) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
+            Parent root = loader.load();
+
+            Object ctrlObj = loader.getController();
+            if (ctrlObj instanceof ContenidoCarteleraController ctrl) {
+                ctrl.setCoordinador(this.coordinador);
+                ctrl.setUsuario(this.usuario);
+                ctrl.setPelicula(pelicula); // <- manda la pel�cula
+            }
+
+            Stage stage = (Stage) (content != null ? content.getScene().getWindow() : btnCartelera.getScene().getWindow());
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle("Detalle  " + (pelicula != null && pelicula.getTitulo()!=null ? pelicula.getTitulo() : "Pel\u00EDcula"));
+            stage.setMaximized(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -272,33 +310,44 @@ public class ClienteController {
 
     private void cargarCard(ImageView img, Label lbl, Pelicula pelicula) {
         if (pelicula == null) return;
-        if (lbl != null) lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin t�tulo");
-        if (img != null && pelicula.getPosterUrl() != null && !pelicula.getPosterUrl().isBlank()) {
-            Image posterImage = resolveImage(pelicula.getPosterUrl());
-            if (posterImage != null) img.setImage(posterImage);
+        if (lbl != null) lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin t\u00EDtulo");
+        if (img != null) {
+            Image posterImage = null;
+            if (pelicula.getPosterUrl() != null && !pelicula.getPosterUrl().isBlank()) {
+                posterImage = resolveImage(pelicula.getPosterUrl());
+            }
+            if (posterImage == null) posterImage = resolveImage("placeholder.png");
+            if (posterImage != null) {
+                img.setImage(posterImage);
+                img.setPreserveRatio(true);
+                img.setFitWidth(220);
+                img.setSmooth(true);
+                img.setCache(true);
+            }
         }
     }
 
     private Image resolveImage(String ref) {
         if (ref == null || ref.isBlank()) return null;
         try {
-            String lower = ref.toLowerCase();
+            String r = ref.trim();
+            String lower = r.toLowerCase(Locale.ROOT);
+
             if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
-                return new Image(ref, true);
+                return new Image(r, true);
             }
-            if (ref.contains("src\\main\\resources\\Images\\") || ref.contains("src/main/resources/Images/")) {
-                String fileName = ref.substring(Math.max(ref.lastIndexOf('\\'), ref.lastIndexOf('/')) + 1);
-                java.net.URL res = getClass().getResource("/Images/" + fileName);
-                if (res != null) return new Image(res.toExternalForm(), false);
-            }
-            java.net.URL res2 = getClass().getResource("/Images/" + ref);
-            if (res2 != null) return new Image(res2.toExternalForm(), false);
 
-            java.io.File f = new java.io.File(ref);
+            int slash = Math.max(r.lastIndexOf('/'), r.lastIndexOf('\\'));
+            String fileName = (slash >= 0) ? r.substring(slash + 1) : r;
+
+            java.net.URL res = getClass().getResource("/Images/" + fileName);
+            if (res != null) return new Image(res.toExternalForm(), false);
+
+            res = getClass().getResource(r.startsWith("/") ? r : ("/" + r));
+            if (res != null) return new Image(res.toExternalForm(), false);
+
+            java.io.File f = new java.io.File(r);
             if (f.exists()) return new Image(f.toURI().toString(), false);
-
-            java.net.URL res3 = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
-            if (res3 != null) return new Image(res3.toExternalForm(), false);
         } catch (Exception ignored) {}
         return null;
     }
@@ -306,8 +355,8 @@ public class ClienteController {
     private void onIniciarSesion() {
         if (Session.isLoggedIn()) {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-            a.setTitle("Cerrar sesi�n");
-            a.setHeaderText("�Desea cerrar sesi�n?");
+            a.setTitle("Cerrar sesi\u00F3n");
+            a.setHeaderText("\u00BFDesea cerrar sesi\u00F3n?");
             a.setContentText("Salir de la cuenta " + (Session.getCurrent() != null ? Session.getCurrent().getEmail() : ""));
             var opt = a.showAndWait();
             if (opt.isPresent() && opt.get() == javafx.scene.control.ButtonType.OK) onLogout();
@@ -319,9 +368,9 @@ public class ClienteController {
     private void onRegistrarse() {
         if (Session.isLoggedIn()) {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-            a.setTitle("Ya has iniciado sesi�n");
+            a.setTitle("Ya has iniciado sesi\u00F3n");
             a.setHeaderText(null);
-            a.setContentText("Cierra sesi�n si deseas registrar una nueva cuenta.");
+            a.setContentText("Cierra sesi\u00F3n si deseas registrar una nueva cuenta.");
             a.showAndWait();
             return;
         }
@@ -334,7 +383,7 @@ public class ClienteController {
         Session.clear();
         this.usuario = null;
         if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
-        if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesi�n"); }
+        if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesi\u00F3n"); }
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
         updateMenuPerfilState();
     }
@@ -355,7 +404,7 @@ public class ClienteController {
             if (btnRegistrarse  != null) btnRegistrarse.setDisable(true);
         } else {
             if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
-            if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesi�n"); }
+            if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(true); btnIniciarSesion.setText("Iniciar sesi\u00F3n"); }
             if (btnRegistrarse  != null) btnRegistrarse.setDisable(false);
         }
         updateMenuPerfilState();
@@ -370,11 +419,11 @@ public class ClienteController {
         }
     }
 
-    @FXML private void onPromoVerMas() { System.out.println("Promoci�n � Ver m�s (" + safeCiudad() + ")"); }
-    @FXML private void onCard1(){ System.out.println("Card 1 � Ver m�s (" + safeCiudad() + ")"); }
-    @FXML private void onCard2(){ System.out.println("Card 2 � Ver m�s (" + safeCiudad() + ")"); }
-    @FXML private void onCard3(){ System.out.println("Card 3 � Ver m�s (" + safeCiudad() + ")"); }
-    @FXML private void onCard4(){ System.out.println("Card 4 � Ver m�s (" + safeCiudad() + ")"); }
+    @FXML private void onPromoVerMas() { System.out.println("Promoci\u00F3n \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
+    @FXML private void onCard1(){ System.out.println("Card 1 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
+    @FXML private void onCard2(){ System.out.println("Card 2 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
+    @FXML private void onCard3(){ System.out.println("Card 3 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
+    @FXML private void onCard4(){ System.out.println("Card 4 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
 
     private void onSeleccionarCiudad() {
         String ciudad = (cbCiudad != null) ? cbCiudad.getValue() : null;
@@ -421,7 +470,7 @@ public class ClienteController {
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.setTitle("Resultados de b�squeda");
+            stage.setTitle("Resultados de b\u00FAsqueda");
             stage.setMaximized(true);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -435,7 +484,7 @@ public class ClienteController {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Acceso denegado");
             a.setHeaderText(null);
-            a.setContentText("Debes iniciar sesi�n para ver tu historial de compras.");
+            a.setContentText("Debes iniciar sesi\u00F3n para ver tu historial de compras.");
             a.showAndWait();
             return;
         }
@@ -524,7 +573,7 @@ public class ClienteController {
             AsientosController ctrl = loader.getController();
             var ocup  = java.util.Set.of("B3","B4","C7","E2","F8");
             var acces = java.util.Set.of("E3","E4","E5","E6");
-            ctrl.setFuncion("Los 4 Fant�sticos", "1:10 pm", ocup, acces);
+            ctrl.setFuncion("Los 4 Fant\u00E1sticos", "1:10 pm", ocup, acces);
 
             content.getChildren().setAll(pane);
         } catch (Exception e) { e.printStackTrace(); }
@@ -542,7 +591,7 @@ public class ClienteController {
             var url = getClass().getResource("/sigmacine/ui/views/asientos_contenido.fxml");
             if (url == null) url = getClass().getResource("/sigmacine/ui/views/asientos.fxml");
 
-            FXMLLoader loader = new FXMLLoader(java.util.Objects.requireNonNull(url, "No se encontr� la vista de asientos"));
+            FXMLLoader loader = new FXMLLoader(java.util.Objects.requireNonNull(url, "No se encontr\u00F3 la vista de asientos"));
             Parent pane = loader.load();
 
             AsientosController ctrl = loader.getController();

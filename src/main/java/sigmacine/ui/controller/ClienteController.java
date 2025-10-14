@@ -27,6 +27,7 @@ import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
 import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Locale;
 
 /**
@@ -74,6 +75,10 @@ public class ClienteController {
     // Evita disparar múltiples cargas de posters cuando la vista se crea desde distintos flujos
     private boolean postersRequested = false;
     
+    public void setCoordinador(ControladorControlador coordinador) {
+        this.coordinador = coordinador;
+    }
+
 
     public void init(UsuarioDTO usuario) { 
         this.usuario = usuario;
@@ -642,34 +647,7 @@ public class ClienteController {
         }
     }
     
-    private ImageView buscarImageView(String fxId) {
-        try {
-            // Buscar en todos los campos @FXML conocidos
-            if (btnCartelera != null && btnCartelera.getScene() != null) {
-                return (ImageView) btnCartelera.getScene().lookup(fxId);
-            }
-            if (content != null && content.getScene() != null) {
-                return (ImageView) content.getScene().lookup(fxId);
-            }
-        } catch (Exception ex) {
-            System.err.println("Error buscando ImageView " + fxId + ": " + ex.getMessage());
-        }
-        return null;
-    }
-    
-    private Label buscarLabel(String fxId) {
-        try {
-            if (btnCartelera != null && btnCartelera.getScene() != null) {
-                return (Label) btnCartelera.getScene().lookup(fxId);
-            }
-            if (content != null && content.getScene() != null) {
-                return (Label) content.getScene().lookup(fxId);
-            }
-        } catch (Exception ex) {
-            System.err.println("Error buscando Label " + fxId + ": " + ex.getMessage());
-        }
-        return null;
-    }
+    // buscarImageView and buscarLabel helpers are defined earlier in this class; duplicates removed.
     
     private void buscarYCargarEnGrid(List<Pelicula> peliculas) {
         
@@ -720,83 +698,7 @@ public class ClienteController {
         }
     }
     
-    /**
-     * Carga el póster y título de una película en una card (ImageView + Label).
-     */
-    private void cargarCard(ImageView img, Label lbl, Pelicula pelicula) {
-        if (pelicula == null) return;
-        
-        // Poner el título
-        if (lbl != null) {
-            lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
-        }
-        
-        // Cargar el póster
-        if (img != null) {
-            String posterUrl = pelicula.getPosterUrl();
-            
-            
-            if (posterUrl != null && !posterUrl.isBlank()) {
-                Image posterImage = resolveImage(posterUrl);
-                if (posterImage != null) {
-                    img.setImage(posterImage);
-                    
-                } else {
-                    
-                }
-            }
-        }
-    }
-    
-    /**
-     * Resuelve la ruta de una imagen probando varias estrategias:
-     * 1. Si es URL http/https, la carga directamente
-     * 2. Si está en src\main\resources\Images\, extrae solo el nombre del archivo
-     * 3. Prueba cargar desde /Images/nombre
-     * 4. Prueba como archivo local si existe
-     */
-    private Image resolveImage(String ref) {
-        if (ref == null || ref.isBlank()) return null;
-        
-        try {
-            String lower = ref.toLowerCase();
-            
-            // 1. URLs externas
-            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
-                return new Image(ref, true);
-            }
-            
-            // 2. Si contiene la ruta completa "src\main\resources\Images\", extraer solo el nombre
-            if (ref.contains("src\\main\\resources\\Images\\") || ref.contains("src/main/resources/Images/")) {
-                String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
-                if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
-                
-                
-                java.net.URL res = getClass().getResource("/Images/" + fileName);
-                if (res != null) {
-                    
-                    return new Image(res.toExternalForm(), false);
-                }
-            }
-            
-            // 3. Probar como recurso directo /Images/...
-            java.net.URL res = getClass().getResource("/Images/" + ref);
-            if (res != null) return new Image(res.toExternalForm(), false);
-            
-            // 4. Probar como archivo local
-            java.io.File f = new java.io.File(ref);
-            if (f.exists()) return new Image(f.toURI().toString(), false);
-            
-            // 5. Probar con / al inicio
-            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
-            if (res != null) return new Image(res.toExternalForm(), false);
-            
-        } catch (Exception ex) {
-            System.err.println("  → Error resolviendo imagen: " + ex.getMessage());
-        }
-        
-        return null;
-    }
+    // cargarCard and resolveImage helpers are defined earlier in this class; duplicates removed.
 
     /**
      * Abre la pantalla de detalle de película (contenidoCartelera.fxml) para la película indicada.
@@ -830,6 +732,46 @@ public class ClienteController {
             stage.setMaximized(true);
         } catch (Exception ex) {
             System.err.println("Error abriendo detalle: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    // Methods required by ContenidoCarteleraController embedding flow
+    public boolean isSameScene(Button anyButton) {
+        try {
+            if (anyButton == null) return false;
+            if (content != null && content.getScene() != null) {
+                return anyButton.getScene() == content.getScene();
+            }
+            return false;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    public void mostrarAsientos(String titulo, String hora, Set<String> ocupados, Set<String> accesibles) {
+        try {
+            var url = getClass().getResource("/sigmacine/ui/views/asientos.fxml");
+            if (url == null) return;
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent root = loader.load();
+
+            AsientosController ctrl = loader.getController();
+            ctrl.setFuncion(titulo, hora, ocupados, accesibles);
+
+            Stage stage = null;
+            if (content != null && content.getScene() != null) stage = (Stage) content.getScene().getWindow();
+            else if (btnCartelera != null && btnCartelera.getScene() != null) stage = (Stage) btnCartelera.getScene().getWindow();
+            if (stage == null) return;
+
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 1100;
+            double h = current != null ? current.getHeight() : 620;
+            stage.setScene(new Scene(root, w, h));
+            stage.setMaximized(true);
+            stage.setTitle("Selecciona tus asientos");
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

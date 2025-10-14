@@ -25,4 +25,10 @@ public class VerCarritoController {
     private void updateTotal() {
         if (lblTotal != null) lblTotal.setText(carrito.getTotal().toString());
     }
+
+    // Permite que otros controladores fuercen el refresco (compatibilidad)
+    public void refresh() {
+        if (listaItems != null) listaItems.refresh();
+        updateTotal();
+    }
 }

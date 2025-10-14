@@ -75,6 +75,15 @@ public class ClienteController {
     private ControladorControlador coordinador;
     // Evita disparar múltiples cargas de posters cuando la vista se crea desde distintos flujos
     private boolean postersRequested = false;
+
+    // --- Carrito Overlay state ---
+    private javafx.scene.Node carritoNode;           // contenido de verCarrito.fxml
+    private javafx.scene.layout.Pane overlayCarrito; // capa con dimmer + carrito
+    private javafx.scene.layout.StackPane carritoWrapper; // posicionable
+    private boolean carritoVisible = false;
+    private static final double CART_WIDTH = 600;
+    private static final double CART_OFFSET_Y = 8;
+    private static final double CART_MARGIN = 16;
     
     public void setCoordinador(ControladorControlador coordinador) {
         this.coordinador = coordinador;
@@ -142,7 +151,8 @@ public class ClienteController {
         }
 
     if (btnCartelera!= null) btnCartelera.setOnAction(e -> mostrarCartelera());
-        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
+    if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
+    if (btnCart != null) btnCart.setOnAction(e -> toggleCarritoOverlay());
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
         
         if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
@@ -216,6 +226,84 @@ public class ClienteController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void ensureCarritoOverlay() {
+        if (overlayCarrito != null) return;
+        try {
+            FXMLLoader fx = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCarrito.fxml"));
+            carritoNode = fx.load();
+
+            carritoWrapper = new javafx.scene.layout.StackPane(carritoNode);
+            carritoWrapper.setPrefWidth(CART_WIDTH);
+            carritoWrapper.setPickOnBounds(true);
+
+            javafx.scene.layout.Pane dimmer = new javafx.scene.layout.Pane();
+            dimmer.setStyle("-fx-background-color: rgba(0,0,0,0.55);");
+            dimmer.setPickOnBounds(true);
+            dimmer.setOnMouseClicked(e -> hideCarritoOverlay());
+
+            overlayCarrito = new javafx.scene.layout.Pane(dimmer, carritoWrapper);
+            overlayCarrito.setVisible(false);
+            overlayCarrito.setManaged(false);
+
+            // content está dentro de un VBox dentro de BorderPane; su parent esperado es VBox
+            // Para superponer, necesitamos un StackPane: content es StackPane, usamos su parent
+            javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+            dimmer.prefWidthProperty().bind(stackCentro.widthProperty());
+            dimmer.prefHeightProperty().bind(stackCentro.heightProperty());
+            overlayCarrito.prefWidthProperty().bind(stackCentro.widthProperty());
+            overlayCarrito.prefHeightProperty().bind(stackCentro.heightProperty());
+            stackCentro.getChildren().add(overlayCarrito);
+
+            overlayCarrito.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, ev -> {
+                if (ev.getCode() == KeyCode.ESCAPE) hideCarritoOverlay();
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("No se pudo crear el overlay del carrito (verCarrito.fxml)", ex);
+        }
+    }
+
+    private void showCarritoOverlay() {
+        ensureCarritoOverlay();
+        javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+
+        // blur al fondo
+        for (javafx.scene.Node n : stackCentro.getChildren()) {
+            if (n != overlayCarrito) n.setEffect(new javafx.scene.effect.GaussianBlur(12));
+        }
+
+        // posicionar cerca del botón cart
+        javafx.geometry.Bounds b = btnCart.localToScene(btnCart.getBoundsInLocal());
+        javafx.geometry.Point2D p = stackCentro.sceneToLocal(b.getMaxX(), b.getMaxY());
+
+        double x = p.getX() - CART_WIDTH;
+        double y = p.getY() + CART_OFFSET_Y;
+        x = Math.max(CART_MARGIN, Math.min(x, stackCentro.getWidth() - CART_WIDTH - CART_MARGIN));
+        y = Math.max(CART_MARGIN, Math.min(y, stackCentro.getHeight() - carritoWrapper.prefHeight(-1) - CART_MARGIN));
+
+        carritoWrapper.setLayoutX(x);
+        carritoWrapper.setLayoutY(y);
+
+        overlayCarrito.setVisible(true);
+        overlayCarrito.setManaged(true);
+        overlayCarrito.requestFocus();
+        carritoVisible = true;
+    }
+
+    private void hideCarritoOverlay() {
+        if (overlayCarrito == null) return;
+        javafx.scene.layout.StackPane stackCentro = (javafx.scene.layout.StackPane) content.getParent();
+        overlayCarrito.setVisible(false);
+        overlayCarrito.setManaged(false);
+        for (javafx.scene.Node n : stackCentro.getChildren()) n.setEffect(null);
+        carritoVisible = false;
+    }
+
+    private void toggleCarritoOverlay() {
+        if (carritoVisible) hideCarritoOverlay();
+        else showCarritoOverlay();
     }
 
     @FXML

@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -14,18 +15,16 @@ import sigmacine.aplicacion.data.UsuarioDTO;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-// Dependencias necesarias para instanciación manual
+
 import sigmacine.aplicacion.service.VerHistorialService;
 import sigmacine.infraestructura.configDataBase.DatabaseConfig;
 import sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc;
-import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc; 
-import sigmacine.ui.controller.ControladorControlador;
+import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
 import sigmacine.aplicacion.session.Session;
-
 
 public class ClienteController {
 
-    // --- VISTA PRINCIPAL (cliente_home.fxml) ---
+    // --- VISTA PRINCIPAL (pagina_inicial.fxml) ---
     @FXML private Button btnPromoVerMas;
     @FXML private Button btnCartelera;
     @FXML private Button btnConfiteria;
@@ -35,10 +34,11 @@ public class ClienteController {
     @FXML private MenuItem miHistorial;
     @FXML private StackPane promoPane;
     @FXML private ImageView imgPublicidad;
+    @FXML private Label lblPromo;
     @FXML private TextField txtBuscar;
-    @FXML private javafx.scene.control.Button btnBuscar;
+    @FXML private Button btnBuscar;
     @FXML private StackPane content;
-    
+
     @FXML private ChoiceBox<String> cbCiudad;
     @FXML private Button btnSeleccionarCiudad;
     @FXML private Button btnIniciarSesion;
@@ -47,7 +47,8 @@ public class ClienteController {
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
     private ControladorControlador coordinador;
-    
+
+    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
 
     public void init(UsuarioDTO usuario) { this.usuario = usuario; }
     public void init(UsuarioDTO usuario, String ciudad) {
@@ -69,20 +70,18 @@ public class ClienteController {
             imgPublicidad.setFitHeight(110);
             imgPublicidad.setPreserveRatio(true);
         }
-        
+
         if (btnSeleccionarCiudad != null) {
             btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
         }
 
-    if (btnCartelera!= null) btnCartelera.setOnAction(e -> mostrarCartelera());
+        if (btnCartelera != null) btnCartelera.setOnAction(e -> mostrarCartelera());
         if (btnConfiteria != null) btnConfiteria.setOnAction(e -> System.out.println("Ir a Confitería (" + safeCiudad() + ")"));
         if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
-        
-        if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
+        if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial());
 
         if (btnIniciarSesion != null) {
             btnIniciarSesion.setOnAction(e -> onIniciarSesion());
-            // reflect current session
             if (Session.isLoggedIn()) {
                 var u = Session.getCurrent();
                 btnIniciarSesion.setText(u != null && u.getEmail() != null ? u.getEmail() : "Cerrar sesión");
@@ -93,7 +92,6 @@ public class ClienteController {
         }
         if (btnRegistrarse != null) {
             btnRegistrarse.setOnAction(e -> onRegistrarse());
-            // disable register when already logged in
             btnRegistrarse.setDisable(Session.isLoggedIn());
         }
 
@@ -105,15 +103,19 @@ public class ClienteController {
             });
             if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
         }
+
+        // Si aún tenías esto para pruebas, puedes comentarlo si te estorba el flujo:
+        // mostrarAsientosAhora();
     }
 
-    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
+    // ===== Helper opcional: saber si un Node vive en la misma Scene que este content
+    public boolean isSameScene(Node n) {
+        return content != null && n != null && content.getScene() == n.getScene();
+    }
 
     private void onIniciarSesion() {
         System.out.println("[DEBUG] onIniciarSesion invoked");
-        // if already logged in, perform logout; otherwise show login
         if (Session.isLoggedIn()) {
-            // ask for confirmation before logging out
             javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             a.setTitle("Cerrar sesión");
             a.setHeaderText("¿Desea cerrar sesión?");
@@ -130,7 +132,6 @@ public class ClienteController {
     private void onRegistrarse() {
         System.out.println("[DEBUG] onRegistrarse invoked");
         if (Session.isLoggedIn()) {
-            // already logged in — don't allow registering a new account
             javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Ya has iniciado sesión");
             a.setHeaderText(null);
@@ -141,48 +142,42 @@ public class ClienteController {
         if (coordinador != null) coordinador.mostrarRegistro();
     }
 
-
-    private String safeCiudad() {
-        return ciudadSeleccionada != null ? ciudadSeleccionada : "sin ciudad";
-    }
+    private String safeCiudad() { return ciudadSeleccionada != null ? ciudadSeleccionada : "sin ciudad"; }
 
     private void onLogout() {
         System.out.println("Cerrar sesión de: " + (usuario != null ? usuario.getEmail() : "desconocido"));
-        // clear application session and update UI
         Session.clear();
         this.usuario = null;
         if (btnIniciarSesion != null) btnIniciarSesion.setText("Iniciar sesión");
         if (btnRegistrarse != null) btnRegistrarse.setDisable(false);
     }
-    
+
     @FXML private void onPromoVerMas() { System.out.println("Promoción → Ver más (" + safeCiudad() + ")"); }
     @FXML private void onCard1(){ System.out.println("Card 1 → Ver más (" + safeCiudad() + ")"); }
     @FXML private void onCard2(){ System.out.println("Card 2 → Ver más (" + safeCiudad() + ")"); }
     @FXML private void onCard3(){ System.out.println("Card 3 → Ver más (" + safeCiudad() + ")"); }
     @FXML private void onCard4(){ System.out.println("Card 4 → Ver más (" + safeCiudad() + ")"); }
 
-
     private void onSeleccionarCiudad() {
         String ciudad = (cbCiudad != null) ? cbCiudad.getValue() : null;
         if (ciudad == null || ciudad.isBlank()) return;
 
         try {
-            // Load the main client home screen so both flows land on the same initial UI
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/cliente_home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
             Parent root = loader.load();
             ClienteController controller = loader.getController();
             controller.init(this.usuario, ciudad);
 
             Stage stage = (Stage) btnSeleccionarCiudad.getScene().getWindow();
             stage.setTitle("Sigma Cine - Cliente (" + ciudad + ")");
-            javafx.scene.Scene current = stage.getScene();
+            Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
             stage.show();
             stage.setMaximized(true);
         } catch (Exception ex) {
-            throw new RuntimeException("Error cargando cliente_home.fxml", ex);
+            throw new RuntimeException("Error cargando pagina_inicial.fxml", ex);
         }
     }
 
@@ -190,7 +185,7 @@ public class ClienteController {
     private void onBuscarTop() {
         doSearch(txtBuscar != null ? txtBuscar.getText() : "");
     }
-    
+
     private void doSearch(String texto) {
         if (texto == null) texto = "";
         System.out.println("doSearch invoked with: '" + texto + "'");
@@ -202,13 +197,12 @@ public class ClienteController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/resultados_busqueda.fxml"));
             Parent root = loader.load();
             ResultadosBusquedaController controller = loader.getController();
-            // pass current session info so the results view can return to the same client home
             controller.setCoordinador(this.coordinador);
             controller.setUsuario(this.usuario);
             controller.setResultados(resultados, texto);
 
-            javafx.stage.Stage stage = (javafx.stage.Stage) content.getScene().getWindow();
-            javafx.scene.Scene current = stage.getScene();
+            Stage stage = (Stage) content.getScene().getWindow();
+            Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
@@ -227,13 +221,10 @@ public class ClienteController {
         System.out.println("Navegando a Historial de Compras.");
         try {
             DatabaseConfig dbConfig = new DatabaseConfig();
-            // Asume que VerHistorialService requiere un repositorio de Usuario para buscar el historial.
             var usuarioRepo = new UsuarioRepositoryJdbc(dbConfig);
             var historialService = new VerHistorialService(usuarioRepo);
-            
-            // Carga el FXML (ruta verificada y correcta)
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/VerCompras.fxml"));
-            
             VerHistorialController historialController = new VerHistorialController(historialService);
             historialController.setClienteController(this);
 
@@ -242,54 +233,46 @@ public class ClienteController {
             }
 
             loader.setController(historialController);
-            
             Parent historialView = loader.load();
-            
-            // 3. Muestra la vista
             content.getChildren().setAll(historialView);
-            
+
         } catch (Exception ex) {
             System.err.println("Error cargando HistorialDeCompras.fxml: " + ex.getMessage());
             ex.printStackTrace();
             content.getChildren().setAll(new Label("Error cargando Historial: " + ex.getMessage()));
         }
     }
-    
+
+    /** Cartelera a pantalla completa (reemplaza Scene): NO seteamos host aquí. */
     public void mostrarCartelera() {
         System.out.println("Volviendo a Cartelera (Contenido a pantalla completa).");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
             Parent carteleraView = loader.load();
 
-            // Si el controlador de contenidoCartelera.fxml necesita inicialización, invocamos init(usuario)
-            try {
-                var ctrl = loader.getController();
-                // try init(UsuarioDTO)
+            var ctrlObj = loader.getController();
+            if (ctrlObj instanceof ContenidoCarteleraController c) {
+                // ✨ Importante: NO setHost(this) cuando reemplazas la Scene
+                c.setCoordinador(this.coordinador);
+                c.setUsuario(this.usuario);
+            } else {
+                // fallback reflectivo
                 try {
-                    java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
-                    if (m != null) m.invoke(ctrl, this.usuario);
+                    java.lang.reflect.Method m = ctrlObj.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
+                    if (m != null) m.invoke(ctrlObj, this.usuario);
                 } catch (NoSuchMethodException ignore) {}
-
-                // fallback: try setUsuario(UsuarioDTO)
                 try {
-                    java.lang.reflect.Method su = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
-                    if (su != null) su.invoke(ctrl, this.usuario);
+                    java.lang.reflect.Method su = ctrlObj.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
+                    if (su != null) su.invoke(ctrlObj, this.usuario);
                 } catch (NoSuchMethodException ignore) {}
-
-                // also try to set the coordinator so the controller can navigate back while preserving session
                 try {
-                    java.lang.reflect.Method sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
-                    if (sc != null) sc.invoke(ctrl, this.coordinador);
+                    java.lang.reflect.Method sc = ctrlObj.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
+                    if (sc != null) sc.invoke(ctrlObj, this.coordinador);
                 } catch (NoSuchMethodException ignore) {}
-
-            } catch (Exception e) {
-                // log but continue to show the view
-                e.printStackTrace();
             }
 
-            // Reemplazamos la Scene entera para que ocupe toda la ventana
             Stage stage = (Stage) content.getScene().getWindow();
-            javafx.scene.Scene current = stage.getScene();
+            Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;
             double h = current != null ? current.getHeight() : 600;
             stage.setScene(new Scene(carteleraView, w > 0 ? w : 900, h > 0 ? h : 600));
@@ -298,6 +281,71 @@ public class ClienteController {
         } catch (Exception e) {
             content.getChildren().setAll(new Label("Error: No se pudo cargar la vista de cartelera."));
             e.printStackTrace();
+        }
+    }
+
+    private void togglePromo(boolean show) {
+        if (promoPane != null){
+            promoPane.setVisible(show);
+            promoPane.setManaged(show);
+        }
+        if (imgPublicidad != null){
+            imgPublicidad.setVisible(show);
+            imgPublicidad.setManaged(show);
+        }
+        if (lblPromo != null){
+            lblPromo.setVisible(show);
+            lblPromo.setManaged(show);
+        }
+        if (btnPromoVerMas != null){
+            btnPromoVerMas.setVisible(show);
+            btnPromoVerMas.setManaged(show);
+        }
+    }
+
+    // Solo pruebas locales (puedes comentarlo):
+    private void mostrarAsientosAhora() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/asientos.fxml"));
+            Parent pane = loader.load();
+
+            sigmacine.ui.controller.AsientosController ctrl = loader.getController();
+            var ocup  = java.util.Set.of("B3","B4","C7","E2","F8");
+            var acces = java.util.Set.of("E3","E4","E5","E6");
+            ctrl.setFuncion("Los 4 Fantásticos", "1:10 pm", ocup, acces);
+
+            content.getChildren().clear();
+            content.getChildren().add(pane);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void volverHomeContenido() {
+        togglePromo(true);
+    }
+
+    /** Flujo Cartelera -> Asientos embebido en `content` (cuando SÍ estás embebido). */
+    public void mostrarAsientos(String titulo, String hora,
+                                java.util.Set<String> ocupados,
+                                java.util.Set<String> accesibles) {
+        try {
+            togglePromo(false);
+
+            var url = getClass().getResource("/sigmacine/ui/views/asientos_contenido.fxml");
+            if (url == null) {
+                url = getClass().getResource("/sigmacine/ui/views/asientos.fxml");
+            }
+            FXMLLoader loader = new FXMLLoader(java.util.Objects.requireNonNull(url, "No se encontró la vista de asientos"));
+            Parent pane = loader.load();
+
+            sigmacine.ui.controller.AsientosController ctrl = loader.getController();
+            ctrl.setFuncion(titulo, hora, ocupados, accesibles);
+
+            content.getChildren().setAll(pane);
+        } catch (Exception e) {
+            e.printStackTrace();
+            content.getChildren().setAll(new Label("Error cargando Asientos: " + e.getMessage()));
         }
     }
 }

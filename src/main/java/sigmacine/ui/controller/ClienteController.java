@@ -484,9 +484,6 @@ public class ClienteController {
             
             // Carga el FXML (ruta verificada y correcta)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
-            
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/VerCompras.fxml"));
             VerHistorialController historialController = new VerHistorialController(historialService);
             historialController.setClienteController(this);
 
@@ -502,44 +499,34 @@ public class ClienteController {
     }
 
     public void mostrarCartelera() {
-        
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
+            java.net.URL url = getClass().getResource("/sigmacine/ui/views/cartelera.fxml");
+            if (url == null) {
+                content.getChildren().setAll(new Label("Error: No se encontró cartelera.fxml"));
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(url);
             Parent carteleraView = loader.load();
 
-            // Si el controlador de contenidoCartelera.fxml necesita inicialización, invocamos init(usuario)
+            // Wire controller with session/coordinator if available
             try {
-                var ctrl = loader.getController();
-                // try init(UsuarioDTO)
-                try {
-                    java.lang.reflect.Method m = ctrl.getClass().getMethod("init", sigmacine.aplicacion.data.UsuarioDTO.class);
-                    if (m != null) m.invoke(ctrl, this.usuario);
-                } catch (NoSuchMethodException ignore) {}
+                Object ctrl = loader.getController();
+                if (ctrl != null) {
+                    try {
+                        var m = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
+                        if (m != null) m.invoke(ctrl, this.usuario);
+                    } catch (NoSuchMethodException ignore) {}
+                    try {
+                        var m2 = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
+                        if (m2 != null) m2.invoke(ctrl, this.coordinador);
+                    } catch (NoSuchMethodException ignore) {}
+                    try {
+                        var rf = ctrl.getClass().getMethod("refreshSessionUI");
+                        if (rf != null) rf.invoke(ctrl);
+                    } catch (NoSuchMethodException ignore) {}
+                }
+            } catch (Exception ignore) {}
 
-                // fallback: try setUsuario(UsuarioDTO)
-                try {
-                    java.lang.reflect.Method su = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
-                    if (su != null) su.invoke(ctrl, this.usuario);
-                } catch (NoSuchMethodException ignore) {}
-
-                // also try to set the coordinator so the controller can navigate back while preserving session
-                try {
-                    java.lang.reflect.Method sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
-                    if (sc != null) sc.invoke(ctrl, this.coordinador);
-                } catch (NoSuchMethodException ignore) {}
-
-                // If controller exposes refreshSessionUI(), call it so the topbar updates immediately
-                try {
-                    java.lang.reflect.Method rf = ctrl.getClass().getMethod("refreshSessionUI");
-                    if (rf != null) rf.invoke(ctrl);
-                } catch (NoSuchMethodException ignore) {}
-
-            } catch (Exception e) {
-                // log but continue to show the view
-                e.printStackTrace();
-            }
-
-            // Reemplazamos la Scene entera para que ocupe toda la ventana
             Stage stage = (Stage) content.getScene().getWindow();
             Scene current = stage.getScene();
             double w = current != null ? current.getWidth() : 900;

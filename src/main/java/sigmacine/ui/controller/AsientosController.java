@@ -2,13 +2,15 @@ package sigmacine.ui.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import sigmacine.aplicacion.data.UsuarioDTO;
 
 import java.net.URL;
 import java.util.*;
@@ -18,6 +20,20 @@ public class AsientosController implements Initializable {
 
     @FXML private GridPane gridSala;
     @FXML private Label lblResumen;
+
+    // Unified top bar controls
+    @FXML private Button btnCartelera;
+    @FXML private Button btnConfiteria;
+    @FXML private Button btnSigmaCard;
+    @FXML private Button btnCart;
+    @FXML private Button btnIniciarSesion;
+    @FXML private Button btnRegistrarse;
+    @FXML private Label  lblUserName;
+    @FXML private MenuButton menuPerfil;
+    @FXML private MenuItem miCerrarSesion;
+    @FXML private MenuItem miHistorial;
+    @FXML private TextField txtBuscar;
+    @FXML private Button btnBuscar;
 
     @FXML private Label lblTitulo;
     @FXML private Label lblHoraPill;
@@ -36,26 +52,172 @@ public class AsientosController implements Initializable {
     private String hora   = "1:10 pm";
     private Image poster;
 
+    // session/coordinator wiring
+    private UsuarioDTO usuario;
+    private ControladorControlador coordinador;
+    public void setUsuario(UsuarioDTO u) { this.usuario = u; refreshSessionUI(); }
+    public void setCoordinador(ControladorControlador c) { this.coordinador = c; }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Hook up top bar actions
+        if (btnCartelera != null) btnCartelera.setOnAction(e -> goCartelera());
+        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
+        if (btnRegistrarse != null) btnRegistrarse.setOnAction(e -> onRegistrarse());
+        if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> { sigmacine.aplicacion.session.Session.clear(); refreshSessionUI(); });
+        if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial());
+        if (btnIniciarSesion != null) btnIniciarSesion.setOnAction(e -> onIniciarSesion());
+        if (txtBuscar != null) {
+            txtBuscar.setOnKeyPressed(ev -> { if (ev.getCode() == KeyCode.ENTER) doSearch(txtBuscar.getText()); });
+            if (btnBuscar != null) btnBuscar.setOnAction(e -> doSearch(txtBuscar.getText()));
+        }
+
         // Demo si nadie setea función
         if (ocupados.isEmpty()) {
             for (int c = 3; c <= columnas; c += 2) ocupados.add("D" + c);
             for (int c = 2; c <= columnas; c += 3) ocupados.add("E" + c);
             for (int c = 1; c <= columnas; c += 4) ocupados.add("F" + c);
         }
-
-        // Por defecto: accesibles en primera fila A con corrimiento +2 (A5..A8)
         if (accesibles.isEmpty()) {
             accesibles.addAll(Arrays.asList("A5","A6","A7","A8"));
         }
-
         if (lblTitulo != null)   lblTitulo.setText(titulo);
         if (lblHoraPill != null) lblHoraPill.setText(hora);
         if (imgPoster != null && poster != null) imgPoster.setImage(poster);
 
         poblarGrilla();
         actualizarResumen();
+        refreshSessionUI();
+    }
+
+    @FXML private void onBrandClick() { goHome(); }
+    @FXML private void onBuscarTop() { doSearch(txtBuscar != null ? txtBuscar.getText() : ""); }
+
+    private void goHome() {
+        try {
+            Stage stage = (Stage) (gridSala != null ? gridSala.getScene().getWindow() : btnContinuar.getScene().getWindow());
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+            Parent root = loader.load();
+            Object ctrl = loader.getController();
+            if (ctrl instanceof ClienteController c) {
+                c.setCoordinador(this.coordinador);
+                c.init(this.usuario);
+            }
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 1000;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w, h));
+            stage.setTitle("Sigma Cine");
+            stage.setMaximized(true);
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void goCartelera() {
+        try {
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/cartelera.fxml"));
+            Parent root = loader.load();
+            Object ctrl = loader.getController();
+            try {
+                var su = ctrl.getClass().getMethod("setUsuario", sigmacine.aplicacion.data.UsuarioDTO.class);
+                if (su != null) su.invoke(ctrl, this.usuario);
+            } catch (NoSuchMethodException ignore) {}
+            try {
+                var sc = ctrl.getClass().getMethod("setCoordinador", sigmacine.ui.controller.ControladorControlador.class);
+                if (sc != null) sc.invoke(ctrl, this.coordinador);
+            } catch (NoSuchMethodException ignore) {}
+            try {
+                var rf = ctrl.getClass().getMethod("refreshSessionUI");
+                if (rf != null) rf.invoke(ctrl);
+            } catch (NoSuchMethodException ignore) {}
+
+            Stage stage = (Stage) gridSala.getScene().getWindow();
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w, h));
+            stage.setTitle("Sigma Cine - Cartelera");
+            stage.setMaximized(true);
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void onIniciarSesion() {
+        if (sigmacine.aplicacion.session.Session.isLoggedIn()) return;
+        if (coordinador != null) { coordinador.mostrarLogin(); refreshSessionUI(); return; }
+        try {
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/login.fxml"));
+            Parent root = loader.load();
+            var dialog = new javafx.stage.Stage();
+            dialog.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            dialog.initOwner(gridSala.getScene().getWindow());
+            var ctrl = loader.getController();
+            if (ctrl instanceof LoginController lc) {
+                try { ControladorControlador global = ControladorControlador.getInstance(); if (global != null) { lc.setCoordinador(global); lc.setAuthFacade(global.getAuthFacade()); } } catch (Throwable ignore) {}
+                lc.setOnSuccess(() -> { try { dialog.close(); } catch (Exception ignore) {} refreshSessionUI(); });
+            }
+            dialog.setScene(new Scene(root));
+            dialog.showAndWait();
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void onRegistrarse() {
+        if (sigmacine.aplicacion.session.Session.isLoggedIn()) return;
+        if (coordinador != null) { coordinador.mostrarRegistro(); return; }
+    }
+
+    private void onVerHistorial() {
+        if (!sigmacine.aplicacion.session.Session.isLoggedIn()) return;
+        try {
+            var db = new sigmacine.infraestructura.configDataBase.DatabaseConfig();
+            var usuarioRepo = new sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc(db);
+            var service = new sigmacine.aplicacion.service.VerHistorialService(usuarioRepo);
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
+            var controller = new VerHistorialController(service);
+            if (this.usuario != null) controller.setUsuarioEmail(this.usuario.getEmail());
+            loader.setController(controller);
+            Parent root = loader.load();
+            Stage stage = (Stage) gridSala.getScene().getWindow();
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w, h));
+            stage.setTitle("Historial de compras");
+            stage.setMaximized(true);
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void doSearch(String texto) {
+        if (texto == null) texto = "";
+        try {
+            var db = new sigmacine.infraestructura.configDataBase.DatabaseConfig();
+            var repo = new sigmacine.infraestructura.persistencia.jdbc.PeliculaRepositoryJdbc(db);
+            var resultados = repo.buscarPorTitulo(texto);
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/resultados_busqueda.fxml"));
+            Parent root = loader.load();
+            var controller = loader.getController();
+            if (controller instanceof ResultadosBusquedaController rbc) {
+                rbc.setCoordinador(this.coordinador);
+                rbc.setUsuario(this.usuario);
+                rbc.setResultados(resultados, texto);
+            }
+            Stage stage = (Stage) gridSala.getScene().getWindow();
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(root, w, h));
+            stage.setTitle("Resultados de búsqueda");
+            stage.setMaximized(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void refreshSessionUI() {
+        boolean logged = sigmacine.aplicacion.session.Session.isLoggedIn();
+        var u = sigmacine.aplicacion.session.Session.getCurrent();
+        if (lblUserName != null) { lblUserName.setVisible(logged); lblUserName.setManaged(logged); lblUserName.setText(logged && u != null ? (u.getNombre() != null ? u.getNombre() : "") : ""); }
+        if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(!logged); btnIniciarSesion.setManaged(!logged); }
+        if (btnRegistrarse  != null) btnRegistrarse.setDisable(logged);
+        if (menuPerfil != null) { menuPerfil.setVisible(logged); menuPerfil.setManaged(logged); }
     }
 
     private void poblarGrilla() {
@@ -68,12 +230,11 @@ public class AsientosController implements Initializable {
                 String code = code(f, c);
 
                 ToggleButton seat = new ToggleButton();
-                seat.getStyleClass().add("seat"); // definido en CSS como .toggle-button.seat
+                seat.getStyleClass().add("seat");
                 seat.setUserData(code);
                 seat.setFocusTraversable(false);
                 seat.setTooltip(new Tooltip(code));
 
-                // marca si es accesible; el estilo (glow) se aplica en setSeatState
                 seat.getProperties().put("accessible", accesibles.contains(code));
 
                 if (ocupados.contains(code)) {
@@ -83,7 +244,7 @@ public class AsientosController implements Initializable {
                     setSeatState(seat, SeatState.AVAILABLE);
                     seat.setOnAction(e -> {
                         if (seat.isSelected()) {
-                            setSeatState(seat, SeatState.SELECTED); // rojo para todos
+                            setSeatState(seat, SeatState.SELECTED);
                             seleccion.add(code);
                         } else {
                             setSeatState(seat, SeatState.AVAILABLE);
@@ -101,7 +262,6 @@ public class AsientosController implements Initializable {
 
     private enum SeatState { AVAILABLE, SELECTED, UNAVAILABLE }
 
-    // ► Accesible: glow SIEMPRE en AVAILABLE y SELECTED. Unavailable sin glow.
     private void setSeatState(ToggleButton b, SeatState st) {
         b.getStyleClass().removeAll("seat--available", "seat--selected", "seat--unavailable", "seat--accessible");
         boolean isAccessible = Boolean.TRUE.equals(b.getProperties().get("accessible"));
@@ -109,11 +269,11 @@ public class AsientosController implements Initializable {
         switch (st) {
             case AVAILABLE -> {
                 b.getStyleClass().add("seat--available");
-                if (isAccessible) b.getStyleClass().add("seat--accessible"); // brillo SIEMPRE
+                if (isAccessible) b.getStyleClass().add("seat--accessible");
             }
             case SELECTED -> {
-                b.getStyleClass().add("seat--selected");     // rojo para TODOS
-                if (isAccessible) b.getStyleClass().add("seat--accessible"); // brillo también seleccionado
+                b.getStyleClass().add("seat--selected");
+                if (isAccessible) b.getStyleClass().add("seat--accessible");
             }
             case UNAVAILABLE -> b.getStyleClass().add("seat--unavailable");
         }
@@ -133,13 +293,6 @@ public class AsientosController implements Initializable {
         if (btnContinuar != null) btnContinuar.setDisable(n == 0);
     }
 
-    // =======================
-    // API que usan tus controladores
-    // =======================
-
-    /**
-     * Reubica los "accesibles" recibidos a la PRIMERA FILA y +2 columnas (E3..E6 -> A5..A8).
-     */
     public void setFuncion(String titulo,
                            String hora,
                            java.util.Set<String> ocupados,
@@ -188,7 +341,6 @@ public class AsientosController implements Initializable {
         System.out.println("[Asientos] seleccionados => " + getSeleccionados());
     }
 
-    // ----- helpers -----
     private Set<String> shiftAccesiblesToFirstRowPlus2(Set<String> entrada) {
         Set<String> out = new HashSet<>();
         for (String code : entrada) {

@@ -20,27 +20,23 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import sigmacine.aplicacion.data.UsuarioDTO;
 import sigmacine.dominio.entity.Pelicula;
+import sigmacine.aplicacion.session.Session;
+import sigmacine.infraestructura.configDataBase.DatabaseConfig;
+import sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc;
+import sigmacine.aplicacion.service.VerHistorialService;
 
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import sigmacine.aplicacion.data.UsuarioDTO;
+// (duplicate import removed)
 import sigmacine.ui.controller.ControladorControlador;
 
 public class ContenidoCarteleraController {
 
     @FXML private Button btnCarteleraTop;
     @FXML private Button btnBack;
-
-    // Session-related topbar controls (copied from pagina_inicial.fxml)
-    @FXML private MenuButton menuPerfil;
-    @FXML private Button btnIniciarSesion;
-    @FXML private Button btnRegistrarse;
-    @FXML private Label lblUserName;
-    @FXML private MenuItem miCerrarSesion;
-    @FXML private MenuItem miHistorial;
 
     // Session-related topbar controls (copied from pagina_inicial.fxml)
     @FXML private MenuButton menuPerfil;
@@ -155,8 +151,10 @@ public class ContenidoCarteleraController {
                 dialog.showAndWait();
             } catch (Exception ex) { ex.printStackTrace(); }
         });
-        if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> { sigmacine.aplicacion.session.Session.clear(); refreshSessionUI(); });
+    if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> { sigmacine.aplicacion.session.Session.clear(); refreshSessionUI(); });
     }
+
+    // duplicate onBrandClick/onVerHistorial/refreshSessionUI removed
 
     @FXML
     private void onBrandClick() {
@@ -181,7 +179,7 @@ public class ContenidoCarteleraController {
 
     private void onVerHistorial() {
         // Require login like in ClienteController
-        if (!sigmacine.aplicacion.session.Session.isLoggedIn()) {
+    if (!sigmacine.aplicacion.session.Session.isLoggedIn()) {
             javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Acceso denegado");
             a.setHeaderText(null);
@@ -191,9 +189,9 @@ public class ContenidoCarteleraController {
         }
         try {
             // Build service and controller
-            sigmacine.infraestructura.configDataBase.DatabaseConfig dbConfig = new sigmacine.infraestructura.configDataBase.DatabaseConfig();
-            sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc usuarioRepo = new sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc(dbConfig);
-            sigmacine.aplicacion.service.VerHistorialService historialService = new sigmacine.aplicacion.service.VerHistorialService(usuarioRepo);
+            DatabaseConfig dbConfig = new DatabaseConfig();
+            UsuarioRepositoryJdbc usuarioRepo = new UsuarioRepositoryJdbc(dbConfig);
+            VerHistorialService historialService = new VerHistorialService(usuarioRepo);
 
             // Load full-screen history view (not a modal)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
@@ -204,87 +202,7 @@ public class ContenidoCarteleraController {
                     historialController.setUsuarioEmail(this.usuario.getEmail());
                 } else {
                     // fallback to session current user if available
-                    var cur = sigmacine.aplicacion.session.Session.getCurrent();
-                    if (cur != null && cur.getEmail() != null) historialController.setUsuarioEmail(cur.getEmail());
-                }
-            } catch (Exception ignore) {}
-            loader.setController(historialController);
-
-            Parent root = loader.load();
-            // Replace current window scene to navigate fully
-            Stage stage = null;
-            try { stage = (Stage) (btnBack != null ? btnBack.getScene().getWindow() : (menuPerfil != null ? menuPerfil.getScene().getWindow() : null)); } catch (Exception ignore) {}
-            if (stage != null) {
-                Scene current = stage.getScene();
-                double w = current != null ? current.getWidth() : 1000;
-                double h = current != null ? current.getHeight() : 700;
-                stage.setScene(new Scene(root, w, h));
-                stage.setTitle("Historial de compras");
-                stage.setMaximized(true);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void refreshSessionUI() {
-        try {
-            var current = sigmacine.aplicacion.session.Session.getCurrent();
-            boolean logged = sigmacine.aplicacion.session.Session.isLoggedIn();
-            if (btnIniciarSesion != null) { btnIniciarSesion.setVisible(!logged); btnIniciarSesion.setManaged(!logged); }
-            if (btnRegistrarse != null) { btnRegistrarse.setVisible(!logged); btnRegistrarse.setManaged(!logged); }
-            if (lblUserName != null) { lblUserName.setVisible(logged); lblUserName.setManaged(logged); lblUserName.setText(logged && current != null ? current.getNombre() : ""); }
-            if (menuPerfil != null) { menuPerfil.setVisible(logged); menuPerfil.setManaged(logged); }
-        } catch (Exception ex) { ex.printStackTrace(); }
-    }
-
-    @FXML
-    private void onBrandClick() {
-        try {
-            Stage stage = (Stage) (btnBack != null ? btnBack.getScene().getWindow() : btnCarteleraTop.getScene().getWindow());
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
-            Parent root = loader.load();
-            Object ctrl = loader.getController();
-            if (ctrl instanceof ClienteController) {
-                ClienteController c = (ClienteController) ctrl;
-                c.setCoordinador(this.coordinador);
-                c.init(this.usuario);
-            }
-            Scene current = stage.getScene();
-            double w = current != null ? current.getWidth() : 1000;
-            double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w, h));
-            stage.setTitle("Sigma Cine");
-            stage.setMaximized(true);
-        } catch (Exception ex) { ex.printStackTrace(); }
-    }
-
-    private void onVerHistorial() {
-        // Require login like in ClienteController
-        if (!sigmacine.aplicacion.session.Session.isLoggedIn()) {
-            javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-            a.setTitle("Acceso denegado");
-            a.setHeaderText(null);
-            a.setContentText("Debes iniciar sesión para ver tu historial de compras.");
-            a.showAndWait();
-            return;
-        }
-        try {
-            // Build service and controller
-            sigmacine.infraestructura.configDataBase.DatabaseConfig dbConfig = new sigmacine.infraestructura.configDataBase.DatabaseConfig();
-            sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc usuarioRepo = new sigmacine.infraestructura.persistencia.jdbc.UsuarioRepositoryJdbc(dbConfig);
-            sigmacine.aplicacion.service.VerHistorialService historialService = new sigmacine.aplicacion.service.VerHistorialService(usuarioRepo);
-
-            // Load full-screen history view (not a modal)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/verCompras.fxml"));
-            VerHistorialController historialController = new VerHistorialController(historialService);
-            // Inject email if available
-            try {
-                if (this.usuario != null && this.usuario.getEmail() != null) {
-                    historialController.setUsuarioEmail(this.usuario.getEmail());
-                } else {
-                    // fallback to session current user if available
-                    var cur = sigmacine.aplicacion.session.Session.getCurrent();
+                    sigmacine.aplicacion.data.UsuarioDTO cur = sigmacine.aplicacion.session.Session.getCurrent();
                     if (cur != null && cur.getEmail() != null) historialController.setUsuarioEmail(cur.getEmail());
                 }
             } catch (Exception ignore) {}

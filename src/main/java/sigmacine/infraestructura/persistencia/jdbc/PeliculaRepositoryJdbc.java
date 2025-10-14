@@ -32,16 +32,12 @@ public class PeliculaRepositoryJdbc implements PeliculaRepository {
                      "FROM PELICULA WHERE UPPER(TITULO) LIKE UPPER(?)";
         try (Connection cn = db.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
-            System.out.println("[DEBUG] PeliculaRepositoryJdbc.buscarPorTitulo param: '" + q + "'");
             ps.setString(1, "%"+q+"%");
             try (ResultSet rs = ps.executeQuery()) {
                 List<Pelicula> out = new ArrayList<>();
-                int rows = 0;
                 while (rs.next()){
                      out.add(PeliculaMapper.map(rs));
-                    rows++;
                     }
-                System.out.println("[DEBUG] PeliculaRepositoryJdbc.buscarPorTitulo rows=" + rows);
                 return out;
             }
         } catch (SQLException e) {

@@ -71,12 +71,11 @@ public class ClienteController {
     private UsuarioDTO usuario;
     private String ciudadSeleccionada;
     private ControladorControlador coordinador;
+    // Evita disparar múltiples cargas de posters cuando la vista se crea desde distintos flujos
+    private boolean postersRequested = false;
+    
 
-    public void setCoordinador(ControladorControlador c) {
-        this.coordinador = c;
-    }
-
-    public void init(UsuarioDTO usuario) {
+    public void init(UsuarioDTO usuario) { 
         this.usuario = usuario;
         esperarYCargarPeliculas();
         refreshSessionUI();
@@ -86,9 +85,33 @@ public class ClienteController {
         this.usuario = usuario;
         this.ciudadSeleccionada = ciudad;
         esperarYCargarPeliculas();
-        refreshSessionUI();
     }
-
+    
+    private void esperarYCargarPeliculas() {
+        if (postersRequested) {
+            return;
+        }
+        postersRequested = true;
+        // Intentar buscar un elemento que debería existir para verificar si la escena está lista
+        if (btnCartelera != null && btnCartelera.getScene() != null) {
+            Platform.runLater(() -> cargarPeliculasInicio());
+        } else if (btnCartelera != null) {
+            btnCartelera.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    Platform.runLater(() -> cargarPeliculasInicio());
+                }
+            });
+        } else {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000); // Esperar 1 segundo
+                    Platform.runLater(() -> cargarPeliculasInicio());
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+        }
+    }
     public void initCiudad(UsuarioDTO usuario) {
         this.usuario = usuario;
         if (cbCiudad != null) {
@@ -100,19 +123,26 @@ public class ClienteController {
 
     @FXML
     private void initialize() {
+        
+        
         if (promoPane != null && imgPublicidad != null) {
             imgPublicidad.fitWidthProperty().bind(promoPane.widthProperty());
             imgPublicidad.setFitHeight(110);
             imgPublicidad.setPreserveRatio(true);
         }
+        
+        if (btnSeleccionarCiudad != null) {
+            btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
+        }
 
-        if (btnSeleccionarCiudad != null) btnSeleccionarCiudad.setOnAction(e -> onSeleccionarCiudad());
-        if (btnCartelera != null)        btnCartelera.setOnAction(e -> mostrarCartelera());
-        if (btnConfiteria != null)       btnConfiteria.setOnAction(e -> System.out.println("Ir a Confiter\u00EDa (" + safeCiudad() + ")"));
-        if (miCerrarSesion != null)      miCerrarSesion.setOnAction(e -> onLogout());
-        if (miHistorial != null)         miHistorial.setOnAction(e -> onVerHistorial());
+    if (btnCartelera!= null) btnCartelera.setOnAction(e -> mostrarCartelera());
+        if (btnConfiteria != null) btnConfiteria.setOnAction(e -> {});
+        if (miCerrarSesion != null) miCerrarSesion.setOnAction(e -> onLogout());
+        
+        if (miHistorial != null) miHistorial.setOnAction(e -> onVerHistorial()); // Llama al método corregido.
 
-        updateMenuPerfilState();
+    // Disable profile menu when not logged in
+    updateMenuPerfilState();
 
         if (btnIniciarSesion != null) btnIniciarSesion.setOnAction(e -> onIniciarSesion());
         if (btnRegistrarse  != null) {
@@ -129,157 +159,28 @@ public class ClienteController {
             content.getChildren().addListener((ListChangeListener<Node>) c -> updatePublicidadVisibility());
             updatePublicidadVisibility();
         }
+
+        // Las películas se cargarán cuando se llame init() o init(usuario, ciudad)
+        // Si esta vista se usa en `cliente_home.fxml` sin invocar init(), aseguramos la carga aquí.
+        esperarYCargarPeliculas();
     }
 
-    private void esperarYCargarPeliculas() {
-        if (btnCartelera != null && btnCartelera.getScene() != null) {
-            Platform.runLater(this::cargarPeliculasInicio);
-        } else if (btnCartelera != null) {
-            btnCartelera.sceneProperty().addListener((obs, oldS, newS) -> {
-                if (newS != null) Platform.runLater(this::cargarPeliculasInicio);
-            });
-        } else {
-            new Thread(() -> {
-                try {
-                    Thread.sleep(800);
-                    Platform.runLater(this::cargarPeliculasInicio);
-                } catch (InterruptedException ignored) {}
-            }).start();
-        }
-    }
-
-    private void cargarPeliculasInicio() {
+    /**
+     * Muestra la publicidad sólo cuando no hay sub-vistas cargadas en el StackPane `content`.
+     * También marca los nodes como managed=false cuando están ocultos para que no ocupen espacio.
+     */
+    private void updatePublicidadVisibility() {
         try {
-            DatabaseConfig db = new DatabaseConfig();
-            PeliculaRepositoryJdbc repo = new PeliculaRepositoryJdbc(db);
-            List<Pelicula> peliculas = repo.buscarPorTitulo(""); // todas
-
-            if (peliculas == null || peliculas.isEmpty()) return;
-
-            if (footerGrid == null) {
-                footerGrid = localizarFooterGridDesdeRoot();
-                if (footerGrid == null) return;
+            boolean hasContent = content != null && !content.getChildren().isEmpty();
+            boolean show = !hasContent;
+            if (imgPublicidad != null) {
+                imgPublicidad.setVisible(show);
+                imgPublicidad.setManaged(show);
             }
-            renderizarFooterDinamico(footerGrid, peliculas);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private javafx.scene.layout.GridPane localizarFooterGridDesdeRoot() {
-        try {
-            Scene sc = null;
-            if (promoPane != null) sc = promoPane.getScene();
-            if (sc == null && content != null) sc = content.getScene();
-            if (sc == null && imgPublicidad != null) sc = imgPublicidad.getScene();
-            if (sc == null && btnBuscar != null) sc = btnBuscar.getScene();
-            if (sc == null) return null;
-
-            Parent root = sc.getRoot();
-            if (root instanceof javafx.scene.layout.BorderPane bp) {
-                Node bottom = bp.getBottom();
-                if (bottom instanceof javafx.scene.layout.HBox hb) {
-                    for (Node ch : hb.getChildren()) {
-                        if (ch instanceof javafx.scene.layout.GridPane gp) return gp;
-                    }
-                }
+            if (promoPane != null) {
+                promoPane.setVisible(show);
+                promoPane.setManaged(show);
             }
-        } catch (Exception ignored) {}
-        return null;
-    }
-
-    private void renderizarFooterDinamico(javafx.scene.layout.GridPane grid, List<Pelicula> peliculas) {
-        try {
-            grid.getChildren().clear();
-            if (grid.getColumnConstraints() != null) grid.getColumnConstraints().clear();
-            if (grid.getRowConstraints() != null) grid.getRowConstraints().clear();
-
-            grid.setMaxWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
-            grid.setPrefWidth(javafx.scene.layout.Region.USE_COMPUTED_SIZE);
-            grid.setPadding(new javafx.geometry.Insets(12, 64, 12, 64));
-            grid.setHgap(64);
-            grid.setVgap(16);
-            grid.setAlignment(javafx.geometry.Pos.CENTER);
-            grid.setTranslateY(-30);
-
-            int max = Math.min(3, peliculas.size());
-            for (int i = 0; i < max; i++) {
-                Pelicula p = peliculas.get(i);
-                int col = i;
-
-                ImageView poster = new ImageView();
-                poster.setPreserveRatio(true);
-                poster.setFitWidth(220);
-                poster.setSmooth(true);
-                poster.setCache(true);
-
-                if (p.getPosterUrl() != null && !p.getPosterUrl().isBlank()) {
-                    Image img = resolveImage(p.getPosterUrl());
-                    if (img == null) img = resolveImage("placeholder.png");
-                    if (img != null) poster.setImage(img);
-                } else {
-                    Image img = resolveImage("placeholder.png");
-                    if (img != null) poster.setImage(img);
-                }
-                javafx.scene.layout.GridPane.setColumnIndex(poster, col);
-                javafx.scene.layout.GridPane.setRowIndex(poster, 0);
-                javafx.scene.layout.GridPane.setMargin(poster, new javafx.geometry.Insets(0, 0, 8, 0));
-                grid.getChildren().add(poster);
-
-                Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Sin t\u00EDtulo");
-                titulo.setWrapText(true);
-                titulo.setMaxWidth(220);
-                titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
-                titulo.setAlignment(javafx.geometry.Pos.CENTER);
-                titulo.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-                javafx.scene.layout.GridPane.setColumnIndex(titulo, col);
-                javafx.scene.layout.GridPane.setRowIndex(titulo, 1);
-                javafx.scene.layout.GridPane.setHalignment(titulo, javafx.geometry.HPos.CENTER);
-                javafx.scene.layout.GridPane.setMargin(titulo, new javafx.geometry.Insets(0, 0, 8, 0));
-                grid.getChildren().add(titulo);
-
-                // === NUEVO: bot�n Ver m�s que abre contenidoCartelera.fxml con la pel�cula ===
-                Button verMas = new Button("Ver m\u00E1s");
-                verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
-                verMas.setPrefWidth(96);
-                verMas.setPrefHeight(34);
-                verMas.setOnAction(ev -> irADetallePelicula(p));  // <<--- navegaci�n al detalle
-                // Tambi�n navegar al hacer click en el poster o el t�tulo
-                poster.setOnMouseClicked(ev -> irADetallePelicula(p));
-                titulo.setOnMouseClicked(ev -> irADetallePelicula(p));
-
-                javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
-                javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
-                javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);
-                grid.getChildren().add(verMas);
-            }
-
-            Platform.runLater(() -> { try { grid.applyCss(); grid.layout(); } catch (Exception ignored) {} });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /** Abre contenidoCartelera.fxml y pasa la pel�cula seleccionada. */
-    private void irADetallePelicula(Pelicula pelicula) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
-            Parent root = loader.load();
-
-            Object ctrlObj = loader.getController();
-            if (ctrlObj instanceof ContenidoCarteleraController ctrl) {
-                ctrl.setCoordinador(this.coordinador);
-                ctrl.setUsuario(this.usuario);
-                ctrl.setPelicula(pelicula); // <- manda la pel�cula
-            }
-
-            Stage stage = (Stage) (content != null ? content.getScene().getWindow() : btnCartelera.getScene().getWindow());
-            Scene current = stage.getScene();
-            double w = current != null ? current.getWidth() : 900;
-            double h = current != null ? current.getHeight() : 600;
-            stage.setScene(new Scene(root, w > 0 ? w : 900, h > 0 ? h : 600));
-            stage.setTitle("Detalle  " + (pelicula != null && pelicula.getTitulo()!=null ? pelicula.getTitulo() : "Pel\u00EDcula"));
-            stage.setMaximized(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -353,6 +254,8 @@ public class ClienteController {
     }
 
     private void onIniciarSesion() {
+        
+        // if already logged in, perform logout; otherwise show login
         if (Session.isLoggedIn()) {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             a.setTitle("Cerrar sesi\u00F3n");
@@ -366,6 +269,7 @@ public class ClienteController {
     }
 
     private void onRegistrarse() {
+        
         if (Session.isLoggedIn()) {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Ya has iniciado sesi\u00F3n");
@@ -380,6 +284,8 @@ public class ClienteController {
     private String safeCiudad() { return ciudadSeleccionada != null ? ciudadSeleccionada : "sin ciudad"; }
 
     private void onLogout() {
+        
+        // clear application session and update UI
         Session.clear();
         this.usuario = null;
         if (lblUserName != null) { lblUserName.setText(""); lblUserName.setVisible(false); }
@@ -411,19 +317,22 @@ public class ClienteController {
     }
 
     private void updateMenuPerfilState() {
-        boolean logged = Session.isLoggedIn();
-        if (menuPerfil != null) {
-            menuPerfil.setDisable(!logged);
-            menuPerfil.setVisible(logged);
-            menuPerfil.setManaged(logged);
-        }
+        try {
+            boolean logged = Session.isLoggedIn();
+            if (menuPerfil != null) {
+                menuPerfil.setDisable(!logged);
+                menuPerfil.setVisible(logged);
+                menuPerfil.setManaged(logged);
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
+    
+    @FXML private void onPromoVerMas() { }
+    @FXML private void onCard1(){ }
+    @FXML private void onCard2(){ }
+    @FXML private void onCard3(){ }
+    @FXML private void onCard4(){ }
 
-    @FXML private void onPromoVerMas() { System.out.println("Promoci\u00F3n \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
-    @FXML private void onCard1(){ System.out.println("Card 1 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
-    @FXML private void onCard2(){ System.out.println("Card 2 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
-    @FXML private void onCard3(){ System.out.println("Card 3 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
-    @FXML private void onCard4(){ System.out.println("Card 4 \u2192 Ver m\u00E1s (" + safeCiudad() + ")"); }
 
     private void onSeleccionarCiudad() {
         String ciudad = (cbCiudad != null) ? cbCiudad.getValue() : null;
@@ -453,6 +362,7 @@ public class ClienteController {
 
     private void doSearch(String texto) {
         if (texto == null) texto = "";
+        
         try {
             DatabaseConfig db = new DatabaseConfig();
             var repo = new PeliculaRepositoryJdbc(db);
@@ -480,6 +390,7 @@ public class ClienteController {
 
     @FXML
     private void onVerHistorial() {
+        
         if (!Session.isLoggedIn()) {
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             a.setTitle("Acceso denegado");
@@ -509,6 +420,7 @@ public class ClienteController {
     }
 
     public void mostrarCartelera() {
+        
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml"));
             Parent carteleraView = loader.load();
@@ -545,62 +457,380 @@ public class ClienteController {
         }
     }
 
-    private void updatePublicidadVisibility() {
+    /**
+     * Carga las películas desde la BD y las muestra en las 4 cards del footer.
+     * Llena los pósters y títulos de las películas.
+     */
+    private void cargarPeliculasInicio() {
+        
+        
         try {
-            boolean hasContent = content != null && !content.getChildren().isEmpty();
-            boolean show = !hasContent;
-            if (imgPublicidad != null) { imgPublicidad.setVisible(show); imgPublicidad.setManaged(show); }
-            if (promoPane     != null) { promoPane.setVisible(show);     promoPane.setManaged(show); }
-        } catch (Exception ex) { ex.printStackTrace(); }
+            DatabaseConfig db = new DatabaseConfig();
+            PeliculaRepositoryJdbc repo = new PeliculaRepositoryJdbc(db);
+            
+            // Buscar todas las películas (o filtrar por estado "En Cartelera")
+            List<Pelicula> peliculas = repo.buscarPorTitulo(""); // buscar todas
+            
+            
+            
+            // Si no hay películas, salir
+            if (peliculas == null || peliculas.isEmpty()) {
+                
+                return;
+            }
+            
+            // Si los campos @FXML están null, intentar ubicar el GridPane desde la raíz de la escena
+            if (footerGrid == null) {
+                footerGrid = localizarFooterGridDesdeRoot();
+                
+            }
+            // Si aún no lo tenemos, como fallback intentar lookup
+            if (footerGrid == null) {
+                
+                buscarYCargarConLookup(peliculas);
+                return;
+            }
+            
+            // Independientemente de que existan placeholders en el FXML, renderizamos dinámicamente
+            // para controlar tamaño y centrado con precisión.
+            
+            renderizarFooterDinamico(footerGrid, peliculas);
+            return;
+            
+        } catch (Exception ex) {
+            System.err.println("Error cargando películas para la página inicial: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Localiza el GridPane del footer navegando la raíz de la escena en lugar de @FXML.
+     */
+    private javafx.scene.layout.GridPane localizarFooterGridDesdeRoot() {
+        try {
+            // Tomar cualquier nodo inyectado para llegar a la escena
+            javafx.scene.Scene sc = null;
+            if (promoPane != null) sc = promoPane.getScene();
+            if (sc == null && content != null) sc = content.getScene();
+            if (sc == null && imgPublicidad != null) sc = imgPublicidad.getScene();
+            if (sc == null && btnBuscar != null) sc = btnBuscar.getScene();
+            if (sc == null) return null;
+
+            javafx.scene.Parent root = sc.getRoot();
+            if (root instanceof javafx.scene.layout.BorderPane) {
+                javafx.scene.layout.BorderPane bp = (javafx.scene.layout.BorderPane) root;
+                javafx.scene.Node bottom = bp.getBottom();
+                if (bottom instanceof javafx.scene.layout.HBox) {
+                    for (javafx.scene.Node ch : ((javafx.scene.layout.HBox) bottom).getChildren()) {
+                        if (ch instanceof javafx.scene.layout.GridPane) {
+                            return (javafx.scene.layout.GridPane) ch;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
+        return null;
     }
 
-    public boolean isSameScene(Node n) { return content != null && n != null && content.getScene() == n.getScene(); }
+    /**
+     * Construye tarjetas de películas en el footer al estilo de ResultadosBusqueda (programático).
+     */
+    private void renderizarFooterDinamico(javafx.scene.layout.GridPane grid, List<Pelicula> peliculas) {
+        try {
+            if (grid == null) return;
+            grid.getChildren().clear();
 
-    private void togglePromo(boolean show) {
-        if (promoPane != null){ promoPane.setVisible(show); promoPane.setManaged(show); }
-        if (imgPublicidad != null){ imgPublicidad.setVisible(show); imgPublicidad.setManaged(show); }
-        if (lblPromo != null){ lblPromo.setVisible(show); lblPromo.setManaged(show); }
-        if (btnPromoVerMas != null){ btnPromoVerMas.setVisible(show); btnPromoVerMas.setManaged(show); }
+            // Quitar restricciones de columnas/filas del FXML que estaban forzando tamaños pequeños
+            if (grid.getColumnConstraints() != null) grid.getColumnConstraints().clear();
+            if (grid.getRowConstraints() != null) grid.getRowConstraints().clear();
+
+            // Mantener el GridPane al ancho de su contenido para centrar el bloque completo en el HBox
+            grid.setMaxWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+            grid.setPrefWidth(javafx.scene.layout.Region.USE_COMPUTED_SIZE);
+            grid.setPadding(new javafx.geometry.Insets(12, 64, 12, 64)); // margen y ligero padding superior
+
+            // Espaciados entre tarjetas
+            grid.setHgap(64); // separación horizontal mayor
+            grid.setVgap(16); // separación vertical mayor
+            grid.setAlignment(javafx.geometry.Pos.CENTER);
+            // Ligeramente elevado visualmente
+            grid.setTranslateY(-30);
+
+            // Mostrar solo 3 películas por defecto, centradas
+            int max = Math.min(3, peliculas.size());
+            // Con constraints limpiadas, usamos columnas 0..(max-1) y el GridPane centrará el bloque
+            int startCol = 0;
+
+            for (int i = 0; i < max; i++) {
+                Pelicula p = peliculas.get(i);
+                int col = startCol + i;
+
+                // Poster más grande
+                ImageView poster = new ImageView();
+                poster.setPreserveRatio(true);
+                poster.setFitWidth(220); // ancho mayor
+                String posterRef = p.getPosterUrl();
+                if (posterRef != null && !posterRef.isBlank()) {
+                    Image img = resolveImage(posterRef);
+                    if (img != null) poster.setImage(img);
+                }
+                javafx.scene.layout.GridPane.setColumnIndex(poster, col);
+                javafx.scene.layout.GridPane.setRowIndex(poster, 0);
+                javafx.scene.layout.GridPane.setMargin(poster, new javafx.geometry.Insets(0, 0, 8, 0));
+                grid.getChildren().add(poster);
+
+                // Título centrado y con wrap
+                Label titulo = new Label(p.getTitulo() != null ? p.getTitulo() : "Sin título");
+                titulo.setWrapText(true);
+                titulo.setMaxWidth(220);
+                titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
+                titulo.setAlignment(javafx.geometry.Pos.CENTER);
+                titulo.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+                javafx.scene.layout.GridPane.setColumnIndex(titulo, col);
+                javafx.scene.layout.GridPane.setRowIndex(titulo, 1);
+                javafx.scene.layout.GridPane.setHalignment(titulo, javafx.geometry.HPos.CENTER);
+                javafx.scene.layout.GridPane.setMargin(titulo, new javafx.geometry.Insets(0, 0, 8, 0));
+                grid.getChildren().add(titulo);
+
+                // Botón "Ver más" (opcional, sin acción por ahora)
+                Button verMas = new Button("Ver más");
+                verMas.setStyle("-fx-background-color: #993726; -fx-background-radius: 14; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+                verMas.setPrefWidth(96);
+                verMas.setPrefHeight(34);
+                verMas.setOnAction(e -> abrirDetallePelicula(p));
+                javafx.scene.layout.GridPane.setColumnIndex(verMas, col);
+                javafx.scene.layout.GridPane.setRowIndex(verMas, 2);
+                javafx.scene.layout.GridPane.setHalignment(verMas, javafx.geometry.HPos.CENTER);
+                grid.getChildren().add(verMas);
+            }
+
+            // Forzar layout una vez añadidos
+            javafx.application.Platform.runLater(() -> {
+                try { grid.applyCss(); grid.layout(); } catch (Exception ignore) {}
+            });
+        } catch (Exception ex) {
+            System.err.println("Error renderizando footer dinámico: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    private void buscarYCargarConLookup(List<Pelicula> peliculas) {
+        
+        try {
+            // Intentar obtener los ImageView directamente por fx:id
+            ImageView img1 = buscarImageView("#imgCard1");
+            ImageView img2 = buscarImageView("#imgCard2");
+            ImageView img3 = buscarImageView("#imgCard3");
+            
+            Label lbl1 = buscarLabel("#lblCard1");
+            Label lbl2 = buscarLabel("#lblCard2");
+            Label lbl3 = buscarLabel("#lblCard3");
+            
+            if (peliculas.size() > 0 && img1 != null) {
+                cargarCard(img1, lbl1, peliculas.get(0));
+            }
+            if (peliculas.size() > 1 && img2 != null) {
+                cargarCard(img2, lbl2, peliculas.get(1));
+            }
+            if (peliculas.size() > 2 && img3 != null) {
+                cargarCard(img3, lbl3, peliculas.get(2));
+            }
+            
+        } catch (Exception ex) {
+            System.err.println("Error en buscarYCargarConLookup: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    private ImageView buscarImageView(String fxId) {
+        try {
+            // Buscar en todos los campos @FXML conocidos
+            if (btnCartelera != null && btnCartelera.getScene() != null) {
+                return (ImageView) btnCartelera.getScene().lookup(fxId);
+            }
+            if (content != null && content.getScene() != null) {
+                return (ImageView) content.getScene().lookup(fxId);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando ImageView " + fxId + ": " + ex.getMessage());
+        }
+        return null;
+    }
+    
+    private Label buscarLabel(String fxId) {
+        try {
+            if (btnCartelera != null && btnCartelera.getScene() != null) {
+                return (Label) btnCartelera.getScene().lookup(fxId);
+            }
+            if (content != null && content.getScene() != null) {
+                return (Label) content.getScene().lookup(fxId);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando Label " + fxId + ": " + ex.getMessage());
+        }
+        return null;
+    }
+    
+    private void buscarYCargarEnGrid(List<Pelicula> peliculas) {
+        
+        try {
+            // Buscar todos los nodos del GridPane
+            for (javafx.scene.Node node : footerGrid.getChildren()) {
+                if (node instanceof ImageView) {
+                    ImageView img = (ImageView) node;
+                    Integer colIndex = javafx.scene.layout.GridPane.getColumnIndex(node);
+                    Integer rowIndex = javafx.scene.layout.GridPane.getRowIndex(node);
+                    
+                    if (colIndex == null) colIndex = 0;
+                    if (rowIndex == null) rowIndex = 0;
+                    
+                    // Solo procesar ImageViews en la fila 0 (pósters)
+                    if (rowIndex == 0 && colIndex >= 0 && colIndex < peliculas.size()) {
+                        Pelicula pelicula = peliculas.get(colIndex);
+                        String posterUrl = pelicula.getPosterUrl();
+                        
+                        
+                        if (posterUrl != null && !posterUrl.isBlank()) {
+                            Image posterImage = resolveImage(posterUrl);
+                            if (posterImage != null) {
+                                img.setImage(posterImage);
+                                
+                            }
+                        }
+                    }
+                } else if (node instanceof Label) {
+                    Label lbl = (Label) node;
+                    Integer colIndex = javafx.scene.layout.GridPane.getColumnIndex(node);
+                    Integer rowIndex = javafx.scene.layout.GridPane.getRowIndex(node);
+                    
+                    if (colIndex == null) colIndex = 0;
+                    if (rowIndex == null) rowIndex = 0;
+                    
+                    // Solo procesar Labels en la fila 1 (títulos)
+                    if (rowIndex == 1 && colIndex >= 0 && colIndex < peliculas.size()) {
+                        Pelicula pelicula = peliculas.get(colIndex);
+                        lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
+                        
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("Error buscando elementos en footerGrid: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Carga el póster y título de una película en una card (ImageView + Label).
+     */
+    private void cargarCard(ImageView img, Label lbl, Pelicula pelicula) {
+        if (pelicula == null) return;
+        
+        // Poner el título
+        if (lbl != null) {
+            lbl.setText(pelicula.getTitulo() != null ? pelicula.getTitulo() : "Sin título");
+        }
+        
+        // Cargar el póster
+        if (img != null) {
+            String posterUrl = pelicula.getPosterUrl();
+            
+            
+            if (posterUrl != null && !posterUrl.isBlank()) {
+                Image posterImage = resolveImage(posterUrl);
+                if (posterImage != null) {
+                    img.setImage(posterImage);
+                    
+                } else {
+                    
+                }
+            }
+        }
+    }
+    
+    /**
+     * Resuelve la ruta de una imagen probando varias estrategias:
+     * 1. Si es URL http/https, la carga directamente
+     * 2. Si está en src\main\resources\Images\, extrae solo el nombre del archivo
+     * 3. Prueba cargar desde /Images/nombre
+     * 4. Prueba como archivo local si existe
+     */
+    private Image resolveImage(String ref) {
+        if (ref == null || ref.isBlank()) return null;
+        
+        try {
+            String lower = ref.toLowerCase();
+            
+            // 1. URLs externas
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("file:/")) {
+                return new Image(ref, true);
+            }
+            
+            // 2. Si contiene la ruta completa "src\main\resources\Images\", extraer solo el nombre
+            if (ref.contains("src\\main\\resources\\Images\\") || ref.contains("src/main/resources/Images/")) {
+                String fileName = ref.substring(ref.lastIndexOf("\\") + 1);
+                if (fileName.isEmpty()) fileName = ref.substring(ref.lastIndexOf("/") + 1);
+                
+                
+                java.net.URL res = getClass().getResource("/Images/" + fileName);
+                if (res != null) {
+                    
+                    return new Image(res.toExternalForm(), false);
+                }
+            }
+            
+            // 3. Probar como recurso directo /Images/...
+            java.net.URL res = getClass().getResource("/Images/" + ref);
+            if (res != null) return new Image(res.toExternalForm(), false);
+            
+            // 4. Probar como archivo local
+            java.io.File f = new java.io.File(ref);
+            if (f.exists()) return new Image(f.toURI().toString(), false);
+            
+            // 5. Probar con / al inicio
+            res = getClass().getResource(ref.startsWith("/") ? ref : ("/" + ref));
+            if (res != null) return new Image(res.toExternalForm(), false);
+            
+        } catch (Exception ex) {
+            System.err.println("  → Error resolviendo imagen: " + ex.getMessage());
+        }
+        
+        return null;
     }
 
-    // Solo pruebas locales
-    @SuppressWarnings("unused")
-    private void mostrarAsientosAhora() {
+    /**
+     * Abre la pantalla de detalle de película (contenidoCartelera.fxml) para la película indicada.
+     * Mantiene la sesión de usuario y el coordinador para navegación.
+     */
+    private void abrirDetallePelicula(Pelicula p) {
+        if (p == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/asientos.fxml"));
-            Parent pane = loader.load();
+            var url = getClass().getResource("/sigmacine/ui/views/contenidoCartelera.fxml");
+            if (url == null) throw new IllegalStateException("No se encontró contenidoCartelera.fxml");
 
-            AsientosController ctrl = loader.getController();
-            var ocup  = java.util.Set.of("B3","B4","C7","E2","F8");
-            var acces = java.util.Set.of("E3","E4","E5","E6");
-            ctrl.setFuncion("Los 4 Fant\u00E1sticos", "1:10 pm", ocup, acces);
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent rootDetalle = loader.load();
 
-            content.getChildren().setAll(pane);
-        } catch (Exception e) { e.printStackTrace(); }
-    }
+            ContenidoCarteleraController ctrl = loader.getController();
+            try { ctrl.setCoordinador(this.coordinador); } catch (Exception ignore) {}
+            try { ctrl.setUsuario(this.usuario); } catch (Exception ignore) {}
+            ctrl.setPelicula(p);
 
-    public void volverHomeContenido() { togglePromo(true); }
+            Stage stage = null;
+            if (content != null && content.getScene() != null) stage = (Stage) content.getScene().getWindow();
+            else if (footerGrid != null && footerGrid.getScene() != null) stage = (Stage) footerGrid.getScene().getWindow();
+            else if (btnCartelera != null && btnCartelera.getScene() != null) stage = (Stage) btnCartelera.getScene().getWindow();
+            if (stage == null) return;
 
-    /** Flujo Cartelera -> Asientos embebido en `content`. */
-    public void mostrarAsientos(String titulo, String hora,
-                                java.util.Set<String> ocupados,
-                                java.util.Set<String> accesibles) {
-        try {
-            togglePromo(false);
-
-            var url = getClass().getResource("/sigmacine/ui/views/asientos_contenido.fxml");
-            if (url == null) url = getClass().getResource("/sigmacine/ui/views/asientos.fxml");
-
-            FXMLLoader loader = new FXMLLoader(java.util.Objects.requireNonNull(url, "No se encontr\u00F3 la vista de asientos"));
-            Parent pane = loader.load();
-
-            AsientosController ctrl = loader.getController();
-            ctrl.setFuncion(titulo, hora, ocupados, accesibles);
-
-            content.getChildren().setAll(pane);
-        } catch (Exception e) {
-            e.printStackTrace();
-            content.getChildren().setAll(new Label("Error cargando Asientos: " + e.getMessage()));
+            Scene current = stage.getScene();
+            double w = current != null ? current.getWidth() : 900;
+            double h = current != null ? current.getHeight() : 600;
+            stage.setScene(new Scene(rootDetalle, w > 0 ? w : 900, h > 0 ? h : 600));
+            stage.setTitle(p.getTitulo() != null ? p.getTitulo() : "Detalle de Película");
+            stage.setMaximized(true);
+        } catch (Exception ex) {
+            System.err.println("Error abriendo detalle: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

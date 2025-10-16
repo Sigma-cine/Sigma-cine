@@ -57,6 +57,38 @@ public class VerHistorialController {
         }
     }
 
+    @FXML
+    private void onBrandClick() {
+        try {
+            javafx.stage.Stage stage = null;
+            if (btnVolver != null && btnVolver.getScene() != null) {
+                stage = (javafx.stage.Stage) btnVolver.getScene().getWindow();
+            } else if (comprasContainer != null && comprasContainer.getScene() != null) {
+                stage = (javafx.stage.Stage) comprasContainer.getScene().getWindow();
+            }
+            if (stage != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+                javafx.scene.Parent root = loader.load();
+                try {
+                    Object ctrl = loader.getController();
+                    if (ctrl instanceof ClienteController) {
+                        ClienteController c = (ClienteController) ctrl;
+                        var current = sigmacine.aplicacion.session.Session.getCurrent();
+                        if (current != null) c.init(current);
+                    }
+                } catch (Exception ignore) {}
+                javafx.scene.Scene currentScene = stage.getScene();
+                double w = currentScene != null ? currentScene.getWidth() : 1000;
+                double h = currentScene != null ? currentScene.getHeight() : 700;
+                stage.setScene(new javafx.scene.Scene(root, w, h));
+                stage.setTitle("Sigma Cine");
+                stage.setMaximized(true);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     // Elimina botones "Ver más" y labels genéricos que puedan provenir de la vista de inicio
     private void limpiarNodosPromocionales() {
         try {
@@ -230,7 +262,33 @@ public class VerHistorialController {
         if (clienteController != null) {
             clienteController.mostrarCartelera(); 
         } else {
-            System.err.println("Error: ClienteController no inyectado. No se puede volver.");
+            // If opened standalone (full-screen), navigate back to pagina_inicial.fxml in the same stage
+            try {
+                var scene = btnVolver != null ? btnVolver.getScene() : (comprasContainer != null ? comprasContainer.getScene() : null);
+                if (scene != null && scene.getWindow() instanceof javafx.stage.Stage) {
+                    javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/sigmacine/ui/views/pagina_inicial.fxml"));
+                    javafx.scene.Parent root = loader.load();
+                    // Try to pass session user if available via Session API
+                    try {
+                        Object ctrl = loader.getController();
+                        if (ctrl instanceof ClienteController) {
+                            ClienteController c = (ClienteController) ctrl;
+                            var current = sigmacine.aplicacion.session.Session.getCurrent();
+                            if (current != null) {
+                                // If UsuarioDTO is available, call init(usuario)
+                                c.init(current);
+                            }
+                        }
+                    } catch (Exception ignore) {}
+                    javafx.scene.Scene currentScene = stage.getScene();
+                    double w = currentScene != null ? currentScene.getWidth() : 1000;
+                    double h = currentScene != null ? currentScene.getHeight() : 700;
+                    stage.setScene(new javafx.scene.Scene(root, w, h));
+                    stage.setTitle("Sigma Cine");
+                    stage.setMaximized(true);
+                }
+            } catch (Exception ignore) {}
         }
     }
 }

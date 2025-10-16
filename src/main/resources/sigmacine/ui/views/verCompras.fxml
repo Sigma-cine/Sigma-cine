@@ -1,36 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0"
-            stylesheets="@../css/sigmacine.css"
-            xmlns="http://javafx.com/javafx/17.0.2"
-            xmlns:fx="http://javafx.com/fxml/1"
-            style="-fx-background-color: #000000;">
-
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@sigma.css">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="topbar">
+            <children>
+                <Button fx:id="btnVolver" styleClass="toplink" text="← Volver" />
+                <Label styleClass="brand" text="SIGMA CINE" onMouseClicked="#onBrandClick" style="-fx-cursor: hand;" />
+                <Button styleClass="toplink" text="Cartelera" disable="true" />
+                <Button styleClass="toplink" text="Confitería" />
+                <Button styleClass="toplink" text="Sigma Card" />
+                <Region HBox.hgrow="ALWAYS" />
+                <TextField promptText="Buscar" prefWidth="200" styleClass="search" />
+                <VBox spacing="16">
+                    <children>
+                        <Button styleClass="toplink" text="Cart" />
+                    </children>
+                </VBox>
+                <Button text="Iniciar sesión" styleClass="toplink" />
+                <Label text="" styleClass="toplink" visible="false" />
+                <Button text="Registrarse" styleClass="toplink" />
+                <MenuButton styleClass="icon-btn" text="👤">
+                    <items>
+                        <MenuItem text="Mi Cuenta" />
+                        <MenuItem text="Buscar Tiquetes" />
+                        <MenuItem text="Confitería" />
+                        <MenuItem text="Promociones" />
+                        <MenuItem text="Información Personal" />
+                        <MenuItem text="SigmaCard" />
+                        <MenuItem text="Historial de compras" />
+                        <MenuItem text="Notificaciones" />
+                        <MenuItem text="Cartelera" />
+                        <SeparatorMenuItem />
+                        <MenuItem text="Cerrar Sesión" />
+                    </items>
+                </MenuButton>
+            </children>
+            <padding>
+                <Insets bottom="8" left="16" right="16" top="8" />
+            </padding>
+        </HBox>
+    </top>
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #000000;">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
             <content>
-                <VBox fx:id="comprasContainer" alignment="TOP_CENTER" minHeight="640.0" prefWidth="980.0" spacing="15.0" style="-fx-background-color: #000000;">
-                    <padding>
-                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                    </padding>
-                    
-                    <HBox alignment="CENTER_LEFT" prefWidth="960.0" styleClass="volver-bar">
-                        <Button fx:id="btnVolver" text="← Volver a Cartelera" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-                    </HBox>
-
-                    <Label styleClass="section-title" text="Tus Últimas Compras" alignment="CENTER_LEFT" prefWidth="960.0" style="-fx-text-fill: white;" />
-                    
-                    <!-- El contenedor `comprasContainer` permanecerá vacío aquí; las tarjetas se agregan dinámicamente
-                         desde `VerHistorialController.crearTarjetaCompra(Compra)` -->
+                <VBox alignment="TOP_CENTER" spacing="16" style="-fx-padding: 16;">
+                    <Label text="Historial de Compras" style="-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 24;" />
+                    <VBox fx:id="comprasContainer" spacing="15.0" styleClass="centered-container" />
                 </VBox>
             </content>
         </ScrollPane>

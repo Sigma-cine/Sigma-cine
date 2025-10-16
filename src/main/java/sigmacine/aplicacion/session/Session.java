@@ -7,6 +7,7 @@ import sigmacine.aplicacion.data.UsuarioDTO;
  */
 public final class Session {
     private static UsuarioDTO current;
+    private static String selectedCity;
 
     private Session() {}
 
@@ -14,4 +15,7 @@ public final class Session {
     public static boolean isLoggedIn() { return current != null; }
     public static void setCurrent(UsuarioDTO u) { current = u; }
     public static void clear() { current = null; }
+
+    public static String getSelectedCity() { return selectedCity; }
+    public static void setSelectedCity(String city) { selectedCity = city; }
 }

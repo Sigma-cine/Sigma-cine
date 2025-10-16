@@ -1,63 +1,30 @@
 package sigmacine.dominio.entity;
 
+/** Representa un producto (por ejemplo confitería) que puede añadirse al carrito. */
 public class Producto {
-    private int id;
-    private String nombre;
-    private String descripcion;
-    private double precio;
-    private String tipo;
-    private String estado;
+	private Long id;
+	private String nombre;
+	private long precio; // en centavos o unidad mínima
 
-    public Producto() {}
+	public Producto() {}
 
-    public Producto(int id, String nombre, String descripcion, double precio, String estado, String tipo) {
-        this.id = id;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.precio = precio;
-        this.tipo = tipo;
-        this.estado = estado;
-    }
+	public Producto(Long id, String nombre, long precio) {
+		this.id = id;
+		this.nombre = nombre;
+		this.precio = precio;
+	}
 
-    public int getId() { 
-        return id; 
-    }
-    public void setId(int id) { 
-        this.id = id; 
-    }
+	public Long getId() { return id; }
+	public void setId(Long id) { this.id = id; }
 
-    public String getNombre() { 
-        return nombre; 
-    }
-    public void setNombre(String nombre) { 
-        this.nombre = nombre; 
-    }
+	public String getNombre() { return nombre; }
+	public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getDescripcion() { 
-        return descripcion; 
-    }
-    public void setDescripcion(String descripcion) { 
-        this.descripcion = descripcion; 
-    }
+	public long getPrecio() { return precio; }
+	public void setPrecio(long precio) { this.precio = precio; }
 
-    public double getPrecio() { 
-        return precio; 
-    }
-    public void setPrecio(double precio) { 
-        this.precio = precio; 
-    }
-
-    public String getCategoria() { 
-        return tipo; 
-    }
-    public void setTipo(String tipo) { 
-        this.tipo = tipo; 
-    }
-
-    public String getEstado() { 
-        return estado; 
-    }
-    public void setEstado(String estado) { 
-        this.estado = estado; 
-    }
+	@Override
+	public String toString() {
+		return nombre + " - $" + String.format("%.2f", precio / 100.0);
+	}
 }

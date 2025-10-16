@@ -13,13 +13,20 @@ public class ControladorControlador {
 
     private final Stage stage;
     private final AuthFacade authFacade;
+    // Global instance helper so other controllers can delegate to the app coordinator
+    private static ControladorControlador instance;
     // Guard para la sesión actual: evita mostrar el popup repetidas veces durante la misma ejecución
     private static boolean cityPopupShownInSession = false;
 
     public ControladorControlador(Stage stage, AuthFacade authFacade) {
         this.stage = stage;
         this.authFacade = authFacade;
+        instance = this;
     }
+
+    public static ControladorControlador getInstance() { return instance; }
+
+    public AuthFacade getAuthFacade() { return this.authFacade; }
 
     public void mostrarLogin() {
         // if already logged in, show home instead
@@ -111,7 +118,9 @@ public class ControladorControlador {
                 stage.setTitle("Sigma Cine - Admin");
             } else {
                 ClienteController c = loader.getController();
-                c.initCiudad(usuario);
+                // Use init(usuario) so the controller triggers cargarPeliculasInicio() and
+                // the posters are loaded for the home screen.
+                c.init(usuario);
                 c.setCoordinador(this);
                 stage.setTitle("Sigma Cine - Cliente");
             }
